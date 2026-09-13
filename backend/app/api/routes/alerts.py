@@ -24,6 +24,72 @@ async def list_alerts(
     cursor = db.alerts.find(filter_q, {"_id": 0}).sort("created_at", -1).limit(limit)
     return await cursor.to_list(length=limit)
 
+@router.post("", response_model=dict, status_code=201)
+async def create_alert(payload: dict):
+    db = get_database()
+    alert_id = payload.get("alert_id") or f"ALT-{int(datetime.utcnow().timestamp())}"
+    alert_doc = {
+        "alert_id": alert_id,
+        "project_id": payload.get("project_id", "P1024"),
+        "project_name": payload.get("project_name", f"Corridor {payload.get('project_id', 'P1024')}"),
+        "severity": str(payload.get("severity", "critical")).lower(),
+        "trigger": payload.get("trigger", "DPHIS_THRESHOLD_EXCEEDED"),
+        "dphis": float(payload.get("dphis", 82.4)),
+        "message": payload.get("message", "High risk threshold exceeded"),
+        "investigation_id": payload.get("investigation_id"),
+        "recommendations": payload.get("recommendations", []),
+        "status": payload.get("status", "PENDING").upper(),
+        "notification_sent": payload.get("notification_sent", True),
+        "created_at": datetime.utcnow()
+    }
+    if db is not None:
+        await db.alerts.insert_one(alert_doc)
+
+    alert_doc.pop("_id", None)
+    return {"message": "Alert created successfully", "alert": alert_doc}
+
+@router.post("/trigger-n8n-event")
+async def trigger_n8n_event(
+    project_id: str = Query(default="P1024"),
+    dphis: float = Query(default=82.4),
+    test_mode: bool = Query(default=False)
+):
+    """
+    Dispatches a structured risk event to the n8n Cloud webhook.
+    """
+    import httpx
+    from app.config.settings import settings
+
+    target_url = settings.N8N_TEST_WEBHOOK_URL if test_mode else settings.N8N_RISK_WEBHOOK_URL
+    payload = {
+        "event_type": "RISK_UPDATE",
+        "project_id": project_id,
+        "dphis": dphis,
+        "previous_dphis": round(max(0.0, dphis - 11.2), 1),
+        "risk_level": "CRITICAL" if dphis >= 75 else "HIGH" if dphis >= 50 else "MODERATE",
+        "risk_change": 15.7,
+        "risk_trend": "WORSENING" if dphis >= 70 else "STABLE",
+        "timestamp": datetime.utcnow().isoformat() + "Z"
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.post(target_url, json=payload)
+            return {
+                "success": resp.status_code in (200, 201, 202),
+                "status_code": resp.status_code,
+                "target_url": target_url,
+                "dispatched_payload": payload,
+                "n8n_response": resp.text[:500]
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "target_url": target_url,
+            "dispatched_payload": payload
+        }
+
 @router.post("/{alert_id}/acknowledge")
 async def acknowledge_alert(alert_id: str):
     db = get_database()
