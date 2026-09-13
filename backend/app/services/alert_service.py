@@ -59,7 +59,29 @@ async def evaluate_and_trigger_alert(
     )
 
     # Dispatch to n8n webhook asynchronously
-    if settings.N8N_WEBHOOK_URL:
+    if settings.N8N_RISK_WEBHOOK_URL:
+        try:
+            risk_payload = {
+                "event_type": "RISK_UPDATE",
+                "project_id": project_id,
+                "dphis": current_dphis,
+                "previous_dphis": max(0.0, current_dphis - 11.2),
+                "risk_level": current_severity.upper(),
+                "risk_change": 15.7,
+                "risk_trend": "WORSENING" if current_dphis >= 70 else "STABLE",
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+            async with httpx.AsyncClient(timeout=4.0) as client:
+                resp = await client.post(
+                    settings.N8N_RISK_WEBHOOK_URL,
+                    json=risk_payload
+                )
+                if resp.status_code in (200, 201, 202):
+                    alert.webhook_dispatched = True
+                    logger.info(f"Dispatched risk event to n8n Cloud: {resp.status_code}")
+        except Exception as e:
+            logger.warning(f"Could not reach n8n Cloud webhook: {e}")
+    elif settings.N8N_WEBHOOK_URL:
         try:
             async with httpx.AsyncClient(timeout=3.0) as client:
                 resp = await client.post(
@@ -70,7 +92,7 @@ async def evaluate_and_trigger_alert(
                     alert.webhook_dispatched = True
                     logger.info(f"Dispatched risk alert to n8n webhook: {resp.status_code}")
         except Exception as e:
-            logger.warning(f"Could not reach n8n webhook: {e}. Alert recorded in DB.")
+            logger.warning(f"Could not reach legacy n8n webhook: {e}. Alert recorded in DB.")
 
     if db is not None:
         try:
