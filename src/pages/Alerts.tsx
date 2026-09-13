@@ -31,17 +31,14 @@ export default function Alerts({ onNavigateToInvestigation }: Props) {
 
   return (
     <div className="space-y-4 sm:space-y-6 pt-20 sm:pt-24 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
-      {/* Header - Clean heading without logo beside it */}
+      {/* Header - Clean heading without top eyebrow tag */}
       <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1.5">
-          <div className="text-xs font-mono-code uppercase font-bold text-white/70 tracking-wider">
-            Automated Alert Engine · {alerts.filter(a => a.status === 'PENDING').length} Active
-          </div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white">
             Risk Alerts & Automated Early Warnings
           </h2>
           <p className="text-xs sm:text-base text-white/70">
-            State-transition deduplication & n8n webhook notification bus
+            {alerts.filter(a => a.status === 'PENDING').length} active alerts · State-transition deduplication & n8n webhook bus
           </p>
         </div>
 

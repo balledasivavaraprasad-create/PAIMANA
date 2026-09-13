@@ -31,12 +31,9 @@ export default function Analytics({ onNavigateToProject }: Props) {
 
   return (
     <div className="space-y-6 sm:space-y-8 pt-20 sm:pt-24 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
-      {/* Header */}
+      {/* Header - Clean heading without top eyebrow tag */}
       <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-1.5 sm:space-y-2">
-          <div className="text-xs sm:text-sm font-mono-code uppercase font-bold text-white/70 tracking-widest">
-            National Infrastructure Macro Intelligence
-          </div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white">
             Portfolio Risk & Expenditure Analytics
           </h2>

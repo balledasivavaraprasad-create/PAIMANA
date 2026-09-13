@@ -31,22 +31,14 @@ export default function Investigation({ projectId }: Props) {
 
   return (
     <div className="space-y-6 sm:space-y-8 pt-20 sm:pt-24 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
-      {/* Header */}
+      {/* Header - Clean heading without top eyebrow tags */}
       <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white font-mono-code px-2.5 sm:px-3 py-1 rounded bg-white/10 border border-white/20">
-              Autonomous Agentic Investigation
-            </span>
-            <span className="text-xs sm:text-sm px-2.5 sm:px-3 py-1 rounded bg-white/10 text-white font-mono-code font-semibold border border-white/20">
-              {report ? `Completed (${report.investigation_id})` : 'Standby Mode'}
-            </span>
-          </div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white">
             Evidence-First Investigation: Project {projectId}
           </h2>
           <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
-            {pName} · Multi-tool autonomous discovery across MongoDB snapshots, SHAP drivers, and milestones
+            {pName} · {report ? `Completed (${report.investigation_id})` : 'Multi-tool autonomous discovery across MongoDB snapshots, SHAP drivers & milestones'}
           </p>
         </div>
 

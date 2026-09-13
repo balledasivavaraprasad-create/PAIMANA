@@ -48,14 +48,9 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
       <div className="oled-solid-card w-full max-w-md p-6 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-3">
-          <div>
-            <span className="text-[10px] font-mono-code uppercase font-bold text-[var(--accent)] tracking-widest">
-              Executive Portfolio Management
-            </span>
-            <h3 className="text-base font-bold font-display text-[var(--text-primary)]">
-              Add New Project
-            </h3>
-          </div>
+          <h3 className="text-base font-bold font-display text-[var(--text-primary)]">
+            Add New Project
+          </h3>
           <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-lg cursor-pointer">
             ✕
           </button>

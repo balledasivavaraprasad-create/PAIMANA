@@ -187,10 +187,6 @@ export default function App() {
           {/* SECTION 01 / 04 — HERO "India, in motion." */}
           <section className="snap-start w-full h-screen relative flex items-center justify-between px-6 sm:px-12 md:px-20 pointer-events-none">
             <div className="max-w-xl space-y-4 sm:space-y-6 pointer-events-auto mt-12 sm:mt-16">
-              <div className="text-[10px] sm:text-xs font-mono-code font-bold tracking-[0.25em] uppercase text-white/80 drop-shadow-md">
-                NATIONAL INFRASTRUCTURE INTELLIGENCE · FASTAPI & MONGODB
-              </div>
-
               <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-display tracking-tight text-white leading-[0.9] drop-shadow-[0_8px_32px_rgba(0,0,0,0.95)]">
                 India,<br />
                 in<br />
@@ -223,12 +219,6 @@ export default function App() {
             <div className="w-full max-w-6xl pointer-events-auto">
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-10 shadow-2xl">
                 <div className="space-y-3 sm:space-y-4 max-w-2xl">
-                  <div className="text-xs font-mono-code font-bold tracking-widest uppercase text-white/80 flex items-center gap-2">
-                    <span>02 / 04</span>
-                    <span>•</span>
-                    <span>NATIONAL SNAPSHOT</span>
-                  </div>
-
                   <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold font-display text-white tracking-tight leading-tight">
                     The network is moving.<br />
                     Watch where it bends.
@@ -275,12 +265,6 @@ export default function App() {
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-2 sm:space-y-3">
-                    <div className="text-xs font-mono-code font-bold tracking-widest uppercase text-white/80 flex items-center gap-2">
-                      <span>03 / 04</span>
-                      <span>•</span>
-                      <span>PREDICTIVE DPHIS & EXPLAINABLE AI</span>
-                    </div>
-
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
                       Quantified risk drivers across national corridors.
                     </h2>
@@ -348,12 +332,6 @@ export default function App() {
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1.5 sm:space-y-2">
-                    <div className="text-xs font-mono-code font-bold tracking-widest uppercase text-white/80 flex items-center gap-2">
-                      <span>04 / 04</span>
-                      <span>•</span>
-                      <span>ADMIN & CEO COMMAND</span>
-                    </div>
-
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
                       Nationwide Project Telemetry
                     </h2>
@@ -470,19 +448,13 @@ export default function App() {
       {/* FLOATING BOTTOM DOCK CONTROLS (Only on Motion tab) */}
       {currentTab === 'motion' && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 pointer-events-auto">
-          <div className="oled-solid-card px-4 py-2 flex items-center gap-3 text-xs font-mono-code shadow-2xl">
+          <div className="oled-solid-card px-4 py-2 flex items-center text-xs font-mono-code shadow-2xl">
             <button
               onClick={() => setShowCeoModal(true)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[var(--surface-sunken)] hover:bg-[var(--accent-soft)] text-[var(--text-primary)] font-medium cursor-pointer border border-[var(--border-hairline)]"
             >
               <span>+ Add Project</span>
             </button>
-
-            <span className="text-[var(--text-muted)]">|</span>
-
-            <span className="text-[var(--text-secondary)]">
-              MODEL <strong className="text-[var(--text-primary)]">{activeSection}</strong> / 04
-            </span>
           </div>
         </div>
       )}

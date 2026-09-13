@@ -89,18 +89,16 @@ export default function ProjectIntelligence({ projectId, onNavigateToInvestigati
 
   return (
     <div className="space-y-6 sm:space-y-8 pt-20 sm:pt-24 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
-      {/* Top Header Card - Clean heading without logo beside it */}
+      {/* Top Header Card - Clean heading without top eyebrow tag */}
       <GlassCard variant="hero" padding={24} className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-2 sm:space-y-3">
-          <div className="text-xs font-mono-code uppercase font-bold text-white/70 tracking-wider">
-            Project Telemetry · {projectId}
-          </div>
-          
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white leading-tight">
             {pName}
           </h2>
 
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm md:text-base text-white/80 font-medium">
+            <span className="font-mono-code font-bold text-white px-2 py-0.5 rounded bg-white/10">{projectId}</span>
+            <span>•</span>
             <span>{project?.ministry || "Ministry of Road Transport & Highways"}</span>
             <span>•</span>
             <span>{pSector}</span>
