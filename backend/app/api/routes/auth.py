@@ -38,5 +38,44 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "username": current_user.get("username"),
         "role": current_user.get("role"),
         "email": current_user.get("email"),
-        "full_name": current_user.get("full_name")
+        "full_name": current_user.get("full_name"),
+        "dphis_alert_threshold": current_user.get("dphis_alert_threshold", 75.0),
+        "alert_email": current_user.get("alert_email") or current_user.get("email"),
+        "notify_via_email": current_user.get("notify_via_email", True)
+    }
+
+@router.get("/preferences")
+async def get_preferences(current_user: dict = Depends(get_current_user)):
+    return {
+        "dphis_alert_threshold": current_user.get("dphis_alert_threshold", 75.0),
+        "alert_email": current_user.get("alert_email") or current_user.get("email"),
+        "notify_via_email": current_user.get("notify_via_email", True)
+    }
+
+@router.put("/preferences")
+async def update_preferences(
+    payload: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    db = get_database()
+    threshold = float(payload.get("dphis_alert_threshold", 75.0))
+    alert_email = payload.get("alert_email") or current_user.get("email")
+    notify_via_email = bool(payload.get("notify_via_email", True))
+
+    update_fields = {
+        "dphis_alert_threshold": threshold,
+        "alert_email": alert_email,
+        "notify_via_email": notify_via_email
+    }
+
+    if db is not None:
+        await db.users.update_one(
+            {"username": current_user.get("username")},
+            {"$set": update_fields},
+            upsert=True
+        )
+
+    return {
+        "message": "Preferences updated successfully",
+        "preferences": update_fields
     }

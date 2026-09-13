@@ -52,13 +52,43 @@ async def create_alert(payload: dict):
 async def trigger_n8n_event(
     project_id: str = Query(default="P1024"),
     dphis: float = Query(default=82.4),
+    threshold: float = Query(default=75.0, description="Alert threshold limit set by user (default 75.0)"),
+    recipient_email: Optional[str] = Query(default=None, description="User email to send alert notification to"),
+    recipient_name: Optional[str] = Query(default=None),
     test_mode: bool = Query(default=False)
 ):
     """
     Dispatches a structured risk event to the n8n Cloud webhook.
+    Checks if dphis > threshold (default 75.0).
+    Includes the user's recipient credentials so n8n can email them directly.
     """
     import httpx
     from app.config.settings import settings
+
+    db = get_database()
+    email_to = recipient_email
+    name_to = recipient_name or "Executive Officer"
+
+    if not email_to and db is not None:
+        user = await db.users.find_one({"is_active": True})
+        if user:
+            email_to = user.get("alert_email") or user.get("email")
+            name_to = user.get("full_name") or name_to
+            if threshold == 75.0 and "dphis_alert_threshold" in user:
+                threshold = float(user["dphis_alert_threshold"])
+
+    if not email_to:
+        email_to = "balledasivavaraprasad@gmail.com"
+
+    threshold_exceeded = dphis > threshold
+    if not threshold_exceeded:
+        return {
+            "success": False,
+            "threshold_exceeded": False,
+            "message": f"DPHIS score {dphis} is below the threshold of {threshold}. No alert or email triggered.",
+            "dphis": dphis,
+            "threshold": threshold
+        }
 
     target_url = settings.N8N_TEST_WEBHOOK_URL if test_mode else settings.N8N_RISK_WEBHOOK_URL
     payload = {
@@ -68,7 +98,14 @@ async def trigger_n8n_event(
         "previous_dphis": round(max(0.0, dphis - 11.2), 1),
         "risk_level": "CRITICAL" if dphis >= 75 else "HIGH" if dphis >= 50 else "MODERATE",
         "risk_change": 15.7,
-        "risk_trend": "WORSENING" if dphis >= 70 else "STABLE",
+        "risk_trend": "WORSENING" if dphis >= threshold else "STABLE",
+        "threshold": threshold,
+        "threshold_exceeded": True,
+        "recipient": {
+            "email": email_to,
+            "name": name_to,
+            "username": "admin"
+        },
         "timestamp": datetime.utcnow().isoformat() + "Z"
     }
 
@@ -77,8 +114,10 @@ async def trigger_n8n_event(
             resp = await client.post(target_url, json=payload)
             return {
                 "success": resp.status_code in (200, 201, 202),
+                "threshold_exceeded": True,
                 "status_code": resp.status_code,
                 "target_url": target_url,
+                "recipient_email": email_to,
                 "dispatched_payload": payload,
                 "n8n_response": resp.text[:500]
             }

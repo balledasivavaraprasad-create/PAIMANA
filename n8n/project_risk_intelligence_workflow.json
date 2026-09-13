@@ -22,7 +22,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const item = $input.first().json;\n\n// 1. Verify required payload fields\nif (!item.project_id || item.dphis === undefined || !item.risk_level || !item.timestamp) {\n  throw new Error('Validation Failed: Missing required payload attributes (project_id, dphis, risk_level, timestamp)');\n}\n\n// 2. Validate DPHIS range [0, 100]\nconst dphis = Number(item.dphis);\nif (isNaN(dphis) || dphis < 0 || dphis > 100) {\n  throw new Error(`Validation Failed: dphis (${item.dphis}) must be a valid number between 0 and 100`);\n}\n\nreturn [{\n  json: {\n    event_type: item.event_type || 'RISK_UPDATE',\n    project_id: String(item.project_id).trim(),\n    dphis: dphis,\n    previous_dphis: Number(item.previous_dphis || dphis),\n    risk_level: String(item.risk_level).toUpperCase(),\n    risk_change: Number(item.risk_change || 0),\n    risk_trend: item.risk_trend || (dphis >= 70 ? 'WORSENING' : 'STABLE'),\n    timestamp: item.timestamp,\n    validated_at: new Date().toISOString()\n  }\n}];"
+        "jsCode": "const item = $input.first().json;\n\n// 1. Verify required payload fields\nif (!item.project_id || item.dphis === undefined || !item.risk_level || !item.timestamp) {\n  throw new Error('Validation Failed: Missing required payload attributes (project_id, dphis, risk_level, timestamp)');\n}\n\n// 2. Validate DPHIS range [0, 100]\nconst dphis = Number(item.dphis);\nif (isNaN(dphis) || dphis < 0 || dphis > 100) {\n  throw new Error(`Validation Failed: dphis (${item.dphis}) must be a valid number between 0 and 100`);\n}\n\n// 3. User custom threshold (default: 75.0)\nconst threshold = Number(item.threshold || 75.0);\nconst recipient = item.recipient || {\n  email: 'balledasivavaraprasad@gmail.com',\n  name: 'Executive Officer',\n  username: 'admin'\n};\n\nreturn [{\n  json: {\n    event_type: item.event_type || 'RISK_UPDATE',\n    project_id: String(item.project_id).trim(),\n    project_name: item.project_name || `Corridor ${item.project_id}`,\n    dphis: dphis,\n    threshold: threshold,\n    threshold_exceeded: dphis >= threshold,\n    previous_dphis: Number(item.previous_dphis || dphis),\n    risk_level: String(item.risk_level).toUpperCase(),\n    risk_change: Number(item.risk_change || 0),\n    risk_trend: item.risk_trend || (dphis >= threshold ? 'WORSENING' : 'STABLE'),\n    recipient: recipient,\n    recipient_email: recipient.email,\n    recipient_name: recipient.name,\n    timestamp: item.timestamp,\n    validated_at: new Date().toISOString()\n  }\n}];"
       },
       "id": "node-validate",
       "name": "Validate Risk Event",
@@ -99,7 +99,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const event = $('Validate Risk Event').item.json;\nconst projectResp = $('Get Project').first()?.json || {};\nconst riskResp = $('Get Risk Intelligence').first()?.json || {};\nconst shapResp = $('Get Risk Drivers (SHAP)').first()?.json || {};\n\n// Normalize data or use calibrated fallbacks\nconst project = {\n  id: projectResp.project_id || event.project_id,\n  name: projectResp.project_name || `Strategic Corridor ${event.project_id}`,\n  sector: projectResp.sector || 'Roads & Highways',\n  state: projectResp.state || 'National Corridor',\n  ministry: projectResp.ministry || 'Ministry of Road Transport and Highways',\n  physical_progress: projectResp.progress?.physical || 34,\n  financial_progress: projectResp.progress?.financial || 62,\n  cost: projectResp.cost || { original: 3500, revised: 4218, currency: 'INR_CR' }\n};\n\nconst risk = {\n  dphis: event.dphis,\n  level: event.risk_level,\n  components: riskResp.components || {\n    time: 0.82,\n    cost: 0.75,\n    progress: 0.70,\n    milestone: 0.65,\n    financial: 0.52,\n    implementation: 0.61\n  },\n  trend: {\n    previous: event.previous_dphis,\n    change: event.risk_change,\n    direction: event.risk_trend\n  }\n};\n\nconst shapDrivers = shapResp.top_factors || [\n  { feature: 'critical_path_schedule_deviation', impact: 0.24, direction: 'increase_risk' },\n  { feature: 'capex_disbursement_execution_disparity', impact: 0.21, direction: 'increase_risk' },\n  { feature: 'contractual_mechanization_deficit', impact: 0.17, direction: 'increase_risk' }\n];\n\nreturn [{\n  json: {\n    project_id: event.project_id,\n    dphis: event.dphis,\n    risk_level: event.risk_level,\n    risk_change: event.risk_change,\n    risk_trend: event.risk_trend,\n    project: project,\n    risk: risk,\n    shap_drivers: shapDrivers,\n    is_high_risk: event.dphis >= 70 || event.risk_level === 'CRITICAL' || event.risk_level === 'HIGH'\n  }\n}];"
+        "jsCode": "const event = $('Validate Risk Event').item.json;\nconst projectResp = $('Get Project').first()?.json || {};\nconst riskResp = $('Get Risk Intelligence').first()?.json || {};\nconst shapResp = $('Get Risk Drivers (SHAP)').first()?.json || {};\n\nconst project = {\n  id: projectResp.project_id || event.project_id,\n  name: projectResp.project_name || event.project_name || `Strategic Corridor ${event.project_id}`,\n  sector: projectResp.sector || 'Roads & Highways',\n  state: projectResp.state || 'National Corridor',\n  ministry: projectResp.ministry || 'Ministry of Road Transport and Highways',\n  physical_progress: projectResp.progress?.physical || 34,\n  financial_progress: projectResp.progress?.financial || 62,\n  cost: projectResp.cost || { original: 3500, revised: 4218, currency: 'INR_CR' }\n};\n\nconst risk = {\n  dphis: event.dphis,\n  level: event.risk_level,\n  components: riskResp.components || {\n    time: 0.82,\n    cost: 0.75,\n    progress: 0.70,\n    milestone: 0.65,\n    financial: 0.52,\n    implementation: 0.61\n  },\n  trend: {\n    previous: event.previous_dphis,\n    change: event.risk_change,\n    direction: event.risk_trend\n  }\n};\n\nconst shapDrivers = shapResp.top_factors || [\n  { feature: 'critical_path_schedule_deviation', impact: 0.24, direction: 'increase_risk' },\n  { feature: 'capex_disbursement_execution_disparity', impact: 0.21, direction: 'increase_risk' },\n  { feature: 'contractual_mechanization_deficit', impact: 0.17, direction: 'increase_risk' }\n];\n\nreturn [{\n  json: {\n    project_id: event.project_id,\n    project_name: project.name,\n    dphis: event.dphis,\n    threshold: event.threshold || 75.0,\n    risk_level: event.risk_level,\n    risk_change: event.risk_change,\n    risk_trend: event.risk_trend,\n    recipient_email: event.recipient_email,\n    recipient_name: event.recipient_name,\n    project: project,\n    risk: risk,\n    shap_drivers: shapDrivers,\n    is_high_risk: event.dphis >= (event.threshold || 75.0)\n  }\n}];"
       },
       "id": "node-synthesize-dossier",
       "name": "Synthesize Project Dossier",
@@ -122,7 +122,7 @@
             {
               "id": "cond-dphis-threshold",
               "leftValue": "={{ $json.dphis }}",
-              "rightValue": 70,
+              "rightValue": "={{ $json.threshold || 75 }}",
               "operator": {
                 "type": "number",
                 "operation": "gte"
@@ -133,7 +133,7 @@
         }
       },
       "id": "node-if-high-risk",
-      "name": "High Risk?",
+      "name": "High Risk? (DPHIS >= User Threshold)",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
@@ -144,7 +144,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const item = $input.first().json;\n\nreturn [{\n  json: {\n    status: 'MONITORING_ACTIVE',\n    message: `Asset ${item.project_id} nominal DPHIS (${item.dphis} < 70). Standard econometric surveillance maintained. No executive intervention required.`,\n    project_id: item.project_id,\n    dphis: item.dphis,\n    risk_level: item.risk_level,\n    logged_at: new Date().toISOString()\n  }\n}];"
+        "jsCode": "const item = $input.first().json;\n\nreturn [{\n  json: {\n    status: 'MONITORING_ACTIVE',\n    message: `Asset ${item.project_id} nominal DPHIS (${item.dphis} < threshold ${item.threshold || 75}). Standard surveillance maintained. No alert email dispatched.`,\n    project_id: item.project_id,\n    dphis: item.dphis,\n    threshold: item.threshold || 75,\n    risk_level: item.risk_level,\n    logged_at: new Date().toISOString()\n  }\n}];"
       },
       "id": "node-log-monitoring",
       "name": "Log Monitoring Event",
@@ -158,7 +158,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const item = $input.first().json;\nconst project = item.project;\nconst risk = item.risk;\nconst shap = item.shap_drivers;\n\n// Empirical causal reasoning engine\nconst findings = [\n  `Certified physical completion (${project.physical_progress}%) exhibits severe hysteresis relative to cumulative financial disbursement (${project.financial_progress}%), inducing acute milestone recovery friction.`,\n  `Longitudinal risk acceleration detected with DPHIS escalating by +${risk.trend.change}% into ${risk.level} threshold.`,\n  `Additive Shapley decomposition isolates ${shap[0]?.feature || 'Critical path slippage'} as the primary structural escalation vector.`\n];\n\nconst recommendations = [\n  {\n    priority: 'HIGH',\n    action: 'Mandate independent escrow reconciliation and halt unearned financial disbursements until certified on-site milestones align.',\n    reason: 'Physical-to-financial execution disparity exceeds 25 percentage point statutory tolerance.'\n  },\n  {\n    priority: 'HIGH',\n    action: 'Execute contractual audit of equipment and labor mechanization against Detailed Project Report (DPR) specifications.',\n    reason: 'Critical path superstructure milestones have suffered severe buffer depletion.'\n  }\n];\n\nreturn [{\n  json: {\n    project_id: item.project_id,\n    dphis: item.dphis,\n    severity: item.risk_level === 'CRITICAL' ? 'CRITICAL' : 'HIGH',\n    intervention_required: true,\n    confidence: 0.94,\n    findings: findings,\n    recommendations: recommendations,\n    synthesized_at: new Date().toISOString()\n  }\n}];"
+        "jsCode": "const item = $input.first().json;\nconst project = item.project;\nconst risk = item.risk;\nconst shap = item.shap_drivers;\n\n// Empirical causal reasoning engine\nconst findings = [\n  `Certified physical completion (${project.physical_progress}%) exhibits severe hysteresis relative to cumulative financial disbursement (${project.financial_progress}%), inducing acute milestone recovery friction.`,\n  `Longitudinal risk acceleration detected with DPHIS (${item.dphis}) exceeding the alert threshold (${item.threshold}) set by user.`,\n  `Additive Shapley decomposition isolates ${shap[0]?.feature || 'Critical path slippage'} as the primary structural escalation vector.`\n];\n\nconst recommendations = [\n  {\n    priority: 'HIGH',\n    action: 'Mandate independent escrow reconciliation and halt unearned disbursements until certified on-site milestones align.',\n    reason: 'Physical-to-financial execution disparity exceeds statutory tolerance.'\n  },\n  {\n    priority: 'HIGH',\n    action: 'Execute contractual audit of equipment and labor mechanization against Detailed Project Report (DPR) specifications.',\n    reason: 'Critical path superstructure milestones have suffered severe buffer depletion.'\n  }\n];\n\nreturn [{\n  json: {\n    project_id: item.project_id,\n    project_name: item.project_name,\n    dphis: item.dphis,\n    threshold: item.threshold,\n    severity: item.risk_level === 'CRITICAL' ? 'CRITICAL' : 'HIGH',\n    recipient_email: item.recipient_email,\n    recipient_name: item.recipient_name,\n    intervention_required: true,\n    confidence: 0.94,\n    findings: findings,\n    recommendations: recommendations,\n    synthesized_at: new Date().toISOString()\n  }\n}];"
       },
       "id": "node-ai-investigation",
       "name": "AI Risk Investigation Agent",
@@ -203,7 +203,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const item = $input.first().json;\n\nreturn [{\n  json: {\n    status: 'INVESTIGATION_ARCHIVED',\n    message: `Investigation completed for Asset ${item.project_id}. No statutory intervention warranted at this time.`,\n    investigation_id: 'INV-' + Math.floor(1000 + Math.random() * 9000),\n    archived_at: new Date().toISOString()\n  }\n}];"
+        "jsCode": "const item = $input.first().json;\n\nreturn [{\n  json: {\n    status: 'INVESTIGATION_ARCHIVED',\n    message: `Investigation completed for Asset ${item.project_id}. No statutory intervention warranted.`,\n    investigation_id: 'INV-' + Math.floor(1000 + Math.random() * 9000),\n    archived_at: new Date().toISOString()\n  }\n}];"
       },
       "id": "node-store-investigation",
       "name": "Store Investigation Dossier",
@@ -217,7 +217,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const item = $input.first().json;\nconst projId = item.project_id;\nconst dphis = item.dphis;\n\nconst alertSubject = `[CRITICAL ESCALATION] Capital Asset ${projId} DPHIS ${dphis} Requires Immediate Intervention`;\n\nconst alertBody = `===================================================================\\nINSTITUTIONAL EARLY WARNING & RISK SURVEILLANCE DIRECTIVE\\n===================================================================\\n\\nAsset Token: ${projId}\\nComposite Health Index (DPHIS): ${dphis} / 100 [CRITICAL INTERVENTION TIER]\\nAlgorithmic Diagnostic Confidence: ${(item.confidence * 100).toFixed(1)}% (CI: 95%)\\n\\nKey Empirical Findings:\\n1. ${item.findings[0] || 'Physical progress lags financial disbursement significantly.'}\\n2. ${item.findings[1] || 'Critical path buffer exhausted.'}\\n3. ${item.findings[2] || 'Mechanization deficit identified.'}\\n\\nExecutive Statutory Directives:\\n• Action 1: ${item.recommendations[0]?.action}\\n• Action 2: ${item.recommendations[1]?.action}\\n\\nGenerated autonomously via PAIMANA Decision-Support Engine.\\n===================================================================`;\n\nreturn [{\n  json: {\n    project_id: projId,\n    severity: item.severity || 'CRITICAL',\n    dphis: dphis,\n    trigger: 'DPHIS_THRESHOLD_EXCEEDED',\n    investigation_id: 'INV-' + Math.floor(1000 + Math.random() * 9000),\n    alert_subject: alertSubject,\n    alert_body: alertBody,\n    findings: item.findings,\n    recommendations: item.recommendations,\n    notification_sent: true,\n    created_at: new Date().toISOString()\n  }\n}];"
+        "jsCode": "const item = $input.first().json;\nconst projId = item.project_id;\nconst dphis = item.dphis;\nconst threshold = item.threshold || 75;\nconst recipientEmail = item.recipient_email || 'balledasivavaraprasad@gmail.com';\nconst recipientName = item.recipient_name || 'Executive Officer';\n\nconst alertSubject = `[CRITICAL RISK ALERT] Asset ${projId} DPHIS ${dphis} Exceeded Threshold (${threshold})`;\n\nconst alertBody = `Dear ${recipientName},\n\nThis is an automated institutional risk alert dispatched via the PAIMANA Decision-Support Platform.\n\n===================================================================\nCAPITAL ASSET RISK ESCALATION NOTIFICATION\n===================================================================\n\nAsset Token: ${projId}\nProject Name: ${item.project_name || 'Strategic Corridor'}\nComposite DPHIS Score: ${dphis} / 100\nConfigured User Threshold: ${threshold} / 100 [THRESHOLD EXCEEDED]\nDiagnostic Confidence: ${(item.confidence * 100).toFixed(1)}% (CI: 95%)\n\nKey Empirical Findings:\n1. ${item.findings[0]}\n2. ${item.findings[1]}\n3. ${item.findings[2]}\n\nExecutive Statutory Directives:\n• Action 1: ${item.recommendations[0]?.action}\n• Action 2: ${item.recommendations[1]?.action}\n\nPlease review this project immediately on the PAIMANA platform.\n\nSincerely,\nPAIMANA Infrastructure Risk Intelligence Surveillance\n===================================================================`;\n\nreturn [{\n  json: {\n    project_id: projId,\n    project_name: item.project_name,\n    severity: item.severity || 'CRITICAL',\n    dphis: dphis,\n    threshold: threshold,\n    trigger: 'DPHIS_THRESHOLD_EXCEEDED',\n    recipient_email: recipientEmail,\n    recipient_name: recipientName,\n    investigation_id: 'INV-' + Math.floor(1000 + Math.random() * 9000),\n    alert_subject: alertSubject,\n    alert_body: alertBody,\n    findings: item.findings,\n    recommendations: item.recommendations,\n    notification_sent: true,\n    created_at: new Date().toISOString()\n  }\n}];"
       },
       "id": "node-build-alert",
       "name": "Build Executive Alert",
@@ -230,11 +230,29 @@
     },
     {
       "parameters": {
+        "fromEmail": "PAIMANA Risk Intelligence <alerts@paimana.gov.in>",
+        "toEmail": "={{ $json.recipient_email }}",
+        "subject": "={{ $json.alert_subject }}",
+        "text": "={{ $json.alert_body }}",
+        "options": {}
+      },
+      "id": "node-send-email",
+      "name": "Send Email to User",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2180,
+        140
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
         "method": "POST",
         "url": "={{ $env.BACKEND_API_URL || 'http://localhost:8000/api/v1' }}/alerts",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\\n  \\\"project_id\\\": \\\"{{ $json.project_id }}\\\",\\n  \\\"project_name\\\": \\\"Corridor {{ $json.project_id }}\\\",\\n  \\\"severity\\\": \\\"{{ $json.severity }}\\\",\\n  \\\"trigger\\\": \\\"{{ $json.trigger }}\\\",\\n  \\\"dphis\\\": {{ $json.dphis }},\\n  \\\"message\\\": \\\"{{ $json.alert_subject }}\\\",\\n  \\\"investigation_id\\\": \\\"{{ $json.investigation_id }}\\\",\\n  \\\"status\\\": \\\"PENDING\\\"\\n}",
+        "jsonBody": "={\n  \"project_id\": \"{{ $json.project_id }}\",\n  \"project_name\": \"{{ $json.project_name }}\",\n  \"severity\": \"{{ $json.severity }}\",\n  \"trigger\": \"{{ $json.trigger }}\",\n  \"dphis\": {{ $json.dphis }},\n  \"message\": \"{{ $json.alert_subject }}\",\n  \"investigation_id\": \"{{ $json.investigation_id }}\",\n  \"status\": \"PENDING\"\n}",
         "options": {
           "response": {
             "response": {
@@ -248,7 +266,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2180,
+        2420,
         140
       ]
     }
@@ -324,14 +342,14 @@
       "main": [
         [
           {
-            "node": "High Risk?",
+            "node": "High Risk? (DPHIS >= User Threshold)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "High Risk?": {
+    "High Risk? (DPHIS >= User Threshold)": {
       "main": [
         [
           {
@@ -382,6 +400,17 @@
       "main": [
         [
           {
+            "node": "Send Email to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email to User": {
+      "main": [
+        [
+          {
             "node": "Save Alert to MongoDB",
             "type": "main",
             "index": 0
@@ -390,10 +419,10 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "paimana-risk-intelligence-v1",
+  "versionId": "paimana-risk-intelligence-v2",
   "id": "5fAaWSDOSrbvszjZ"
 }

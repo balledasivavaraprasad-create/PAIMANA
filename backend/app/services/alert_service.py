@@ -22,6 +22,27 @@ async def evaluate_and_trigger_alert(
     """
     db = get_database()
     
+    # Fetch user preferences for threshold and email credentials
+    user = None
+    if db is not None:
+        user = await db.users.find_one({"is_active": True})
+
+    threshold = 75.0
+    recipient_email = "balledasivavaraprasad@gmail.com"
+    recipient_name = "Executive Officer"
+    username = "admin"
+
+    if user:
+        threshold = float(user.get("dphis_alert_threshold", 75.0))
+        recipient_email = user.get("alert_email") or user.get("email") or recipient_email
+        recipient_name = user.get("full_name") or recipient_name
+        username = user.get("username") or username
+
+    # Only trigger if DPHIS is above the limit set by user or default 75
+    if current_dphis < threshold:
+        logger.info(f"DPHIS {current_dphis} does not exceed threshold {threshold}. Alert suppressed.")
+        return None
+
     # Check severity transition
     if current_severity not in ("high", "critical"):
         return None
@@ -41,7 +62,7 @@ async def evaluate_and_trigger_alert(
     alert_id = f"ALT-{uuid.uuid4().hex[:8].upper()}"
     msg = (
         f"CRITICAL ESCALATION: Project {project_name} ({project_id}) has reached DPHIS {current_dphis} "
-        f"({current_severity.upper()}). Severity escalated from {previous_severity or 'Normal'}."
+        f"exceeding threshold {threshold}. Severity: {current_severity.upper()}."
     )
 
     alert = Alert(
@@ -50,7 +71,7 @@ async def evaluate_and_trigger_alert(
         project_name=project_name,
         severity=current_severity,
         previous_severity=previous_severity,
-        trigger="DPHIS_ESCALATION",
+        trigger="DPHIS_THRESHOLD_EXCEEDED",
         dphis=current_dphis,
         message=msg,
         status="PENDING",
@@ -58,17 +79,25 @@ async def evaluate_and_trigger_alert(
         created_at=datetime.utcnow()
     )
 
-    # Dispatch to n8n webhook asynchronously
+    # Dispatch to n8n webhook asynchronously with user recipient credentials
     if settings.N8N_RISK_WEBHOOK_URL:
         try:
             risk_payload = {
                 "event_type": "RISK_UPDATE",
                 "project_id": project_id,
+                "project_name": project_name,
                 "dphis": current_dphis,
                 "previous_dphis": max(0.0, current_dphis - 11.2),
                 "risk_level": current_severity.upper(),
                 "risk_change": 15.7,
-                "risk_trend": "WORSENING" if current_dphis >= 70 else "STABLE",
+                "risk_trend": "WORSENING" if current_dphis >= threshold else "STABLE",
+                "threshold": threshold,
+                "threshold_exceeded": True,
+                "recipient": {
+                    "email": recipient_email,
+                    "name": recipient_name,
+                    "username": username
+                },
                 "timestamp": datetime.utcnow().isoformat() + "Z"
             }
             async with httpx.AsyncClient(timeout=4.0) as client:
