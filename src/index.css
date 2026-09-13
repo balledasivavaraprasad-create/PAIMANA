@@ -27,26 +27,26 @@
 
   :root[data-theme="light"] {
     --bg-base: transparent;
-    --bg-surface: rgba(255, 255, 255, 0.35);
-    --bg-card: rgba(255, 255, 255, 0.28);
-    --surface-sunken: rgba(255, 255, 255, 0.22);
-    --border-hairline: rgba(255, 255, 255, 0.45);
-    --glass-border: rgba(255, 255, 255, 0.5);
+    --bg-surface: rgba(255, 255, 255, 0.18);
+    --bg-card: rgba(255, 255, 255, 0.15);
+    --surface-sunken: rgba(255, 255, 255, 0.08);
+    --border-hairline: rgba(255, 255, 255, 0.28);
+    --glass-border: rgba(255, 255, 255, 0.35);
     
     --text-primary: #0F172A;
     --text-secondary: #1E293B;
     --text-muted: #475569;
     --accent: #0F172A;
     --accent-hover: #000000;
-    --accent-soft: rgba(15, 23, 42, 0.1);
+    --accent-soft: rgba(15, 23, 42, 0.08);
     
     --risk-critical: #DC2626;
     --risk-high: #EA580C;
     --risk-moderate: #D97706;
     --risk-low: #059669;
     
-    --card-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.7);
-    --card-glow-hover: 0 24px 50px -10px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.85);
+    --card-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    --card-glow-hover: 0 18px 40px -10px rgba(0, 0, 0, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.7);
   }
 
   body {
@@ -71,42 +71,42 @@
 :root[data-theme="dark"] .oled-solid-card,
 :root[data-theme="dark"] .glass-panel,
 .oled-solid-card, .glass-panel {
-  background-color: rgba(18, 20, 32, 0.35);
-  backdrop-filter: blur(22px) saturate(170%);
-  -webkit-backdrop-filter: blur(22px) saturate(170%);
-  border: 1px solid rgba(255, 255, 255, 0.20);
+  background-color: rgba(15, 18, 28, 0.26);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 20px;
-  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.30), inset 0 1px 1px 0 rgba(255, 255, 255, 0.20);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root[data-theme="dark"] .oled-solid-card:hover,
 :root[data-theme="dark"] .glass-panel:hover {
-  background-color: rgba(26, 30, 46, 0.48);
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.35);
+  background-color: rgba(22, 26, 40, 0.38);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.40), inset 0 1px 1px 0 rgba(255, 255, 255, 0.28);
   transform: translateY(-2px);
 }
 
-/* Apple Translucent Frosted Glass for Light Mode Flashcards */
+/* Apple Translucent Frosted Glass for Light Mode Flashcards (A bit less frosted, clean & airy) */
 :root[data-theme="light"] .oled-solid-card,
 :root[data-theme="light"] .glass-panel {
-  background-color: rgba(255, 255, 255, 0.28);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.55);
 }
 
 :root[data-theme="light"] .oled-solid-card:hover,
 :root[data-theme="light"] .glass-panel:hover {
-  background-color: rgba(255, 255, 255, 0.38);
-  border-color: rgba(255, 255, 255, 0.65);
-  box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.50);
+  box-shadow: 0 18px 40px -10px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.70);
   transform: translateY(-2px);
 }
 
-/* Subtle, softer inner flashcards in Light Mode (avoids double-frosting) */
+/* Subtle, softer inner flashcards in Light Mode (Very light frosting, no double-blur) */
 :root[data-theme="light"] .oled-solid-card .oled-solid-card,
 :root[data-theme="light"] .glass-panel .glass-panel,
 :root[data-theme="light"] .glass-hero .glass-panel,
@@ -114,45 +114,45 @@
 :root[data-theme="light"] .glass-panel [class*="bg-white/5"],
 :root[data-theme="light"] .glass-hero [class*="bg-white/5"],
 :root[data-theme="light"] [class*="bg-white/5"] {
-  background-color: rgba(255, 255, 255, 0.16) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.38) !important;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.05) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
 }
 
 :root[data-theme="light"] .oled-solid-card .oled-solid-card:hover,
 :root[data-theme="light"] .glass-panel .glass-panel:hover,
 :root[data-theme="light"] .glass-hero .glass-panel:hover,
 :root[data-theme="light"] [class*="bg-white/5"]:hover {
-  background-color: rgba(255, 255, 255, 0.24) !important;
-  border-color: rgba(255, 255, 255, 0.55) !important;
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.40) !important;
 }
 
 :root[data-theme="dark"] .glass-hero {
-  background-color: rgba(18, 20, 32, 0.38);
-  backdrop-filter: blur(26px) saturate(180%);
-  -webkit-backdrop-filter: blur(26px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: rgba(15, 18, 28, 0.28);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.20);
   border-radius: 26px;
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.38), inset 0 1px 1px 0 rgba(255, 255, 255, 0.30);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.32), inset 0 1px 1px 0 rgba(255, 255, 255, 0.24);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root[data-theme="light"] .glass-hero {
-  background-color: rgba(255, 255, 255, 0.32);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+  border: 1px solid rgba(255, 255, 255, 0.40);
   border-radius: 26px;
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.10), inset 0 1px 1px rgba(255, 255, 255, 0.60);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-hero:hover {
-  background-color: rgba(26, 30, 46, 0.52);
-  border-color: rgba(255, 255, 255, 0.40);
-  box-shadow: 0 28px 60px -12px rgba(0, 0, 0, 0.50), inset 0 1px 1px 0 rgba(255, 255, 255, 0.40);
+  background-color: rgba(22, 26, 40, 0.42);
+  border-color: rgba(255, 255, 255, 0.30);
+  box-shadow: 0 22px 50px -12px rgba(0, 0, 0, 0.42), inset 0 1px 1px 0 rgba(255, 255, 255, 0.30);
 }
 
 /* Map Pin Pulse Effect */
