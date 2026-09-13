@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from app.db.mongodb import get_database
 
 router = APIRouter(prefix="/alerts", tags=["Alerts & Notifications"])
@@ -27,7 +27,7 @@ async def list_alerts(
 @router.post("", response_model=dict, status_code=201)
 async def create_alert(payload: dict):
     db = get_database()
-    alert_id = payload.get("alert_id") or f"ALT-{int(datetime.utcnow().timestamp())}"
+    alert_id = payload.get("alert_id") or f"ALT-{int(datetime.now(timezone.utc).timestamp())}"
     alert_doc = {
         "alert_id": alert_id,
         "project_id": payload.get("project_id", "P1024"),
@@ -40,7 +40,7 @@ async def create_alert(payload: dict):
         "recommendations": payload.get("recommendations", []),
         "status": payload.get("status", "PENDING").upper(),
         "notification_sent": payload.get("notification_sent", True),
-        "created_at": datetime.utcnow()
+        "created_at": datetime.now(timezone.utc)
     }
     if db is not None:
         await db.alerts.insert_one(alert_doc)
@@ -106,7 +106,7 @@ async def trigger_n8n_event(
             "name": name_to,
             "username": "admin"
         },
-        "timestamp": datetime.utcnow().isoformat() + "Z"
+        "timestamp": datetime.now(timezone.utc).isoformat() + "Z"
     }
 
     try:
@@ -137,7 +137,7 @@ async def acknowledge_alert(alert_id: str):
 
     res = await db.alerts.update_one(
         {"alert_id": alert_id},
-        {"$set": {"status": "ACKNOWLEDGED", "acknowledged_at": datetime.utcnow()}}
+        {"$set": {"status": "ACKNOWLEDGED", "acknowledged_at": datetime.now(timezone.utc)}}
     )
     if res.matched_count == 0:
         raise HTTPException(status_code=404, detail="Alert not found")
@@ -151,7 +151,7 @@ async def resolve_alert(alert_id: str):
 
     res = await db.alerts.update_one(
         {"alert_id": alert_id},
-        {"$set": {"status": "RESOLVED", "resolved_at": datetime.utcnow()}}
+        {"$set": {"status": "RESOLVED", "resolved_at": datetime.now(timezone.utc)}}
     )
     if res.matched_count == 0:
         raise HTTPException(status_code=404, detail="Alert not found")

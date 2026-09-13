@@ -1,6 +1,6 @@
 import uuid
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from app.agents.tools import (
     tool_get_project,
     tool_get_history,
@@ -140,7 +140,7 @@ async def run_investigation(project_id: str, trigger_reason: str = "CRITICAL_DPH
         recommendations=recommendations,
         tools_executed=tools_executed,
         overall_confidence=0.91,
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
 
     # Persist report in MongoDB

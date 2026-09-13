@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import GlassCard from '../components/GlassCard';
 import RiskBadge from '../components/RiskBadge';
-import { fetchAlerts, acknowledgeAlert, AlertItem } from '../lib/api';
+import { fetchAlerts, acknowledgeAlert, triggerN8nRiskEvent, AlertItem } from '../lib/api';
 
 interface Props {
   onNavigateToInvestigation?: (projectId: string) => void;
@@ -10,6 +10,13 @@ interface Props {
 export default function Alerts({ onNavigateToInvestigation }: Props) {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // User-configurable alert threshold and n8n credentials
+  const [userThreshold, setUserThreshold] = useState<number>(75.0);
+  const [recipientEmail, setRecipientEmail] = useState<string>('balledasivavaraprasad@gmail.com');
+  const [simulatedDphis, setSimulatedDphis] = useState<number>(84.5);
+  const [isTriggering, setIsTriggering] = useState<boolean>(false);
+  const [simulationResult, setSimulationResult] = useState<any | null>(null);
 
   const loadAlerts = () => {
     fetchAlerts().then(items => {
@@ -26,6 +33,33 @@ export default function Alerts({ onNavigateToInvestigation }: Props) {
     const ok = await acknowledgeAlert(alertId);
     if (ok) {
       setAlerts(prev => prev.map(a => a.alert_id === alertId ? { ...a, status: 'ACKNOWLEDGED' } : a));
+    }
+  };
+
+  const handleTriggerSimulation = async () => {
+    setIsTriggering(true);
+    setSimulationResult(null);
+    try {
+      const res = await triggerN8nRiskEvent({
+        projectId: 'P1024',
+        dphis: simulatedDphis,
+        threshold: userThreshold,
+        recipientEmail: recipientEmail,
+        recipientName: 'Executive Officer'
+      });
+      setSimulationResult(res);
+      // If alert was created, refresh alerts stream
+      if (res.threshold_exceeded) {
+        setTimeout(loadAlerts, 1500);
+      }
+    } catch (err: any) {
+      setSimulationResult({
+        success: false,
+        threshold_exceeded: false,
+        message: err.message || 'Dispatch failed'
+      });
+    } finally {
+      setIsTriggering(false);
     }
   };
 
@@ -50,6 +84,104 @@ export default function Alerts({ onNavigateToInvestigation }: Props) {
             ↻ Re-Synchronize Incident Stream
           </button>
         </div>
+      </GlassCard>
+
+      {/* Executive Threshold & n8n Cloud Workflow Protocol */}
+      <GlassCard variant="medium" padding={24} className="space-y-4 border border-white/20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/10 pb-3">
+          <div>
+            <h3 className="text-base sm:text-lg font-bold font-display text-white flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              Automated Institutional Alert & n8n Cloud Workflow Protocol
+            </h3>
+            <p className="text-xs sm:text-sm text-white/70">
+              Surveillance engine continuously evaluates asset DPHIS against user-configured threshold (default: &gt; 75.0). Exceeding this boundary triggers automated email dispatch to user credentials via n8n Cloud.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 font-mono-code text-xs text-white/80 shrink-0">
+            <span className="px-2.5 py-1 bg-white/10 rounded-lg border border-white/20">Webhook: Live</span>
+            <span className="px-2.5 py-1 bg-white/10 rounded-lg border border-white/20">Recipient: balledasivavaraprasad@gmail.com</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono-code text-white/80 uppercase">DPHIS Alert Threshold</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="40"
+                max="95"
+                step="1"
+                value={userThreshold}
+                onChange={e => setUserThreshold(Number(e.target.value))}
+                className="w-full bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-mono-code text-white focus:outline-none focus:border-white"
+              />
+              <span className="text-xs font-mono-code text-white/60 shrink-0">/ 100</span>
+            </div>
+            <p className="text-[11px] text-white/50">Default: 75.0 (Critical Tier)</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono-code text-white/80 uppercase">Target Recipient Email</label>
+            <input
+              type="email"
+              value={recipientEmail}
+              onChange={e => setRecipientEmail(e.target.value)}
+              className="w-full bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-mono-code text-white focus:outline-none focus:border-white"
+              placeholder="user@paimana.gov.in"
+            />
+            <p className="text-[11px] text-white/50">User credential destination</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono-code text-white/80 uppercase">Simulated Asset DPHIS</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={simulatedDphis}
+                onChange={e => setSimulatedDphis(Number(e.target.value))}
+                className="w-full bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-mono-code text-white focus:outline-none focus:border-white"
+              />
+              <span className="text-xs font-mono-code text-white/60 shrink-0">/ 100</span>
+            </div>
+            <p className="text-[11px] text-white/50">Test value to evaluate rule</p>
+          </div>
+
+          <div className="flex flex-col justify-end space-y-1.5">
+            <button
+              onClick={handleTriggerSimulation}
+              disabled={isTriggering}
+              className="w-full px-4 py-2.5 rounded-lg bg-white text-black font-mono-code font-bold text-xs sm:text-sm hover:bg-zinc-200 transition-all cursor-pointer disabled:opacity-50 shadow-md"
+            >
+              {isTriggering ? "Evaluating..." : "⚡ Execute Risk Evaluation"}
+            </button>
+            <p className="text-[11px] text-white/50 text-center">FastAPI → n8n Cloud Webhook</p>
+          </div>
+        </div>
+
+        {simulationResult && (
+          <div className={`p-3.5 rounded-lg border text-xs sm:text-sm font-mono-code flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+            simulationResult.threshold_exceeded
+              ? "bg-emerald-950/50 border-emerald-500/50 text-emerald-200"
+              : "bg-amber-950/50 border-amber-500/50 text-amber-200"
+          }`}>
+            <div>
+              <span className="font-bold">
+                {simulationResult.threshold_exceeded ? "✓ ESCALATION TRIGGERED:" : "ℹ ALERT SUPPRESSED:"}
+              </span>{" "}
+              {simulationResult.message || (simulationResult.threshold_exceeded ? `DPHIS score ${simulatedDphis} exceeds threshold ${userThreshold}. Dispatched to n8n Cloud; notification email queued for ${simulationResult.recipient_email}.` : `DPHIS score ${simulatedDphis} is below threshold ${userThreshold}. Standard surveillance maintained.`)}
+            </div>
+            {simulationResult.status_code && (
+              <span className="px-2.5 py-1 rounded bg-black/40 border border-white/20 text-xs shrink-0">
+                HTTP {simulationResult.status_code} OK
+              </span>
+            )}
+          </div>
+        )}
       </GlassCard>
 
       {/* Alerts Stream */}

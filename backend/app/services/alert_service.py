@@ -1,6 +1,6 @@
 import uuid
 from typing import Optional, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import httpx
 from app.db.mongodb import get_database
 from app.models.alert import Alert
@@ -39,7 +39,7 @@ async def evaluate_and_trigger_alert(
         username = user.get("username") or username
 
     # Only trigger if DPHIS is above the limit set by user or default 75
-    if current_dphis < threshold:
+    if current_dphis <= threshold:
         logger.info(f"DPHIS {current_dphis} does not exceed threshold {threshold}. Alert suppressed.")
         return None
 
@@ -49,7 +49,7 @@ async def evaluate_and_trigger_alert(
 
     # Check cooldown if DB available
     if db is not None:
-        cutoff = datetime.utcnow() - timedelta(hours=settings.ALERT_COOLDOWN_HOURS)
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=settings.ALERT_COOLDOWN_HOURS)
         recent_alert = await db.alerts.find_one({
             "project_id": project_id,
             "severity": current_severity,
@@ -76,7 +76,7 @@ async def evaluate_and_trigger_alert(
         message=msg,
         status="PENDING",
         webhook_dispatched=False,
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
 
     # Dispatch to n8n webhook asynchronously with user recipient credentials
@@ -98,7 +98,7 @@ async def evaluate_and_trigger_alert(
                     "name": recipient_name,
                     "username": username
                 },
-                "timestamp": datetime.utcnow().isoformat() + "Z"
+                "timestamp": datetime.now(timezone.utc).isoformat() + "Z"
             }
             async with httpx.AsyncClient(timeout=4.0) as client:
                 resp = await client.post(

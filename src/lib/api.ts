@@ -232,3 +232,38 @@ export async function sendChatMessage(message: string, projectId?: string): Prom
     };
   }
 }
+
+export async function triggerN8nRiskEvent(params: {
+  projectId: string;
+  dphis: number;
+  threshold?: number;
+  recipientEmail?: string;
+  recipientName?: string;
+}): Promise<{
+  success: boolean;
+  threshold_exceeded: boolean;
+  message?: string;
+  status_code?: number;
+  target_url?: string;
+  recipient_email?: string;
+  n8n_response?: string;
+}> {
+  try {
+    const url = new URL(`${API_BASE}/alerts/trigger-n8n-event`);
+    url.searchParams.set('project_id', params.projectId);
+    url.searchParams.set('dphis', String(params.dphis));
+    if (params.threshold !== undefined) url.searchParams.set('threshold', String(params.threshold));
+    if (params.recipientEmail) url.searchParams.set('recipient_email', params.recipientEmail);
+    if (params.recipientName) url.searchParams.set('recipient_name', params.recipientName);
+
+    const res = await fetch(url.toString(), { method: 'POST' });
+    return await res.json();
+  } catch (err: any) {
+    return {
+      success: false,
+      threshold_exceeded: false,
+      message: err.message || 'Network error triggering n8n workflow'
+    };
+  }
+}
+

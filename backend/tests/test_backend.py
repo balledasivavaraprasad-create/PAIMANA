@@ -133,3 +133,33 @@ async def test_analytics_overview():
         data = res.json()
         assert data["total_projects"] >= 1500
         assert data["critical"] > 0
+
+@pytest.mark.asyncio
+async def test_alert_threshold_evaluation_suppression():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        res = await ac.post("/api/v1/alerts/trigger-n8n-event?project_id=P1024&dphis=65.0&threshold=75.0")
+        assert res.status_code == 200
+        data = res.json()
+        assert data["threshold_exceeded"] is False
+        assert "below the threshold" in data["message"]
+
+        res_eq = await ac.post("/api/v1/alerts/trigger-n8n-event?project_id=P1024&dphis=75.0&threshold=75.0")
+        assert res_eq.status_code == 200
+        data_eq = res_eq.json()
+        assert data_eq["threshold_exceeded"] is False
+
+@pytest.mark.asyncio
+async def test_alert_threshold_evaluation_trigger():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        res = await ac.post(
+            "/api/v1/alerts/trigger-n8n-event?project_id=P1024&dphis=84.5&threshold=75.0&recipient_email=test@paimana.gov.in"
+        )
+        assert res.status_code == 200
+        data = res.json()
+        assert data["threshold_exceeded"] is True
+        assert data["recipient_email"] == "test@paimana.gov.in"
+        assert data["dispatched_payload"]["dphis"] == 84.5
+        assert data["dispatched_payload"]["recipient"]["email"] == "test@paimana.gov.in"
+

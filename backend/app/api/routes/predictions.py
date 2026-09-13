@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from datetime import datetime
+from datetime import datetime, timezone
 from app.db.mongodb import get_database
 from app.services.feature_service import engineer_features
 from app.services.shap_service import explain_features
@@ -47,5 +47,5 @@ async def get_project_predictions(project_id: str):
         overall_risk_probability=round(risk_prob, 3),
         top_shap_factors=shap_factors,
         model_version="xgb_v1.0",
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
