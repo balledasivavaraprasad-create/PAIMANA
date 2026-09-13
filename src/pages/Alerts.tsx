@@ -30,7 +30,7 @@ export default function Alerts({ onNavigateToInvestigation }: Props) {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 pt-20 sm:pt-24 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
       {/* Header - Clean heading without top eyebrow tag */}
       <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1.5">

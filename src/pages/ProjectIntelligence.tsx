@@ -88,7 +88,7 @@ export default function ProjectIntelligence({ projectId, onNavigateToInvestigati
   const currentDphis = risk?.dphis ?? project?.dphis ?? 85.0;
 
   return (
-    <div className="space-y-6 sm:space-y-8 pt-20 sm:pt-24 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
+    <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
       {/* Top Header Card - Clean heading without top eyebrow tag */}
       <GlassCard variant="hero" padding={24} className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-2 sm:space-y-3">

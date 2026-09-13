@@ -30,7 +30,7 @@ export default function Investigation({ projectId }: Props) {
   const pName = project?.project_name || "NH-48 Varanasi-Ranchi Expressway";
 
   return (
-    <div className="space-y-6 sm:space-y-8 pt-20 sm:pt-24 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
+    <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
       {/* Header - Clean heading without top eyebrow tags */}
       <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-2">

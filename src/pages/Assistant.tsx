@@ -81,7 +81,7 @@ export default function Assistant({ selectedProjectId = 'P1024' }: Props) {
   };
 
   return (
-    <div className="pt-20 sm:pt-24 pb-6 px-4 sm:px-8 md:px-12 max-w-5xl mx-auto flex flex-col h-[calc(100vh-80px)] justify-between space-y-3 sm:space-y-4">
+    <div className="pt-16 sm:pt-20 pb-6 px-4 sm:px-8 md:px-12 max-w-5xl mx-auto flex flex-col h-[calc(100vh-65px)] justify-between space-y-3 sm:space-y-4">
       {/* Header */}
       <GlassCard variant="hero" padding={18} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
