@@ -447,15 +447,14 @@ export default function App() {
 
       {/* FLOATING BOTTOM DOCK CONTROLS (Only on Motion tab) */}
       {currentTab === 'motion' && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 pointer-events-auto">
-          <div className="oled-solid-card px-4 py-2 flex items-center text-xs font-mono-code shadow-2xl">
-            <button
-              onClick={() => setShowCeoModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[var(--surface-sunken)] hover:bg-[var(--accent-soft)] text-[var(--text-primary)] font-medium cursor-pointer border border-[var(--border-hairline)]"
-            >
-              <span>+ Add Project</span>
-            </button>
-          </div>
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
+          <button
+            onClick={() => setShowCeoModal(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0B0F17] hover:bg-[#141A26] border border-white/10 text-white text-xs font-mono-code font-medium shadow-md transition-colors duration-150 cursor-pointer"
+          >
+            <span className="text-white/80 text-sm leading-none font-normal">+</span>
+            <span className="text-white">Add Project</span>
+          </button>
         </div>
       )}
 
