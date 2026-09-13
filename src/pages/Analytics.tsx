@@ -35,16 +35,16 @@ export default function Analytics({ onNavigateToProject }: Props) {
       <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-1.5 sm:space-y-2">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white">
-            Portfolio Risk & Expenditure Analytics
+            Macroeconomic Capital Expenditure & Portfolio Risk Analytics
           </h2>
           <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
-            Live aggregation across {totalProjects.toLocaleString()} central sector projects and 18,000 monthly trajectory snapshots
+            Empirical longitudinal aggregation across {totalProjects.toLocaleString()} sovereign infrastructure capital assets and 18,000 multi-temporal telemetry snapshots
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <span className="text-xs sm:text-sm font-mono-code px-3.5 py-1.5 rounded-xl bg-white/10 text-white font-semibold border border-white/20">
-            Database: 1,500 Projects
+            Monitored Cohort: 1,500 Assets
           </span>
         </div>
       </GlassCard>
@@ -52,24 +52,24 @@ export default function Analytics({ onNavigateToProject }: Props) {
       {/* Top 4 Macro Metrics - Fully responsive grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <MetricCard
-          label="Total Monitored Projects"
+          label="Total Capitalized Assets"
           value={totalProjects.toLocaleString()}
-          sub="Central Sector Portfolios"
+          sub="Central Sector Portfolio Corpus"
         />
         <MetricCard
-          label="Intervention Flags"
+          label="Critical Intervention Thresholds"
           value={criticalCount.toString()}
-          sub={`+${highCount} in High Tier`}
+          sub={`+${highCount} in High Vulnerability Cohort`}
         />
         <MetricCard
-          label="Portfolio Average DPHIS"
+          label="National Health Index (DPHIS Mean)"
           value={avgDphis.toString()}
-          sub="National Health Benchmark"
+          sub="Econometric Baseline Benchmark"
         />
         <MetricCard
-          label="Cost Overrun Exposure"
+          label="Projected Capital Escalation Exposure"
           value={`${costOverrun}%`}
-          sub="Sanctioned Budget Slippage"
+          sub="Net Contingency Outlay Variance"
         />
       </div>
 
@@ -79,9 +79,9 @@ export default function Analytics({ onNavigateToProject }: Props) {
         <GlassCard variant="medium" padding={24} className="space-y-4 sm:space-y-5">
           <div className="flex items-center justify-between">
             <h3 className="text-base sm:text-lg font-bold font-display text-white">
-              Portfolio DPHIS Risk Trajectory
+              Longitudinal Portfolio Health & Risk Drift Trajectory
             </h3>
-            <span className="text-xs font-mono-code text-white/70">6-Month Trend</span>
+            <span className="text-xs font-mono-code text-white/70">6-Month Temporal Sequence</span>
           </div>
 
           <div className="space-y-3 pt-1">
@@ -96,11 +96,11 @@ export default function Analytics({ onNavigateToProject }: Props) {
               <div key={t.month} className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/15 flex items-center justify-between gap-2">
                 <div className="space-y-0.5">
                   <div className="text-xs sm:text-sm font-bold font-mono-code text-white">{t.month}</div>
-                  <div className="text-[11px] sm:text-xs text-white/70">{t.critical_count} critical corridors</div>
+                  <div className="text-[11px] sm:text-xs text-white/70">{t.critical_count} critical corridor interventions</div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-sm sm:text-base font-bold font-mono-code text-white">{t.average_dphis} DPHIS</div>
-                  <div className="text-[10px] sm:text-xs text-white/80 font-mono-code font-semibold">+{(t.average_dphis - 38.0).toFixed(1)} pts deviation</div>
+                  <div className="text-sm sm:text-base font-bold font-mono-code text-white">Index: {t.average_dphis}</div>
+                  <div className="text-[10px] sm:text-xs text-white/80 font-mono-code font-semibold">+{(t.average_dphis - 38.0).toFixed(1)} pts stochastic drift</div>
                 </div>
               </div>
             ))}
@@ -110,7 +110,7 @@ export default function Analytics({ onNavigateToProject }: Props) {
         {/* Sector Exposure Breakdown */}
         <GlassCard variant="medium" padding={24} className="space-y-4 sm:space-y-5">
           <h3 className="text-base sm:text-lg font-bold font-display text-white">
-            National Sector Exposure & Outlay
+            Sectoral Capital Allocation & Vulnerability Exposure
           </h3>
 
           <div className="space-y-3 pt-1">
@@ -127,8 +127,8 @@ export default function Analytics({ onNavigateToProject }: Props) {
                   <span className="font-mono-code font-bold text-white shrink-0">{sec.outlay}</span>
                 </div>
                 <div className="flex items-center justify-between text-[11px] sm:text-xs md:text-sm font-mono-code text-white/70">
-                  <span>{sec.count} projects</span>
-                  <span className="text-white font-bold">{sec.critical} Elevated</span>
+                  <span>{sec.count} Capital Assets</span>
+                  <span className="text-white font-bold">{sec.critical} Critical Vulnerability Assets</span>
                 </div>
               </div>
             ))}

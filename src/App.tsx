@@ -38,6 +38,7 @@ export default function App() {
 
   // Scroll Progress Tracking for Video Dimming
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [videoEnded, setVideoEnded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -132,10 +133,10 @@ export default function App() {
   };
 
   const shapDrivers = [
-    { name: 'Schedule Deviation Rate', impact: '+43 pts', text: 'Superstructure Phase 1 milestone delayed by 28 months', severity: 'critical' },
-    { name: 'Financial–Physical Progress Gap', impact: '+24 pts', text: '62% funds disbursed vs 34% physical progress achieved', severity: 'critical' },
-    { name: 'Contractor Equipment Deployment', impact: '+14 pts', text: 'Machinery on site 38% below DPR requirements', severity: 'high' },
-    { name: 'Right of Way (RoW) Clearance', impact: '-8 pts', text: 'Land acquisition 98% cleared by state authority', severity: 'low' },
+    { name: 'Critical Path Schedule Deviation', impact: '+43.2 pts', text: 'Superstructure Phase 1 milestone buffer exhausted; critical path slip: Δt = +28 mos', severity: 'critical' },
+    { name: 'CapEx Disbursement–Execution Disparity', impact: '+24.1 pts', text: 'Disbursement velocity (62%) diverges from certified physical completion (34%) by 28 pts', severity: 'critical' },
+    { name: 'Contractual Mechanization Deficit', impact: '+14.5 pts', text: 'On-site machinery mobilization 38% below Detailed Project Report (DPR) baseline', severity: 'high' },
+    { name: 'Right-of-Way (RoW) Liquidation Efficacy', impact: '-8.0 pts', text: 'Cadastral land acquisition 98.4% finalized with statutory encumbrance clearance', severity: 'low' },
   ];
 
   return (
@@ -147,33 +148,51 @@ export default function App() {
         alertCount={alertCount}
       />
 
-      {/* BACKGROUND VIDEO - VISIBLE ON ALL PAGES (STOPS ON INDIA IN MOTION) */}
+      {/* BACKGROUND VIDEO & STATIC MAP AT END - VISIBLE ON ALL PAGES */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-black">
+        {/* Static India Map image displayed seamlessly when video completes */}
+        <img
+          src="/india_map_final.png"
+          alt="National Infrastructure Spatial Map"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out"
+          style={{
+            opacity: videoEnded
+              ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
+              : 0,
+            filter: currentTab === 'motion'
+              ? `brightness(${Math.max(0.93, 1 - scrollProgress * 0.07)})`
+              : 'brightness(0.94)'
+          }}
+        />
+
         <video
           autoPlay
           muted
           playsInline
-          onEnded={(e) => { e.currentTarget.pause(); }}
-          className="w-full h-full object-cover transition-all duration-300 ease-out"
+          onEnded={() => {
+            setVideoEnded(true);
+          }}
+          className="w-full h-full object-cover transition-opacity duration-700 ease-out"
           style={{
-            opacity: currentTab === 'motion'
-              ? Math.max(0.76, 0.95 - scrollProgress * 0.19)
-              : 0.85,
+            opacity: !videoEnded
+              ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
+              : 0,
             filter: currentTab === 'motion'
-              ? `brightness(${Math.max(0.89, 1 - scrollProgress * 0.11)}) saturate(${100 + scrollProgress * 8}%) blur(${scrollProgress * 1.2}px)`
-              : 'brightness(0.90) blur(0.5px)',
-            transform: `scale(${1 + (currentTab === 'motion' ? scrollProgress * 0.03 : 0.02)})`
+              ? `brightness(${Math.max(0.93, 1 - scrollProgress * 0.07)})`
+              : 'brightness(0.94)'
           }}
         >
+          <source src="/dashboard.mp4" type="video/mp4" />
           <source src="/video.mp4" type="video/mp4" />
         </video>
+
         {/* Scroll-Driven Darkening Overlay - subtle so background and foreground blend seamlessly */}
         <div
           className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out bg-black"
           style={{
             opacity: currentTab === 'motion'
-              ? Math.min(0.24, 0.10 + scrollProgress * 0.14)
-              : 0.18
+              ? Math.min(0.12, scrollProgress * 0.12)
+              : 0.10
           }}
         />
       </div>
@@ -193,8 +212,8 @@ export default function App() {
                 motion.
               </h1>
 
-              <p className="text-xs sm:text-sm md:text-base text-white/90 font-medium leading-relaxed max-w-sm pt-2 drop-shadow-md">
-                A living predictive intelligence model of the nation's infrastructure network across 28 states.
+              <p className="text-xs sm:text-sm md:text-base text-white/90 font-medium leading-relaxed max-w-md pt-2 drop-shadow-md">
+                Continuous econometric surveillance and stochastic risk decomposition across 28 sub-national infrastructure corridors.
               </p>
 
               <div className="pt-3 sm:pt-4 flex flex-wrap items-center gap-3">
@@ -202,13 +221,13 @@ export default function App() {
                   onClick={() => setCurrentTab('intelligence')}
                   className="px-5 py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold shadow-2xl hover:bg-slate-200 transition-all cursor-pointer"
                 >
-                  Explore Risk Intelligence →
+                  Inspect Portfolio Risk Matrix →
                 </button>
                 <button
                   onClick={() => setCurrentTab('assistant')}
                   className="px-5 py-2.5 rounded-xl bg-black/60 text-white border border-white/30 text-xs sm:text-sm font-mono-code font-bold hover:bg-black/80 transition-all cursor-pointer"
                 >
-                  Ask AI Assistant 💬
+                  Consult Analytical Copilot 💬
                 </button>
               </div>
             </div>
@@ -218,14 +237,13 @@ export default function App() {
           <section className="snap-start w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
             <div className="w-full max-w-6xl pointer-events-auto">
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-10 shadow-2xl">
-                <div className="space-y-3 sm:space-y-4 max-w-2xl">
+                <div className="space-y-3 sm:space-y-4 max-w-3xl">
                   <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold font-display text-white tracking-tight leading-tight">
-                    The network is moving.<br />
-                    Watch where it bends.
+                    Macroeconomic Capital Velocity & Inter-Corridor Stress Surveillance
                   </h2>
 
                   <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-normal">
-                    Portfolio health is aggregated dynamically from {portfolioStats.totalProjects.toLocaleString()} monitored projects in the intelligence database.
+                    Longitudinal portfolio health synthesized dynamically across {portfolioStats.totalProjects.toLocaleString()} sovereign infrastructure assets spanning 18,000 empirical snapshot vectors.
                   </p>
                 </div>
 
@@ -235,24 +253,24 @@ export default function App() {
                     <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
                       {portfolioStats.avgDphis}
                     </div>
-                    <div className="text-xs text-white/80 font-medium">Average DPHIS Score</div>
-                    <div className="text-xs font-mono-code text-white font-semibold">+4.1 pts trend acceleration</div>
+                    <div className="text-xs text-white/80 font-medium">Portfolio Mean Health Index (DPHIS)</div>
+                    <div className="text-xs font-mono-code text-white font-semibold">+4.1 pts longitudinal risk acceleration</div>
                   </div>
 
                   <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
                     <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
                       {portfolioStats.totalProjects.toLocaleString()}
                     </div>
-                    <div className="text-xs text-white/80 font-medium">Monitored Infrastructure Projects</div>
-                    <div className="text-xs font-mono-code text-white font-semibold">18,000 monthly snapshots</div>
+                    <div className="text-xs text-white/80 font-medium">Active Strategic Capital Assets</div>
+                    <div className="text-xs font-mono-code text-white font-semibold">18,000 multi-temporal telemetry audits</div>
                   </div>
 
                   <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
                     <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
                       {portfolioStats.criticalCount}
                     </div>
-                    <div className="text-xs text-white/80 font-medium">Critical Intervention Flags</div>
-                    <div className="text-xs font-mono-code text-white font-semibold">Automated alert engine active</div>
+                    <div className="text-xs text-white/80 font-medium">High-Vulnerability Intervention Thresholds</div>
+                    <div className="text-xs font-mono-code text-white font-semibold">Algorithmic anomaly detection active</div>
                   </div>
                 </div>
               </div>
@@ -266,10 +284,10 @@ export default function App() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-2 sm:space-y-3">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
-                      Quantified risk drivers across national corridors.
+                      Empirical Risk Decomposition & Additive Shapley Attribution
                     </h2>
                     <p className="text-xs sm:text-sm text-white/80">
-                      SHAP feature attribution explaining score escalation on critical projects like {selectedPin.id}.
+                      Isolating marginal covariate contributions driving probabilistic failure escalation on corridor {selectedPin.id}.
                     </p>
                   </div>
 
@@ -277,7 +295,7 @@ export default function App() {
                     onClick={() => setCurrentTab('intelligence')}
                     className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold hover:bg-zinc-200 transition-all cursor-pointer shadow-lg whitespace-nowrap shrink-0"
                   >
-                    Deep Inspection →
+                    Forensic Audit Dossier →
                   </button>
                 </div>
 
@@ -286,18 +304,18 @@ export default function App() {
                     <div className="flex items-center justify-between border-b border-white/10 pb-3">
                       <span className="font-mono-code font-bold text-white">{selectedPin.id}</span>
                       <span className="px-2.5 py-1 rounded bg-white/10 text-white text-xs font-mono-code font-bold border border-white/20">
-                        Score: {selectedPin.dphis} · High / Elevated
+                        DPHIS: {selectedPin.dphis} · Critical Risk Cohort
                       </span>
                     </div>
                     <h4 className="text-sm sm:text-base font-bold text-white">{selectedPin.name}</h4>
                     <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-                      Physical progress (34%) lags financial utilisation (62%) by 28 percentage points, creating severe milestone recovery risk.
+                      Certified physical completion (34%) exhibits severe hysteresis relative to cumulative financial disbursement (62%), inducing acute milestone recovery friction.
                     </p>
 
                     <div className="pt-2 space-y-2 text-xs sm:text-sm">
                       <div className="flex justify-between font-mono-code text-white/80">
-                        <span>Physical Execution: 34%</span>
-                        <span className="text-white font-bold">Target: 78%</span>
+                        <span>Physical Capitalization: 34%</span>
+                        <span className="text-white font-bold">Sanctioned Target Baseline: 78%</span>
                       </div>
                       <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
                         <div className="h-full bg-white rounded-full" style={{ width: '34%' }} />
@@ -307,7 +325,7 @@ export default function App() {
 
                   <div className="oled-solid-card p-5 sm:p-6 space-y-3">
                     <h4 className="text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider text-white/80 mb-2">
-                      Top Quantified SHAP Impact Drivers
+                      Top Additive Shapley Attribution Vectors (SHAP)
                     </h4>
                     {shapDrivers.map(d => (
                       <div key={d.name} className="p-3 rounded-xl bg-white/5 border border-white/15 space-y-1">
@@ -333,7 +351,7 @@ export default function App() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1.5 sm:space-y-2">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
-                      Nationwide Project Telemetry
+                      National Infrastructure Portfolio Ledger & Capital Telemetry
                     </h2>
                   </div>
 
@@ -342,7 +360,7 @@ export default function App() {
                       onClick={() => setShowCeoModal(true)}
                       className="px-5 py-2.5 rounded-xl bg-black text-white text-xs sm:text-sm font-bold font-mono-code cursor-pointer border border-white/30 shadow-[0_0_14px_rgba(255,255,255,0.22)] hover:bg-zinc-900 hover:border-white/60 transition-all duration-200 flex items-center gap-2"
                     >
-                      <span>+ Add Project</span>
+                      <span>+ Ingest Capital Asset</span>
                     </button>
                   </div>
                 </div>
@@ -351,13 +369,13 @@ export default function App() {
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-white/[0.04] border-b border-white/10 text-white/70 font-mono-code text-[10px] uppercase sticky top-0 z-10 backdrop-blur-[2px]">
-                        <th className="p-4">Pin ID</th>
-                        <th className="p-4">Project Name</th>
-                        <th className="p-4">State</th>
-                        <th className="p-4">DPHIS</th>
-                        <th className="p-4">Budget</th>
-                        <th className="p-4">Delay</th>
-                        <th className="p-4">Actions</th>
+                        <th className="p-4">Asset Token</th>
+                        <th className="p-4">Infrastructure Nomenclature</th>
+                        <th className="p-4">Jurisdictional State</th>
+                        <th className="p-4">DPHIS Index</th>
+                        <th className="p-4">Sanctioned Outlay</th>
+                        <th className="p-4">Critical Delay</th>
+                        <th className="p-4">Analytical Protocol</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -384,7 +402,7 @@ export default function App() {
                               }}
                               className="px-2.5 py-1 rounded bg-[var(--surface-sunken)] hover:bg-white hover:text-black text-[10px] font-mono-code text-white border border-white/20 transition-all cursor-pointer"
                             >
-                              Analyze →
+                              Inspect →
                             </button>
                           </td>
                         </tr>
@@ -453,7 +471,7 @@ export default function App() {
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0B0F17] hover:bg-[#141A26] border border-white/10 text-white text-xs font-mono-code font-medium shadow-md transition-colors duration-150 cursor-pointer"
           >
             <span className="text-white/80 text-sm leading-none font-normal">+</span>
-            <span className="text-white">Add Project</span>
+            <span className="text-white">Ingest Capital Asset</span>
           </button>
         </div>
       )}

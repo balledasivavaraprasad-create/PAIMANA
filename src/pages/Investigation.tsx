@@ -35,10 +35,10 @@ export default function Investigation({ projectId }: Props) {
       <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-2">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white">
-            Evidence-First Investigation: Project {projectId}
+            Empirical Multi-Agent Causal Diagnosis: Asset {projectId}
           </h2>
           <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
-            {pName} · {report ? `Completed (${report.investigation_id})` : 'Multi-tool autonomous discovery across MongoDB snapshots, SHAP drivers & milestones'}
+            {pName} · {report ? `Diagnostic Dossier Finalized (${report.investigation_id})` : 'Autonomous algorithmic evidence synthesis across longitudinal snapshot matrices, Shapley factor attributions & critical path milestones'}
           </p>
         </div>
 
@@ -51,10 +51,10 @@ export default function Investigation({ projectId }: Props) {
             {loading ? (
               <>
                 <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                <span>Executing Investigation Tools...</span>
+                <span>Executing Controlled Algorithmic Pipeline...</span>
               </>
             ) : (
-              <span>⚡ Execute Investigation</span>
+              <span>⚡ Initiate Causal Diagnosis Protocol</span>
             )}
           </button>
         </div>
@@ -63,18 +63,18 @@ export default function Investigation({ projectId }: Props) {
       {/* Tool Execution Sequence - Responsive grid for split-screen and mobile */}
       <GlassCard variant="medium" padding={20} className="space-y-4">
         <div className="text-xs sm:text-sm font-mono-code font-bold uppercase text-white/80 flex flex-wrap items-center justify-between gap-2">
-          <span>Agent Tool Execution Pipeline (Controlled FastAPI Services)</span>
-          <span className="text-white font-semibold">Grounded Tool Pipeline</span>
+          <span>Autonomous Causal Diagnostic Sequence (Controlled FastAPI Service Layer)</span>
+          <span className="text-white font-semibold">Deterministic Execution</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[
-            { name: '1. Project Core', desc: 'tool_get_project', active: !!report },
-            { name: '2. Time Trajectory', desc: 'tool_get_history', active: !!report },
-            { name: '3. SHAP Attribution', desc: 'tool_get_shap', active: !!report },
-            { name: '4. Milestones', desc: 'tool_get_milestones', active: !!report },
-            { name: '5. Environment', desc: 'tool_get_environment', active: !!report },
-            { name: '6. Peer Benchmark', desc: 'tool_compare_peers', active: !!report },
+            { name: '1. Baseline Corpus', desc: 'tool_get_project', active: !!report },
+            { name: '2. Trajectory Sequence', desc: 'tool_get_history', active: !!report },
+            { name: '3. Shapley Vectors', desc: 'tool_get_shap', active: !!report },
+            { name: '4. Critical Milestones', desc: 'tool_get_milestones', active: !!report },
+            { name: '5. Geospatial Topology', desc: 'tool_get_environment', active: !!report },
+            { name: '6. Peer Benchmarks', desc: 'tool_compare_peers', active: !!report },
           ].map(tool => (
             <div
               key={tool.name}
@@ -87,7 +87,7 @@ export default function Investigation({ projectId }: Props) {
               <div className="font-bold text-xs sm:text-sm font-mono-code text-white">{tool.name}</div>
               <div className="text-[10px] sm:text-xs font-mono-code text-white/70">{tool.desc}</div>
               <div className="text-[10px] sm:text-xs font-bold text-white mt-1">
-                {tool.active ? '✓ Complete' : '○ Standby'}
+                {tool.active ? '✓ Finalized' : '○ Standby Mode'}
               </div>
             </div>
           ))}
@@ -100,9 +100,9 @@ export default function Investigation({ projectId }: Props) {
           {/* Findings & Grounded Evidence */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-5">
             <h3 className="text-base sm:text-lg font-bold font-display text-white flex items-center gap-2">
-              <span>Grounded Evidence Findings</span>
+              <span>Empirically Grounded Causal Findings</span>
               <span className="text-xs sm:text-sm font-mono-code text-white/80">
-                ({report.findings.length} Isolated)
+                ({report.findings.length} Isolated Pathways)
               </span>
             </h3>
 
@@ -111,7 +111,7 @@ export default function Investigation({ projectId }: Props) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <h4 className="text-sm sm:text-base font-bold text-white">{f.title}</h4>
                   <span className="text-xs font-mono-code px-2.5 sm:px-3 py-1 rounded bg-white/10 text-white border border-white/20 shrink-0">
-                    Confidence: {(f.confidence * 100).toFixed(0)}%
+                    Confidence: {(f.confidence * 100).toFixed(0)}% (CI: 95%)
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm md:text-base text-white/85 leading-relaxed">{f.summary}</p>
@@ -119,7 +119,7 @@ export default function Investigation({ projectId }: Props) {
                 {/* Evidence citations */}
                 <div className="pt-3 border-t border-white/15 space-y-2">
                   <div className="text-xs font-mono-code font-bold uppercase text-white/70">
-                    Evidence Footprints:
+                    Empirical Footprint Audit Traces:
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                     {f.evidence.map((ev, ei) => (
@@ -138,17 +138,17 @@ export default function Investigation({ projectId }: Props) {
           {/* Targeted Recommendations */}
           <div className="space-y-4 sm:space-y-5">
             <h3 className="text-base sm:text-lg font-bold font-display text-white">
-              Decision-Support Recommendations
+              Executive Intervention Directives
             </h3>
 
             {report.recommendations.map((rec, i) => (
               <GlassCard key={i} variant="medium" padding={20} className="space-y-3 border-l-4 border-l-white">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono-code font-bold px-2 py-0.5 rounded bg-white/15 text-white">
-                    Priority: {rec.priority}
+                    Statutory Priority: {rec.priority}
                   </span>
                   <span className="text-xs font-mono-code text-white/70">
-                    {(rec.confidence * 100).toFixed(0)}% Match
+                    {(rec.confidence * 100).toFixed(0)}% Empirical Congruence
                   </span>
                 </div>
 
@@ -157,7 +157,7 @@ export default function Investigation({ projectId }: Props) {
 
                 {rec.target_agency && (
                   <div className="pt-2 border-t border-white/15 text-xs font-mono-code text-white/90">
-                    Target Authority: {rec.target_agency}
+                    Statutory Sponsoring Authority: {rec.target_agency}
                   </div>
                 )}
               </GlassCard>
@@ -172,7 +172,7 @@ export default function Investigation({ projectId }: Props) {
                   : 'bg-black text-white border border-white/30 hover:bg-zinc-900 shadow-xl'
               }`}
             >
-              {acknowledged ? '✓ Findings Acknowledged & Logged to Audit Trail' : 'Acknowledge & Sign Findings'}
+              {acknowledged ? '✓ Executive Dossier Ratified & Logged to Sovereign Audit Ledger' : 'Ratify & Sign Statutory Directives'}
             </button>
           </div>
         </div>
@@ -180,16 +180,16 @@ export default function Investigation({ projectId }: Props) {
         <GlassCard variant="medium" padding={36} className="text-center space-y-4">
           <div className="text-3xl sm:text-4xl text-white">🔍</div>
           <div className="text-base sm:text-xl font-bold text-white">
-            Ready to Launch Multi-Tool Investigation for {projectId}
+            Algorithmic Causal Investigation Engine Primed: Asset {projectId}
           </div>
           <p className="text-xs sm:text-sm md:text-base text-white/80 max-w-xl mx-auto leading-relaxed">
-            Clicking "Execute Investigation" triggers the autonomous pipeline. It queries MongoDB for historical snapshots, calculates SHAP impact factors, extracts milestone delays, and generates grounded evidence citations.
+            Initiating the protocol activates an autonomous diagnostic graph querying multi-temporal snapshot matrices, evaluating additive Shapley decompositions, auditing critical path milestone buffers, and synthesizing deterministic evidence footprints.
           </p>
           <button
             onClick={handleRunInvestigation}
             className="w-full sm:w-auto px-6 sm:px-7 py-3 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.2)] hover:bg-zinc-900 cursor-pointer"
           >
-            Launch Autonomous Agent
+            ⚡ Initiate Causal Diagnosis Protocol
           </button>
         </GlassCard>
       )}

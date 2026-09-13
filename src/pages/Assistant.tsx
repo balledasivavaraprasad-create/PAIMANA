@@ -21,16 +21,16 @@ export default function Assistant({ selectedProjectId = 'P1024' }: Props) {
     {
       id: '1',
       sender: 'assistant',
-      text: `Welcome to PAIMANA Intelligence Assistant. Connected to your FastAPI intelligence backend and MongoDB cluster. I can analyze risk scores, explain SHAP drivers for projects like ${selectedProjectId}, detect velocity stagnation, and recommend interventions. How can I assist you?`,
+      text: `Welcome to the PAIMANA Institutional Decision-Support Copilot. Active connection verified with the FastAPI econometric reasoning layer and sovereign asset cluster. I provide multi-factor risk decomposition, additive Shapley latent variable analysis for assets such as ${selectedProjectId}, physical-financial disparity diagnostics, and statutory remediation directives. How may I direct your inquiry?`,
       citations: [
-        { feature: 'Live Database', impact: '1,500 Projects', description: 'MongoDB paimana_intelligence connected' },
-        { feature: 'SHAP TreeExplainer', impact: 'Real-time', description: 'XGBoost feature attributions available' },
+        { feature: 'Sovereign Asset Corpus', impact: '1,500 Monitored Assets', description: 'MongoDB longitudinal telemetry cluster active' },
+        { feature: 'Additive Shapley Engine', impact: 'Deterministic', description: 'Empirical XGBoost factor decomposition available' },
       ],
       suggestedActions: [
-        `Why is ${selectedProjectId} high?`,
-        'Which projects are elevated?',
-        `Recommend actions for ${selectedProjectId}`,
-        `What is the trend for ${selectedProjectId}?`
+        `Deconstruct primary SHAP escalation drivers for Asset ${selectedProjectId}`,
+        'Identify corridors exhibiting acute progress-disbursement divergence',
+        `Synthesize statutory remediation directives for Asset ${selectedProjectId}`,
+        `Evaluate longitudinal risk drift acceleration for Asset ${selectedProjectId}`
       ],
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
@@ -86,10 +86,10 @@ export default function Assistant({ selectedProjectId = 'P1024' }: Props) {
       <GlassCard variant="hero" padding={18} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-lg sm:text-xl font-bold font-display text-white">
-            PAIMANA Intelligence Assistant
+            Institutional Decision-Support Copilot
           </h2>
           <p className="text-xs sm:text-sm text-white/70">
-            Executive decision-support chat grounded in FastAPI tools, MongoDB time-series & SHAP
+            Executive macroeconomic reasoning engine grounded in deterministic FastAPI services, longitudinal MongoDB time-series, and additive Shapley attribution
           </p>
         </div>
 
@@ -121,7 +121,7 @@ export default function Assistant({ selectedProjectId = 'P1024' }: Props) {
               {msg.citations && msg.citations.length > 0 && (
                 <div className="pt-3 border-t border-white/10 space-y-2">
                   <div className="text-[11px] sm:text-xs font-mono-code uppercase font-bold text-white/60">
-                    Evidence Footprints:
+                    Empirical Footprint Audit Traces:
                   </div>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {msg.citations.map((c, idx) => (
@@ -159,7 +159,7 @@ export default function Assistant({ selectedProjectId = 'P1024' }: Props) {
         {loading && (
           <div className="flex items-center gap-2 text-xs sm:text-sm text-white/70 font-mono-code p-2">
             <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-            <span>Consulting intelligence pipeline tools...</span>
+            <span>Synthesizing econometric decision-support models...</span>
           </div>
         )}
       </div>
@@ -171,7 +171,7 @@ export default function Assistant({ selectedProjectId = 'P1024' }: Props) {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSend()}
-          placeholder={`Ask about ${selectedProjectId} delays, SHAP, recommendations...`}
+          placeholder={`Inquire regarding Asset ${selectedProjectId} stochastic delays, Shapley vectors, or intervention directives...`}
           className="flex-1 bg-transparent border-none text-xs sm:text-sm md:text-base text-white outline-none px-2 sm:px-3 font-sans placeholder:text-white/40"
         />
 
@@ -180,7 +180,7 @@ export default function Assistant({ selectedProjectId = 'P1024' }: Props) {
           disabled={!input.trim() || loading}
           className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs sm:text-sm font-mono-code font-bold cursor-pointer transition-all shadow-md disabled:opacity-40 shrink-0"
         >
-          Send
+          Transmit Inquiry
         </button>
       </GlassCard>
     </div>

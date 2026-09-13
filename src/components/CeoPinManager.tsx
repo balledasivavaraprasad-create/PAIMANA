@@ -49,7 +49,7 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
       <div className="oled-solid-card w-full max-w-md p-6 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-3">
           <h3 className="text-base font-bold font-display text-[var(--text-primary)]">
-            Add New Project
+            Institutional Capital Asset Ingestion Protocol
           </h3>
           <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-lg cursor-pointer">
             ✕
@@ -59,7 +59,7 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
         <form onSubmit={handleSubmit} className="space-y-3 text-xs text-[var(--text-secondary)]">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Project ID</label>
+              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Asset Identification Token</label>
               <input
                 type="text"
                 value={id}
@@ -68,7 +68,7 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
               />
             </div>
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">State Location</label>
+              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Sub-National Jurisdiction</label>
               <select
                 value={state}
                 onChange={e => setState(e.target.value)}
@@ -87,12 +87,12 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
           </div>
 
           <div>
-            <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Project Name</label>
+            <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Infrastructure Nomenclature</label>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="e.g. Western Dedicated Freight Corridor Phase II"
+              placeholder="e.g. Western Dedicated Freight Corridor Package 4"
               className="w-full px-3 py-2 rounded-lg bg-[var(--surface-sunken)] border border-[var(--border-hairline)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
               required
             />
@@ -100,21 +100,21 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Risk Severity</label>
+              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Risk Classification</label>
               <select
                 value={risk}
                 onChange={e => setRisk(e.target.value as any)}
                 className="w-full px-3 py-2 rounded-lg bg-[var(--surface-sunken)] border border-[var(--border-hairline)] text-[var(--text-primary)] outline-none"
               >
-                <option value="critical">Critical (75+ DPHIS)</option>
-                <option value="high">High Risk (50-74)</option>
-                <option value="moderate">Moderate (25-49)</option>
-                <option value="low">Low Risk (0-24)</option>
+                <option value="critical">Critical Risk Cohort (75+ DPHIS)</option>
+                <option value="high">Elevated Variance Tier (50-74)</option>
+                <option value="moderate">Moderate Exposure (25-49)</option>
+                <option value="low">Nominal Baseline (0-24)</option>
               </select>
             </div>
 
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">DPHIS Score ({dphis})</label>
+              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Calibrated DPHIS Index ({dphis} / 100)</label>
               <input
                 type="range"
                 min="1"
@@ -128,7 +128,7 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Budget Estimate</label>
+              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Sanctioned Capital Outlay</label>
               <input
                 type="text"
                 value={cost}
@@ -138,7 +138,7 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
             </div>
 
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Schedule Slip</label>
+              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Critical Path Delay (Δt)</label>
               <input
                 type="text"
                 value={delay}
@@ -154,13 +154,13 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
               onClick={onClose}
               className="flex-1 py-2.5 rounded-xl border border-[var(--border-hairline)] text-[var(--text-secondary)] font-semibold text-xs hover:bg-[var(--surface-sunken)] cursor-pointer"
             >
-              Cancel
+              Abort Protocol
             </button>
             <button
               type="submit"
               className="flex-1 py-2.5 rounded-xl bg-black text-white font-semibold text-xs border border-white/30 shadow-[0_0_12px_rgba(255,255,255,0.22)] hover:bg-zinc-900 hover:border-white/60 cursor-pointer transition-all duration-200"
             >
-              Add Project to Telemetry
+              Ingest & Commit to Ledger
             </button>
           </div>
         </form>
