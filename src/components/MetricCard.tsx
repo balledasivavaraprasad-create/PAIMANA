@@ -26,26 +26,25 @@ export function MetricCard({
     <GlassCard variant="medium" padding={18} className={`flex flex-col justify-between flex-1 min-w-[180px] ${className}`}>
       <div>
         <div className="flex items-center justify-between gap-2 mb-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+          <span className="text-xs md:text-sm font-semibold uppercase tracking-wider text-white/70">
             {label}
           </span>
-          {icon && <div className="text-[var(--text-muted)] opacity-80">{icon}</div>}
+          {icon && <div className="text-white/70 opacity-80">{icon}</div>}
         </div>
 
         <div
-          className="text-2xl font-bold font-display tracking-tight font-mono-data"
-          style={{ color: accent || 'var(--text-primary)' }}
+          className="text-2xl md:text-3xl font-bold font-display tracking-tight font-mono-data text-white"
         >
           {value}
         </div>
       </div>
 
       {(sub || trend || sparkline) && (
-        <div className="mt-3 pt-2 border-t border-[var(--border-hairline)] flex items-center justify-between">
+        <div className="mt-3 pt-2.5 border-t border-white/15 flex items-center justify-between">
           {sub && (
-            <div className="text-[11px] text-[var(--text-secondary)] flex items-center gap-1">
-              {trend === 'up' && <span className="text-[var(--risk-critical)] font-bold">↑</span>}
-              {trend === 'down' && <span className="text-[var(--risk-low)] font-bold">↓</span>}
+            <div className="text-xs md:text-sm text-white/80 flex items-center gap-1.5">
+              {trend === 'up' && <span className="text-white font-bold">↑</span>}
+              {trend === 'down' && <span className="text-white font-bold">↓</span>}
               <span>{sub}</span>
             </div>
           )}
@@ -55,7 +54,7 @@ export function MetricCard({
               <svg viewBox={`0 0 ${sparkline.length - 1} 10`} className="w-full h-full">
                 <polyline
                   fill="none"
-                  stroke={accent || 'var(--accent)'}
+                  stroke="#ffffff"
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"

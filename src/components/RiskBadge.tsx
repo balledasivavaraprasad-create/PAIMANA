@@ -9,31 +9,19 @@ interface RiskBadgeProps {
   className?: string;
 }
 
-export function RiskBadge({ level, showGlow = false, size = 'sm', className = '' }: RiskBadgeProps) {
+export function RiskBadge({ level, size = 'sm', className = '' }: RiskBadgeProps) {
   const levelMap = {
     critical: {
-      color: 'var(--risk-critical)',
-      bg: 'var(--risk-critical-bg)',
-      border: 'var(--risk-critical-border)',
-      label: 'Critical',
+      label: 'Elevated / High',
     },
     high: {
-      color: 'var(--risk-high)',
-      bg: 'var(--risk-high-bg)',
-      border: 'var(--risk-high-border)',
-      label: 'High Risk',
+      label: 'High Priority',
     },
     moderate: {
-      color: 'var(--risk-moderate)',
-      bg: 'var(--risk-moderate-bg)',
-      border: 'var(--risk-moderate-border)',
-      label: 'Moderate',
+      label: 'Standard',
     },
     low: {
-      color: 'var(--risk-low)',
-      bg: 'var(--risk-low-bg)',
-      border: 'var(--risk-low-border)',
-      label: 'Low Risk',
+      label: 'Baseline',
     },
   };
 
@@ -42,27 +30,15 @@ export function RiskBadge({ level, showGlow = false, size = 'sm', className = ''
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-semibold uppercase tracking-wider ${className}`}
+      className={`inline-flex items-center gap-1.5 font-semibold uppercase tracking-wider bg-white/10 text-white border border-white/20 font-mono-code ${className}`}
       style={{
-        background: config.bg,
-        color: config.color,
-        border: `1px solid ${config.border}`,
-        fontSize: isSm ? 10 : 11,
-        padding: isSm ? '2px 8px' : '4px 10px',
-        borderRadius: 6,
+        fontSize: isSm ? 13 : 14,
+        padding: isSm ? '4px 10px' : '6px 14px',
+        borderRadius: 8,
         letterSpacing: '0.05em',
-        boxShadow: showGlow ? `0 0 12px ${config.bg}` : 'none',
       }}
     >
-      <span
-        style={{
-          width: 5,
-          height: 5,
-          borderRadius: '50%',
-          background: config.color,
-          boxShadow: showGlow ? `0 0 6px ${config.color}` : 'none',
-        }}
-      />
+      <span className="w-1.5 h-1.5 rounded-full bg-white" />
       {config.label}
     </span>
   );

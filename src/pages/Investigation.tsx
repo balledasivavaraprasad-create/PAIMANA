@@ -30,36 +30,36 @@ export default function Investigation({ projectId }: Props) {
   const pName = project?.project_name || "NH-48 Varanasi-Ranchi Expressway";
 
   return (
-    <div className="space-y-6 pt-20 pb-12 px-6 md:px-16 max-w-7xl mx-auto">
+    <div className="space-y-6 sm:space-y-8 pt-20 sm:pt-24 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
       {/* Header */}
-      <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] font-mono-code">
+      <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white font-mono-code px-2.5 sm:px-3 py-1 rounded bg-white/10 border border-white/20">
               Autonomous Agentic Investigation
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-semibold border border-emerald-500/20">
-              {report ? `Completed (${report.investigation_id})` : 'Ready to Execute'}
+            <span className="text-xs sm:text-sm px-2.5 sm:px-3 py-1 rounded bg-white/10 text-white font-mono-code font-semibold border border-white/20">
+              {report ? `Completed (${report.investigation_id})` : 'Standby Mode'}
             </span>
           </div>
-          <h2 className="text-2xl font-bold font-display text-[var(--text-primary)]">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white">
             Evidence-First Investigation: Project {projectId}
           </h2>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
             {pName} · Multi-tool autonomous discovery across MongoDB snapshots, SHAP drivers, and milestones
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={handleRunInvestigation}
             disabled={loading}
-            className="px-5 py-2.5 rounded-xl bg-black text-white text-xs font-mono-code font-bold border border-white/30 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-2"
+            className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.25)] hover:bg-zinc-900 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
-                <span className="w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                <span>Investigating Tools...</span>
+                <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                <span>Executing Investigation Tools...</span>
               </>
             ) : (
               <span>⚡ Execute Investigation</span>
@@ -68,14 +68,14 @@ export default function Investigation({ projectId }: Props) {
         </div>
       </GlassCard>
 
-      {/* Tool Execution Sequence */}
-      <GlassCard variant="medium" padding={20} className="space-y-3">
-        <div className="text-xs font-mono-code font-bold uppercase text-[var(--text-muted)] flex items-center justify-between">
-          <span>Agent Tool Execution Pipeline (Controlled FastAPI Tools)</span>
-          <span className="text-emerald-500 font-semibold">Strict Evidence Grounding</span>
+      {/* Tool Execution Sequence - Responsive grid for split-screen and mobile */}
+      <GlassCard variant="medium" padding={20} className="space-y-4">
+        <div className="text-xs sm:text-sm font-mono-code font-bold uppercase text-white/80 flex flex-wrap items-center justify-between gap-2">
+          <span>Agent Tool Execution Pipeline (Controlled FastAPI Services)</span>
+          <span className="text-white font-semibold">Grounded Tool Pipeline</span>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[
             { name: '1. Project Core', desc: 'tool_get_project', active: !!report },
             { name: '2. Time Trajectory', desc: 'tool_get_history', active: !!report },
@@ -86,16 +86,16 @@ export default function Investigation({ projectId }: Props) {
           ].map(tool => (
             <div
               key={tool.name}
-              className={`p-3 rounded-xl border text-xs space-y-1 ${
+              className={`p-3 sm:p-4 rounded-xl border space-y-1.5 ${
                 tool.active
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-[var(--text-primary)]'
-                  : 'bg-[var(--surface-sunken)] border-[var(--border-hairline)] text-[var(--text-muted)]'
+                  ? 'bg-white/15 border-white/40 text-white'
+                  : 'bg-white/5 border-white/10 text-white/60'
               }`}
             >
-              <div className="font-bold font-mono-code">{tool.name}</div>
-              <div className="text-[10px] font-mono-code opacity-75">{tool.desc}</div>
-              <div className="text-[10px] font-bold">
-                {tool.active ? '✓ Verified' : '○ Standby'}
+              <div className="font-bold text-xs sm:text-sm font-mono-code text-white">{tool.name}</div>
+              <div className="text-[10px] sm:text-xs font-mono-code text-white/70">{tool.desc}</div>
+              <div className="text-[10px] sm:text-xs font-bold text-white mt-1">
+                {tool.active ? '✓ Complete' : '○ Standby'}
               </div>
             </div>
           ))}
@@ -104,37 +104,37 @@ export default function Investigation({ projectId }: Props) {
 
       {/* Investigation Results */}
       {report ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Findings & Grounded Evidence */}
-          <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-sm font-bold font-display text-[var(--text-primary)] flex items-center gap-2">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-5">
+            <h3 className="text-base sm:text-lg font-bold font-display text-white flex items-center gap-2">
               <span>Grounded Evidence Findings</span>
-              <span className="text-xs font-mono-code text-[var(--accent)]">
+              <span className="text-xs sm:text-sm font-mono-code text-white/80">
                 ({report.findings.length} Isolated)
               </span>
             </h3>
 
             {report.findings.map((f, i) => (
-              <GlassCard key={i} variant="medium" padding={20} className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-bold text-[var(--text-primary)]">{f.title}</h4>
-                  <span className="text-[10px] font-mono-code px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <GlassCard key={i} variant="medium" padding={22} className="space-y-3 sm:space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <h4 className="text-sm sm:text-base font-bold text-white">{f.title}</h4>
+                  <span className="text-xs font-mono-code px-2.5 sm:px-3 py-1 rounded bg-white/10 text-white border border-white/20 shrink-0">
                     Confidence: {(f.confidence * 100).toFixed(0)}%
                   </span>
                 </div>
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{f.summary}</p>
+                <p className="text-xs sm:text-sm md:text-base text-white/85 leading-relaxed">{f.summary}</p>
 
                 {/* Evidence citations */}
-                <div className="pt-2 border-t border-[var(--border-hairline)] space-y-1.5">
-                  <div className="text-[10px] font-mono-code font-bold uppercase text-[var(--text-muted)]">
+                <div className="pt-3 border-t border-white/15 space-y-2">
+                  <div className="text-xs font-mono-code font-bold uppercase text-white/70">
                     Evidence Footprints:
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                     {f.evidence.map((ev, ei) => (
-                      <div key={ei} className="p-2 rounded-lg bg-[var(--surface-sunken)] border border-[var(--border-hairline)] text-[11px] font-mono-code">
-                        <span className="text-[var(--text-muted)]">{ev.source}.{ev.field}: </span>
-                        <span className="font-bold text-[var(--accent)]">{ev.value}</span>
-                        {ev.context && <div className="text-[9px] text-[var(--text-secondary)] mt-0.5">{ev.context}</div>}
+                      <div key={ei} className="p-2.5 sm:p-3 rounded-xl bg-white/5 border border-white/15 text-xs sm:text-sm font-mono-code">
+                        <span className="text-white/70">{ev.source}.{ev.field}: </span>
+                        <span className="font-bold text-white">{ev.value}</span>
+                        {ev.context && <div className="text-xs text-white/60 mt-1">{ev.context}</div>}
                       </div>
                     ))}
                   </div>
@@ -144,28 +144,28 @@ export default function Investigation({ projectId }: Props) {
           </div>
 
           {/* Targeted Recommendations */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold font-display text-[var(--text-primary)]">
+          <div className="space-y-4 sm:space-y-5">
+            <h3 className="text-base sm:text-lg font-bold font-display text-white">
               Decision-Support Recommendations
             </h3>
 
             {report.recommendations.map((rec, i) => (
-              <GlassCard key={i} variant="medium" padding={20} className="space-y-3 border-l-4 border-l-[var(--accent)]">
+              <GlassCard key={i} variant="medium" padding={20} className="space-y-3 border-l-4 border-l-white">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono-code font-bold px-2 py-0.5 rounded bg-red-500/15 text-red-500">
+                  <span className="text-xs font-mono-code font-bold px-2 py-0.5 rounded bg-white/15 text-white">
                     Priority: {rec.priority}
                   </span>
-                  <span className="text-[10px] font-mono-code text-[var(--text-muted)]">
+                  <span className="text-xs font-mono-code text-white/70">
                     {(rec.confidence * 100).toFixed(0)}% Match
                   </span>
                 </div>
 
-                <div className="text-xs font-bold text-[var(--text-primary)]">{rec.action}</div>
-                <p className="text-[11px] text-[var(--text-secondary)]">{rec.reason}</p>
+                <div className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug">{rec.action}</div>
+                <p className="text-xs sm:text-sm text-white/80 leading-relaxed">{rec.reason}</p>
 
                 {rec.target_agency && (
-                  <div className="pt-2 border-t border-[var(--border-hairline)] text-[10px] font-mono-code text-[var(--accent)]">
-                    Action Target: {rec.target_agency}
+                  <div className="pt-2 border-t border-white/15 text-xs font-mono-code text-white/90">
+                    Target Authority: {rec.target_agency}
                   </div>
                 )}
               </GlassCard>
@@ -174,10 +174,10 @@ export default function Investigation({ projectId }: Props) {
             <button
               onClick={() => setAcknowledged(true)}
               disabled={acknowledged}
-              className={`w-full py-3 rounded-xl text-xs font-mono-code font-bold transition-all cursor-pointer ${
+              className={`w-full py-3 rounded-xl text-xs sm:text-sm font-mono-code font-bold transition-all cursor-pointer ${
                 acknowledged
-                  ? 'bg-emerald-600 text-white cursor-default'
-                  : 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-lg'
+                  ? 'bg-white text-black cursor-default'
+                  : 'bg-black text-white border border-white/30 hover:bg-zinc-900 shadow-xl'
               }`}
             >
               {acknowledged ? '✓ Findings Acknowledged & Logged to Audit Trail' : 'Acknowledge & Sign Findings'}
@@ -185,17 +185,17 @@ export default function Investigation({ projectId }: Props) {
           </div>
         </div>
       ) : (
-        <GlassCard variant="medium" padding={40} className="text-center space-y-4">
-          <div className="text-3xl">🔍</div>
-          <div className="text-base font-bold text-[var(--text-primary)]">
+        <GlassCard variant="medium" padding={36} className="text-center space-y-4">
+          <div className="text-3xl sm:text-4xl text-white">🔍</div>
+          <div className="text-base sm:text-xl font-bold text-white">
             Ready to Launch Multi-Tool Investigation for {projectId}
           </div>
-          <p className="text-xs text-[var(--text-secondary)] max-w-md mx-auto">
-            Clicking "Execute Investigation" triggers the LangGraph agentic pipeline. It queries MongoDB for historical snapshots, runs SHAP models, extracts milestone delays, and generates grounded evidence citations.
+          <p className="text-xs sm:text-sm md:text-base text-white/80 max-w-xl mx-auto leading-relaxed">
+            Clicking "Execute Investigation" triggers the autonomous pipeline. It queries MongoDB for historical snapshots, calculates SHAP impact factors, extracts milestone delays, and generates grounded evidence citations.
           </p>
           <button
             onClick={handleRunInvestigation}
-            className="px-6 py-2.5 rounded-xl bg-black text-white text-xs font-mono-code font-bold border border-white/30 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:bg-zinc-900 cursor-pointer"
+            className="w-full sm:w-auto px-6 sm:px-7 py-3 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.2)] hover:bg-zinc-900 cursor-pointer"
           >
             Launch Autonomous Agent
           </button>

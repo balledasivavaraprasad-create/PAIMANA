@@ -30,65 +30,64 @@ export default function Analytics({ onNavigateToProject }: Props) {
   const costOverrun = overview?.cost_overrun_pct || 5.0;
 
   return (
-    <div className="space-y-6 pt-20 pb-12 px-6 md:px-16 max-w-7xl mx-auto">
+    <div className="space-y-6 sm:space-y-8 pt-20 sm:pt-24 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
       {/* Header */}
-      <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="text-[10px] font-mono-code uppercase font-bold text-[var(--accent)] tracking-widest mb-1">
+      <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+        <div className="space-y-1.5 sm:space-y-2">
+          <div className="text-xs sm:text-sm font-mono-code uppercase font-bold text-white/70 tracking-widest">
             National Infrastructure Macro Intelligence
           </div>
-          <h2 className="text-2xl font-bold font-display text-[var(--text-primary)]">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white">
             Portfolio Risk & Expenditure Analytics
           </h2>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
             Live aggregation across {totalProjects.toLocaleString()} central sector projects and 18,000 monthly trajectory snapshots
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono-code px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20">
-            ● Connected to MongoDB Intelligence DB
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-xs sm:text-sm font-mono-code px-3.5 py-1.5 rounded-xl bg-white/10 text-white font-semibold border border-white/20">
+            Database: 1,500 Projects
           </span>
         </div>
       </GlassCard>
 
-      {/* Top 4 Macro Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Top 4 Macro Metrics - Fully responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <MetricCard
           label="Total Monitored Projects"
           value={totalProjects.toLocaleString()}
           sub="Central Sector Portfolios"
         />
         <MetricCard
-          label="Critical Intervention Flags"
+          label="Intervention Flags"
           value={criticalCount.toString()}
-          accent="var(--risk-critical)"
-          sub={`+${highCount} in High Risk Tier`}
+          sub={`+${highCount} in High Tier`}
         />
         <MetricCard
           label="Portfolio Average DPHIS"
           value={avgDphis.toString()}
-          accent="var(--accent)"
-          sub="Baseline Health Benchmark"
+          sub="National Health Benchmark"
         />
         <MetricCard
           label="Cost Overrun Exposure"
           value={`${costOverrun}%`}
-          accent="var(--risk-high)"
           sub="Sanctioned Budget Slippage"
         />
       </div>
 
       {/* 2-Column Analytics: Monthly DPHIS Trend & Sector Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {/* Monthly Trend */}
-        <GlassCard variant="medium" padding={20} className="space-y-4">
-          <h3 className="text-sm font-bold font-display text-[var(--text-primary)] flex items-center justify-between">
-            <span>Portfolio DPHIS Risk Trajectory</span>
-            <span className="text-[10px] font-mono-code text-[var(--text-muted)]">6-Month Trend</span>
-          </h3>
+        <GlassCard variant="medium" padding={24} className="space-y-4 sm:space-y-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base sm:text-lg font-bold font-display text-white">
+              Portfolio DPHIS Risk Trajectory
+            </h3>
+            <span className="text-xs font-mono-code text-white/70">6-Month Trend</span>
+          </div>
 
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 pt-1">
             {(riskTrend.length > 0 ? riskTrend : [
               { month: '2026-03', average_dphis: 40.2, critical_count: 68 },
               { month: '2026-04', average_dphis: 41.5, critical_count: 72 },
@@ -97,14 +96,14 @@ export default function Analytics({ onNavigateToProject }: Props) {
               { month: '2026-07', average_dphis: 45.2, critical_count: 82 },
               { month: '2026-08', average_dphis: 46.1, critical_count: 84 },
             ]).map((t: any) => (
-              <div key={t.month} className="p-3 rounded-xl bg-[var(--surface-sunken)] border border-[var(--border-hairline)] flex items-center justify-between">
+              <div key={t.month} className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/15 flex items-center justify-between gap-2">
                 <div className="space-y-0.5">
-                  <div className="text-xs font-bold font-mono-code text-[var(--text-primary)]">{t.month}</div>
-                  <div className="text-[10px] text-[var(--text-secondary)]">{t.critical_count} critical corridors</div>
+                  <div className="text-xs sm:text-sm font-bold font-mono-code text-white">{t.month}</div>
+                  <div className="text-[11px] sm:text-xs text-white/70">{t.critical_count} critical corridors</div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-bold font-mono-code text-[var(--accent)]">{t.average_dphis} DPHIS</div>
-                  <div className="text-[9px] text-[var(--risk-critical)] font-semibold">+{(t.average_dphis - 38.0).toFixed(1)} pts deviation</div>
+                <div className="text-right shrink-0">
+                  <div className="text-sm sm:text-base font-bold font-mono-code text-white">{t.average_dphis} DPHIS</div>
+                  <div className="text-[10px] sm:text-xs text-white/80 font-mono-code font-semibold">+{(t.average_dphis - 38.0).toFixed(1)} pts deviation</div>
                 </div>
               </div>
             ))}
@@ -112,12 +111,12 @@ export default function Analytics({ onNavigateToProject }: Props) {
         </GlassCard>
 
         {/* Sector Exposure Breakdown */}
-        <GlassCard variant="medium" padding={20} className="space-y-4">
-          <h3 className="text-sm font-bold font-display text-[var(--text-primary)]">
+        <GlassCard variant="medium" padding={24} className="space-y-4 sm:space-y-5">
+          <h3 className="text-base sm:text-lg font-bold font-display text-white">
             National Sector Exposure & Outlay
           </h3>
 
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 pt-1">
             {[
               { sector: 'Roads & National Highways', count: 480, critical: 24, outlay: '₹5.2L Cr' },
               { sector: 'Railways & Dedicated Freight Corridors', count: 320, critical: 16, outlay: '₹3.8L Cr' },
@@ -125,14 +124,14 @@ export default function Analytics({ onNavigateToProject }: Props) {
               { sector: 'Renewable Ultra Mega Solar Grids', count: 290, critical: 6, outlay: '₹1.9L Cr' },
               { sector: 'Deepwater Ports & Shipping Modernization', count: 200, critical: 4, outlay: '₹1.5L Cr' },
             ].map(sec => (
-              <div key={sec.sector} className="p-3 rounded-xl bg-[var(--surface-sunken)] border border-[var(--border-hairline)] space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-[var(--text-primary)]">{sec.sector}</span>
-                  <span className="font-mono-code font-bold text-[var(--accent)]">{sec.outlay}</span>
+              <div key={sec.sector} className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/15 space-y-1.5 sm:space-y-2">
+                <div className="flex items-center justify-between text-xs sm:text-sm md:text-base">
+                  <span className="font-semibold text-white">{sec.sector}</span>
+                  <span className="font-mono-code font-bold text-white shrink-0">{sec.outlay}</span>
                 </div>
-                <div className="flex items-center justify-between text-[11px] font-mono-code text-[var(--text-muted)]">
+                <div className="flex items-center justify-between text-[11px] sm:text-xs md:text-sm font-mono-code text-white/70">
                   <span>{sec.count} projects</span>
-                  <span className="text-[var(--risk-critical)] font-bold">{sec.critical} Critical</span>
+                  <span className="text-white font-bold">{sec.critical} Elevated</span>
                 </div>
               </div>
             ))}
