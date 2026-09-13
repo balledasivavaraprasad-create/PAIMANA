@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+backend/.venv/
+.venv/
+venv/
+ENV/
+
+# Production Builds & Bundles
+dist/
+build/
+.cache/
+.vite/
+*.tsbuildinfo
+
+# Python & Pytest Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Logs & Temporary Files
+*.log
+*-debug.log*
+logs/
+.tmp-*
+.claude-replay.*
+
+# Figma & Platform
+/.plugins/
+/.opencode-skills/
+/.figma/design-context/
+
+# Redundant Media & Folders
+dashboard_video.mp4
+public/dashboard_video.mp4
+Design UI Elements/

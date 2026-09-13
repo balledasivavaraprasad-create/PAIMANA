@@ -1,0 +1,175 @@
+@import 'tailwindcss';
+
+@layer base {
+  :root[data-theme="dark"], :root {
+    --bg-base: #000000;
+    --bg-surface: #050507;
+    --bg-card: rgba(8, 8, 12, 0.75);
+    --surface-sunken: rgba(15, 15, 22, 0.65);
+    --border-hairline: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    
+    --text-primary: #FFFFFF;
+    --text-secondary: #CBD5E1;
+    --text-muted: #94A3B8;
+    --accent: #E2E8F0;
+    --accent-hover: #FFFFFF;
+    --accent-soft: rgba(255, 255, 255, 0.08);
+    
+    --risk-critical: #EF4444;
+    --risk-high: #F97316;
+    --risk-moderate: #F59E0B;
+    --risk-low: #10B981;
+    
+    --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    --card-glow-hover: 0 28px 65px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+
+  :root[data-theme="light"] {
+    --bg-base: transparent;
+    --bg-surface: rgba(255, 255, 255, 0.35);
+    --bg-card: rgba(255, 255, 255, 0.28);
+    --surface-sunken: rgba(255, 255, 255, 0.22);
+    --border-hairline: rgba(255, 255, 255, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    
+    --text-primary: #0F172A;
+    --text-secondary: #1E293B;
+    --text-muted: #475569;
+    --accent: #0F172A;
+    --accent-hover: #000000;
+    --accent-soft: rgba(15, 23, 42, 0.1);
+    
+    --risk-critical: #DC2626;
+    --risk-high: #EA580C;
+    --risk-moderate: #D97706;
+    --risk-low: #059669;
+    
+    --card-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+    --card-glow-hover: 0 24px 50px -10px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.85);
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+/* Typography & Fonts */
+.font-display {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Frosted Glassmorphic Executive Cards (Dark Mode Intact) */
+:root[data-theme="dark"] .oled-solid-card,
+:root[data-theme="dark"] .glass-panel,
+.oled-solid-card, .glass-panel {
+  background-color: rgba(8, 8, 12, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: var(--card-shadow);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[data-theme="dark"] .oled-solid-card:hover,
+:root[data-theme="dark"] .glass-panel:hover {
+  background-color: rgba(14, 14, 20, 0.85);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: var(--card-glow-hover);
+  transform: translateY(-2px);
+}
+
+/* Apple Translucent Frosted Glass for Light Mode Flashcards */
+:root[data-theme="light"] .oled-solid-card,
+:root[data-theme="light"] .glass-panel {
+  background-color: rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+:root[data-theme="light"] .oled-solid-card:hover,
+:root[data-theme="light"] .glass-panel:hover {
+  background-color: rgba(255, 255, 255, 0.38);
+  border-color: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.85);
+  transform: translateY(-2px);
+}
+
+:root[data-theme="dark"] .glass-hero {
+  background-color: rgba(8, 8, 12, 0.78);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 26px;
+  box-shadow: var(--card-shadow);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[data-theme="light"] .glass-hero {
+  background-color: rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 26px;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-hero:hover {
+  background-color: rgba(14, 14, 20, 0.88);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: var(--card-glow-hover);
+}
+
+/* Map Pin Pulse Effect */
+@keyframes pinPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+  70% {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.pin-pulse-critical {
+  animation: pinPulse 2s infinite;
+}
+
+/* Custom Scrollbar (Clean White Scrollbar Thumb) */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+}
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.8);
+}

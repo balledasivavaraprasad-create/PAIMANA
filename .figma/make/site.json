@@ -1,0 +1,11 @@
+{
+  "title": "PAIMANA — National Infrastructure Intelligence & AI Decision-Support Platform",
+  "description": "Enterprise decision-support platform for national infrastructure portfolios with predictive DPHIS, SHAP explainability, agentic investigation, and automated alerting.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
