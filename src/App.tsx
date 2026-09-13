@@ -365,17 +365,17 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-[2px] max-h-[48vh]">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="bg-white/[0.04] border-b border-white/10 text-white/70 font-mono-code text-[10px] uppercase sticky top-0 z-10 backdrop-blur-[2px]">
-                        <th className="p-4">Asset Token</th>
-                        <th className="p-4">Infrastructure Nomenclature</th>
-                        <th className="p-4">Jurisdictional State</th>
-                        <th className="p-4">DPHIS Index</th>
-                        <th className="p-4">Sanctioned Outlay</th>
-                        <th className="p-4">Critical Delay</th>
-                        <th className="p-4">Analytical Protocol</th>
+                <div className="overflow-x-auto overflow-y-auto rounded-xl border border-white/15 bg-black/40 backdrop-blur-md max-h-[44vh] relative">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead className="sticky top-0 z-20">
+                      <tr className="border-b border-white/15">
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Asset Token</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Infrastructure Nomenclature</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Jurisdictional State</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">DPHIS Index</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Sanctioned Outlay</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Critical Delay</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Analytical Protocol</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
