@@ -114,10 +114,10 @@
 :root[data-theme="light"] .glass-panel [class*="bg-white/5"],
 :root[data-theme="light"] .glass-hero [class*="bg-white/5"],
 :root[data-theme="light"] [class*="bg-white/5"] {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(3px) !important;
-  -webkit-backdrop-filter: blur(3px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
 }
 
@@ -125,8 +125,20 @@
 :root[data-theme="light"] .glass-panel .glass-panel:hover,
 :root[data-theme="light"] .glass-hero .glass-panel:hover,
 :root[data-theme="light"] [class*="bg-white/5"]:hover {
-  background-color: rgba(255, 255, 255, 0.14) !important;
-  border-color: rgba(255, 255, 255, 0.40) !important;
+  background-color: rgba(255, 255, 255, 0.10) !important;
+  border-color: rgba(255, 255, 255, 0.30) !important;
+}
+
+/* Subtle, softer inner flashcards in Dark Mode (Less frosted, delicate & clean) */
+:root[data-theme="dark"] .oled-solid-card .oled-solid-card,
+:root[data-theme="dark"] .glass-panel .glass-panel,
+:root[data-theme="dark"] .glass-hero .glass-panel,
+:root[data-theme="dark"] .oled-solid-card [class*="bg-white/5"],
+:root[data-theme="dark"] .glass-panel [class*="bg-white/5"] {
+  background-color: rgba(15, 18, 28, 0.12) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
 }
 
 :root[data-theme="dark"] .glass-hero {

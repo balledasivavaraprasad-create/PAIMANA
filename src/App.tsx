@@ -157,10 +157,10 @@ export default function App() {
           className="w-full h-full object-cover transition-all duration-300 ease-out"
           style={{
             opacity: currentTab === 'motion'
-              ? Math.max(0.72, 0.95 - scrollProgress * 0.23)
+              ? Math.max(0.76, 0.95 - scrollProgress * 0.19)
               : 0.85,
             filter: currentTab === 'motion'
-              ? `brightness(${Math.max(0.86, 1 - scrollProgress * 0.14)}) saturate(${100 + scrollProgress * 6}%) blur(${scrollProgress * 1.5}px)`
+              ? `brightness(${Math.max(0.89, 1 - scrollProgress * 0.11)}) saturate(${100 + scrollProgress * 8}%) blur(${scrollProgress * 1.2}px)`
               : 'brightness(0.90) blur(0.5px)',
             transform: `scale(${1 + (currentTab === 'motion' ? scrollProgress * 0.03 : 0.02)})`
           }}
@@ -172,7 +172,7 @@ export default function App() {
           className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out bg-black"
           style={{
             opacity: currentTab === 'motion'
-              ? Math.min(0.28, 0.10 + scrollProgress * 0.18)
+              ? Math.min(0.24, 0.10 + scrollProgress * 0.14)
               : 0.18
           }}
         />
@@ -347,10 +347,10 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-sunken)] max-h-[48vh]">
+                <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-[2px] max-h-[48vh]">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="bg-[var(--bg-surface)] border-b border-[var(--border-hairline)] text-white/70 font-mono-code text-[10px] uppercase sticky top-0 z-10">
+                      <tr className="bg-white/[0.04] border-b border-white/10 text-white/70 font-mono-code text-[10px] uppercase sticky top-0 z-10 backdrop-blur-[2px]">
                         <th className="p-4">Pin ID</th>
                         <th className="p-4">Project Name</th>
                         <th className="p-4">State</th>
@@ -360,7 +360,7 @@ export default function App() {
                         <th className="p-4">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[var(--border-hairline)]">
+                    <tbody className="divide-y divide-white/5">
                       {pins.map(p => (
                         <tr
                           key={p.id}
