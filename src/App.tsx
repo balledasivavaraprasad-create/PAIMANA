@@ -157,23 +157,23 @@ export default function App() {
           className="w-full h-full object-cover transition-all duration-300 ease-out"
           style={{
             opacity: currentTab === 'motion'
-              ? Math.max(0.85, 0.98 - scrollProgress * 0.08)
-              : 0.90,
+              ? Math.max(0.72, 0.95 - scrollProgress * 0.23)
+              : 0.85,
             filter: currentTab === 'motion'
-              ? `brightness(${1.02 + scrollProgress * 0.06}) saturate(${110 + scrollProgress * 15}%) contrast(1.04)`
-              : 'brightness(1.0) saturate(110%)',
-            transform: `scale(${1 + (currentTab === 'motion' ? scrollProgress * 0.02 : 0.01)})`
+              ? `brightness(${Math.max(0.86, 1 - scrollProgress * 0.14)}) saturate(${100 + scrollProgress * 6}%) blur(${scrollProgress * 1.5}px)`
+              : 'brightness(0.90) blur(0.5px)',
+            transform: `scale(${1 + (currentTab === 'motion' ? scrollProgress * 0.03 : 0.02)})`
           }}
         >
           <source src="/video.mp4" type="video/mp4" />
         </video>
-        {/* Ambient illumination overlay that prevents excessive darkness and keeps the page luminous */}
+        {/* Scroll-Driven Darkening Overlay - subtle so background and foreground blend seamlessly */}
         <div
-          className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out bg-gradient-to-b from-black/20 via-transparent to-indigo-950/20"
+          className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out bg-black"
           style={{
             opacity: currentTab === 'motion'
-              ? 0.15
-              : 0.15
+              ? Math.min(0.28, 0.10 + scrollProgress * 0.18)
+              : 0.18
           }}
         />
       </div>
@@ -328,12 +328,7 @@ export default function App() {
 
           {/* SECTION 04 / 04 — LIVE PROJECTS & CEO ADMIN COMMAND */}
           <section className="snap-start w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
-            {/* Ambient luminous backlight bringing depth and life to the bottom section */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-full max-w-4xl h-80 rounded-full bg-gradient-to-r from-blue-600/15 via-indigo-500/15 to-purple-600/15 blur-3xl opacity-80" />
-            </div>
-
-            <div className="w-full max-w-6xl pointer-events-auto relative">
+            <div className="w-full max-w-6xl pointer-events-auto">
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1.5 sm:space-y-2">
@@ -345,17 +340,17 @@ export default function App() {
                   <div className="flex items-center gap-3 shrink-0">
                     <button
                       onClick={() => setShowCeoModal(true)}
-                      className="px-5 py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-bold font-mono-code cursor-pointer shadow-lg hover:bg-slate-200 transition-all duration-200 flex items-center gap-2"
+                      className="px-5 py-2.5 rounded-xl bg-black text-white text-xs sm:text-sm font-bold font-mono-code cursor-pointer border border-white/30 shadow-[0_0_14px_rgba(255,255,255,0.22)] hover:bg-zinc-900 hover:border-white/60 transition-all duration-200 flex items-center gap-2"
                     >
                       <span>+ Add Project</span>
                     </button>
                   </div>
                 </div>
 
-                <div className="overflow-x-auto rounded-xl border border-white/15 bg-white/[0.04] backdrop-blur-md max-h-[48vh]">
+                <div className="overflow-x-auto rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-sunken)] max-h-[48vh]">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="bg-white/[0.08] border-b border-white/12 text-white/90 font-mono-code text-[10px] uppercase sticky top-0 z-10 backdrop-blur-md">
+                      <tr className="bg-[var(--bg-surface)] border-b border-[var(--border-hairline)] text-white/70 font-mono-code text-[10px] uppercase sticky top-0 z-10">
                         <th className="p-4">Pin ID</th>
                         <th className="p-4">Project Name</th>
                         <th className="p-4">State</th>
@@ -365,13 +360,13 @@ export default function App() {
                         <th className="p-4">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/10">
+                    <tbody className="divide-y divide-[var(--border-hairline)]">
                       {pins.map(p => (
                         <tr
                           key={p.id}
                           onClick={() => setSelectedPin(p)}
-                          className={`cursor-pointer hover:bg-white/[0.08] transition-colors ${
-                            selectedPin?.id === p.id ? 'bg-white/15' : ''
+                          className={`cursor-pointer hover:bg-white/5 transition-colors ${
+                            selectedPin?.id === p.id ? 'bg-white/10' : ''
                           }`}
                         >
                           <td className="p-4 font-mono-code font-bold text-white">{p.id}</td>
@@ -387,7 +382,7 @@ export default function App() {
                                 setSelectedPin(p);
                                 setCurrentTab('intelligence');
                               }}
-                              className="px-2.5 py-1 rounded bg-white/10 hover:bg-white hover:text-black text-[10px] font-mono-code text-white border border-white/20 transition-all cursor-pointer"
+                              className="px-2.5 py-1 rounded bg-[var(--surface-sunken)] hover:bg-white hover:text-black text-[10px] font-mono-code text-white border border-white/20 transition-all cursor-pointer"
                             >
                               Analyze →
                             </button>
