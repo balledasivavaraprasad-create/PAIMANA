@@ -101,6 +101,7 @@ async def trigger_n8n_event(
         "risk_trend": "WORSENING" if dphis >= threshold else "STABLE",
         "threshold": threshold,
         "threshold_exceeded": True,
+        "backend_api_url": settings.BACKEND_API_URL,
         "recipient": {
             "email": email_to,
             "name": name_to,

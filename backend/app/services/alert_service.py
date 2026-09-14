@@ -93,6 +93,7 @@ async def evaluate_and_trigger_alert(
                 "risk_trend": "WORSENING" if current_dphis >= threshold else "STABLE",
                 "threshold": threshold,
                 "threshold_exceeded": True,
+                "backend_api_url": settings.BACKEND_API_URL,
                 "recipient": {
                     "email": recipient_email,
                     "name": recipient_name,

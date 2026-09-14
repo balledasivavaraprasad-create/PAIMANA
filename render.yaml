@@ -18,3 +18,5 @@ services:
         generateValue: true
       - key: N8N_RISK_WEBHOOK_URL
         value: https://sivavaraprasad.app.n8n.cloud/webhook/project-risk-event
+      - key: BACKEND_API_URL
+        value: https://paimana-backend.onrender.com/api/v1

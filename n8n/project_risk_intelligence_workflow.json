@@ -22,7 +22,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const item = $input.first().json;\n\n// 1. Verify required payload fields\nif (!item.project_id || item.dphis === undefined || !item.risk_level || !item.timestamp) {\n  throw new Error('Validation Failed: Missing required payload attributes (project_id, dphis, risk_level, timestamp)');\n}\n\n// 2. Validate DPHIS range [0, 100]\nconst dphis = Number(item.dphis);\nif (isNaN(dphis) || dphis < 0 || dphis > 100) {\n  throw new Error(`Validation Failed: dphis (${item.dphis}) must be a valid number between 0 and 100`);\n}\n\n// 3. User custom threshold (default: 75.0)\nconst threshold = Number(item.threshold || 75.0);\nconst recipient = item.recipient || {\n  email: 'balledasivavaraprasad@gmail.com',\n  name: 'Executive Officer',\n  username: 'admin'\n};\n\nreturn [{\n  json: {\n    event_type: item.event_type || 'RISK_UPDATE',\n    project_id: String(item.project_id).trim(),\n    project_name: item.project_name || `Corridor ${item.project_id}`,\n    dphis: dphis,\n    threshold: threshold,\n    threshold_exceeded: dphis >= threshold,\n    previous_dphis: Number(item.previous_dphis || dphis),\n    risk_level: String(item.risk_level).toUpperCase(),\n    risk_change: Number(item.risk_change || 0),\n    risk_trend: item.risk_trend || (dphis >= threshold ? 'WORSENING' : 'STABLE'),\n    recipient: recipient,\n    recipient_email: recipient.email,\n    recipient_name: recipient.name,\n    timestamp: item.timestamp,\n    validated_at: new Date().toISOString()\n  }\n}];"
+        "jsCode": "const item = $input.first().json;\n\n// 1. Verify required payload fields\nif (!item.project_id || item.dphis === undefined || !item.risk_level || !item.timestamp) {\n  throw new Error('Validation Failed: Missing required payload attributes (project_id, dphis, risk_level, timestamp)');\n}\n\n// 2. Validate DPHIS range [0, 100]\nconst dphis = Number(item.dphis);\nif (isNaN(dphis) || dphis < 0 || dphis > 100) {\n  throw new Error(`Validation Failed: dphis (${item.dphis}) must be a valid number between 0 and 100`);\n}\n\n// 3. User custom threshold (default: 75.0)\nconst threshold = Number(item.threshold || 75.0);\nconst recipient = item.recipient || {\n  email: 'balledasivavaraprasad@gmail.com',\n  name: 'Executive Officer',\n  username: 'admin'\n};\n\nconst backendApiUrl = (item.backend_api_url || item.api_base_url || 'https://paimana-backend.onrender.com/api/v1').replace(/\\/+$/, '');\n\nreturn [{\n  json: {\n    backend_api_url: backendApiUrl,\n    event_type: item.event_type || 'RISK_UPDATE',\n    project_id: String(item.project_id).trim(),\n    project_name: item.project_name || `Corridor ${item.project_id}`,\n    dphis: dphis,\n    threshold: threshold,\n    threshold_exceeded: dphis >= threshold,\n    previous_dphis: Number(item.previous_dphis || dphis),\n    risk_level: String(item.risk_level).toUpperCase(),\n    risk_change: Number(item.risk_change || 0),\n    risk_trend: item.risk_trend || (dphis >= threshold ? 'WORSENING' : 'STABLE'),\n    recipient: recipient,\n    recipient_email: recipient.email,\n    recipient_name: recipient.name,\n    timestamp: item.timestamp,\n    validated_at: new Date().toISOString()\n  }\n}];"
       },
       "id": "node-validate",
       "name": "Validate Risk Event",
@@ -36,7 +36,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.BACKEND_API_URL || 'http://localhost:8000/api/v1' }}/projects/{{ $('Validate Risk Event').item.json.project_id }}",
+        "url": "={{ $('Validate Risk Event').item.json.backend_api_url || 'https://paimana-backend.onrender.com/api/v1' }}/projects/{{ $('Validate Risk Event').item.json.project_id }}",
         "options": {
           "response": {
             "response": {
@@ -57,7 +57,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.BACKEND_API_URL || 'http://localhost:8000/api/v1' }}/projects/{{ $('Validate Risk Event').item.json.project_id }}/risk",
+        "url": "={{ $('Validate Risk Event').item.json.backend_api_url || 'https://paimana-backend.onrender.com/api/v1' }}/projects/{{ $('Validate Risk Event').item.json.project_id }}/risk",
         "options": {
           "response": {
             "response": {
@@ -78,7 +78,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.BACKEND_API_URL || 'http://localhost:8000/api/v1' }}/projects/{{ $('Validate Risk Event').item.json.project_id }}/shap",
+        "url": "={{ $('Validate Risk Event').item.json.backend_api_url || 'https://paimana-backend.onrender.com/api/v1' }}/projects/{{ $('Validate Risk Event').item.json.project_id }}/shap",
         "options": {
           "response": {
             "response": {
@@ -249,7 +249,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.BACKEND_API_URL || 'http://localhost:8000/api/v1' }}/alerts",
+        "url": "={{ $('Validate Risk Event').item.json.backend_api_url || 'https://paimana-backend.onrender.com/api/v1' }}/alerts",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"project_id\": \"{{ $json.project_id }}\",\n  \"project_name\": \"{{ $json.project_name }}\",\n  \"severity\": \"{{ $json.severity }}\",\n  \"trigger\": \"{{ $json.trigger }}\",\n  \"dphis\": {{ $json.dphis }},\n  \"message\": \"{{ $json.alert_subject }}\",\n  \"investigation_id\": \"{{ $json.investigation_id }}\",\n  \"status\": \"PENDING\"\n}",

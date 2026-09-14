@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     OPEN_ELEVATION_BASE_URL: str = "https://api.open-meteo.com/v1/elevation"
 
     # Alerting & Webhooks
+    BACKEND_API_URL: str = "https://paimana-backend.onrender.com/api/v1"
     N8N_WEBHOOK_URL: str = "http://localhost:5678/webhook/paimana-risk-alert"
     N8N_RISK_WEBHOOK_URL: str = "https://sivavaraprasad.app.n8n.cloud/webhook/project-risk-event"
     N8N_TEST_WEBHOOK_URL: str = "https://sivavaraprasad.app.n8n.cloud/webhook-test/project-risk-event"
