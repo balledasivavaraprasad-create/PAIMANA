@@ -1,0 +1,4 @@
+backend/
+n8n/
+.venv/
+scratch/

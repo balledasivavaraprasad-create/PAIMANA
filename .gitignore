@@ -52,3 +52,5 @@ logs/
 dashboard_video.mp4
 public/dashboard_video.mp4
 Design UI Elements/
+.vercel
+.env*
