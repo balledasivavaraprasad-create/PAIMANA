@@ -223,22 +223,25 @@ export default function Login({ onLoginSuccess, onExploreGuest }: LoginProps) {
     <div className={`relative min-h-screen flex flex-col justify-between p-4 sm:p-6 md:p-8 select-none transition-colors duration-200 overflow-x-hidden ${
       isDark ? 'text-slate-100' : 'text-slate-900'
     }`}>
-      {/* ---------------- Fullscreen HD Background Slider ---------------- */}
-      <div className="fixed inset-0 z-0 overflow-hidden bg-[#070C16]">
+      {/* ---------------- Fullscreen HD Background Slider (Crystal-Clear 1080p) ---------------- */}
+      <div className={`fixed inset-0 z-0 overflow-hidden ${isDark ? 'bg-[#070C16]' : 'bg-[#0B1220]'}`}>
         {SLIDES.map((slide, idx) => (
           <div
             key={idx}
-            style={{ backgroundImage: `url('${slide.image}')` }}
+            style={{
+              backgroundImage: `url('${slide.image}')`,
+              imageRendering: '-webkit-optimize-contrast'
+            }}
             className={`absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-1000 transform ${
               currentSlide === idx ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
             }`}
           />
         ))}
-        {/* Subtle Vignette Scrim */}
+        {/* Subtle Vignette Scrim - Zero blur on background image to preserve 100% native 1080p sharpness */}
         <div className={`absolute inset-0 pointer-events-none transition-colors duration-300 ${
           isDark 
-            ? 'bg-radial-gradient from-black/20 via-black/60 to-black/90' 
-            : 'bg-radial-gradient from-white/30 via-white/70 to-slate-100/95 backdrop-blur-[2px]'
+            ? 'bg-radial-gradient from-black/15 via-black/45 to-black/85' 
+            : 'bg-radial-gradient from-transparent via-black/10 to-black/35'
         }`} />
       </div>
 
