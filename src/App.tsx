@@ -6,8 +6,12 @@ import Investigation from './pages/Investigation';
 import Analytics from './pages/Analytics';
 import Assistant from './pages/Assistant';
 import Alerts from './pages/Alerts';
+import Login from './pages/Login';
 import { useTheme } from './hooks/useTheme';
-import { fetchProjects, fetchAlerts, fetchAnalyticsOverview, API_BASE } from './lib/api';
+import {
+  fetchProjects, fetchAlerts, fetchAnalyticsOverview, API_BASE,
+  fetchCurrentUser, clearAuthToken, UserProfile
+} from './lib/api';
 
 const initialPins: ProjectPin[] = [
   { id: 'P1024', name: 'NH-48 Varanasi-Ranchi Expressway', state: 'Uttar Pradesh', latPct: 38, lngPct: 54, dphis: 91, risk: 'critical', cost: '₹4,218 Cr', delay: '28 mo' },
@@ -25,6 +29,7 @@ export default function App() {
   const isDark = theme === 'dark';
 
   const [currentTab, setCurrentTab] = useState<ActiveTab>('motion');
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [pins, setPins] = useState<ProjectPin[]>(initialPins);
   const [selectedPin, setSelectedPin] = useState<ProjectPin>(initialPins[0]);
   const [activeSection, setActiveSection] = useState<'01' | '02' | '03' | '04'>('01');
@@ -35,6 +40,23 @@ export default function App() {
     totalProjects: 1500,
     criticalCount: 60
   });
+
+  const handleLoginSuccess = (authData: any) => {
+    setCurrentUser({
+      username: authData.username,
+      role: authData.role,
+      email: authData.email || '',
+      full_name: authData.full_name || authData.username,
+      ministry: authData.ministry || 'MoSPI Official'
+    });
+    setCurrentTab('motion');
+  };
+
+  const handleSignOut = () => {
+    clearAuthToken();
+    setCurrentUser(null);
+    setCurrentTab('login');
+  };
 
   // Scroll Progress Tracking for Video Dimming
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -77,6 +99,11 @@ export default function App() {
           criticalCount: ov.critical
         });
       }
+    }).catch(console.warn);
+
+    // 4. Check for active session
+    fetchCurrentUser().then(user => {
+      if (user) setCurrentUser(user);
     }).catch(console.warn);
   }, []);
 
@@ -148,10 +175,14 @@ export default function App() {
         currentTab={currentTab}
         onTabChange={setCurrentTab}
         alertCount={alertCount}
+        user={currentUser}
+        onSignOut={handleSignOut}
+        onSignInClick={() => setCurrentTab('login')}
       />
 
-      {/* BACKGROUND VIDEO & STATIC MAP AT END - VISIBLE ON ALL PAGES */}
-      <div className={`fixed inset-0 z-0 overflow-hidden pointer-events-none transition-colors duration-500 ${isDark ? 'bg-black' : 'bg-[#EAECEF]'}`}>
+      {/* BACKGROUND VIDEO & STATIC MAP AT END - VISIBLE ON ALL DASHBOARD PAGES */}
+      {currentTab !== 'login' && (
+        <div className={`fixed inset-0 z-0 overflow-hidden pointer-events-none transition-colors duration-500 ${isDark ? 'bg-black' : 'bg-[#EAECEF]'}`}>
         {isDark ? (
           <React.Fragment key="dark-mode-media">
             {/* Dark Mode Stationary Map (Final Frame) */}
@@ -232,6 +263,7 @@ export default function App() {
           }}
         />
       </div>
+      )}
 
       {/* VIEWPORT CONTENT CONTAINER */}
       {currentTab === 'motion' ? (
@@ -514,6 +546,15 @@ export default function App() {
                 setCurrentTab('investigation');
               }}
             />
+          )}
+
+          {currentTab === 'login' && (
+            <div className="pt-11 sm:pt-12 min-h-screen">
+              <Login
+                onLoginSuccess={handleLoginSuccess}
+                onExploreGuest={() => setCurrentTab('motion')}
+              />
+            </div>
           )}
         </div>
       )}

@@ -267,3 +267,150 @@ export async function triggerN8nRiskEvent(params: {
   }
 }
 
+// ============================================================
+// Authentication & User Identity Management
+// ============================================================
+
+export interface UserProfile {
+  username: string;
+  role: string;
+  email: string;
+  full_name: string;
+  ministry?: string;
+  designation?: string;
+  dphis_alert_threshold?: number;
+  alert_email?: string;
+  notify_via_email?: boolean;
+}
+
+export interface MinistryItem {
+  id: number;
+  name: string;
+  sector: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  role: string;
+  username: string;
+  email?: string;
+  full_name?: string;
+  ministry?: string;
+}
+
+export function getAuthToken(): string | null {
+  return localStorage.getItem('paimana_token');
+}
+
+export function setAuthToken(token: string): void {
+  localStorage.setItem('paimana_token', token);
+}
+
+export function clearAuthToken(): void {
+  localStorage.removeItem('paimana_token');
+}
+
+export async function fetchMinistries(): Promise<MinistryItem[]> {
+  try {
+    const res = await fetch(`${API_BASE}/ministries`);
+    if (!res.ok) throw new Error('Failed to load ministries');
+    return await res.json();
+  } catch (err) {
+    // Fallback list
+    return [
+      { id: 1, name: "Road Transport & Highways", sector: "Transport & Logistics" },
+      { id: 2, name: "Railways", sector: "Railways & Freight" },
+      { id: 3, name: "Housing & Urban Affairs", sector: "Urban Transit & Metro" },
+      { id: 4, name: "Power", sector: "Energy & Power" },
+      { id: 5, name: "Jal Shakti", sector: "Water Resources & Sanitation" },
+      { id: 6, name: "Coal", sector: "Coal & Mining" },
+      { id: 7, name: "Steel", sector: "Steel & Metallurgical" },
+      { id: 8, name: "Petroleum & Natural Gas", sector: "Petrochemical & Gas" },
+      { id: 9, name: "Ports, Shipping & Waterways", sector: "Ports & Shipping" },
+    ];
+  }
+}
+
+export async function loginUser(credentials: { email: string; password: string }): Promise<AuthResponse> {
+  const res = await fetch(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials)
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || data.error || 'Authentication failed.');
+  }
+  if (data.access_token) {
+    setAuthToken(data.access_token);
+  }
+  return data;
+}
+
+export async function registerUser(payload: {
+  fullName: string;
+  email: string;
+  ministryId?: number;
+  ministry?: string;
+  designation?: string;
+  password: string;
+  termsAccepted: boolean;
+  aiAckAccepted: boolean;
+}): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || data.error || 'Registration failed.');
+  }
+  return data;
+}
+
+export async function verifyOtp(payload: { email: string; otp: string }): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || data.error || 'OTP verification failed.');
+  }
+  return data;
+}
+
+export async function resendOtp(payload: { email: string; purpose?: string }): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE}/auth/resend-otp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: payload.email, purpose: payload.purpose || 'signup' })
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || data.error || 'Could not resend verification code.');
+  }
+  return data;
+}
+
+export async function fetchCurrentUser(): Promise<UserProfile | null> {
+  const token = getAuthToken();
+  if (!token) return null;
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      clearAuthToken();
+      return null;
+    }
+    return await res.json();
+  } catch (err) {
+    return null;
+  }
+}
+
+

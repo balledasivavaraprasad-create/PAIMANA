@@ -23,6 +23,14 @@ class Settings(BaseSettings):
     N8N_TEST_WEBHOOK_URL: str = "https://sivavaraprasad.app.n8n.cloud/webhook-test/project-risk-event"
     ALERT_COOLDOWN_HOURS: int = 24
 
+    # SMTP Authentication & Email Service
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = "syntaxtrrors@gmail.com"
+    SMTP_PASS: Optional[str] = "szbfukaiioisvnly"
+    SMTP_FROM_NAME: str = "PAIMANA Identity & Access"
+    OTP_EXPIRE_MINUTES: int = 5
+
     # LLM Settings
     LLM_PROVIDER: str = "gemini"  # gemini, openai, groq, mock
     GEMINI_API_KEY: Optional[str] = None

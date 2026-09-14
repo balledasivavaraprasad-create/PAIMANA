@@ -53,8 +53,9 @@ async def health_check():
         "database": "connected"
     }
 
-# Include API Routers under /api/v1
+# Include API Routers under /api/v1 and /api aliases
 app.include_router(auth_router, prefix=settings.API_V1_STR)
+app.include_router(auth_router, prefix="/api")
 app.include_router(projects_router, prefix=settings.API_V1_STR)
 app.include_router(risk_router, prefix=settings.API_V1_STR)
 app.include_router(predictions_router, prefix=settings.API_V1_STR)

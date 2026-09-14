@@ -37,6 +37,11 @@ SECTORS = [
 ]
 
 PROJECT_TEMPLATES = [
+    "Sea Link Coastal Connector Phase 2",
+    "Himalayan Rail Arch Bridge (Chenab USBRL)",
+    "National Expressway Corridor — Segment C",
+    "Interbasin Water Transfer Link — Stage 1",
+    "Thermal Power Capacity Expansion Unit 5",
     "NH-48 Varanasi-Ranchi Expressway",
     "Chennai Metro Rail Phase III Viaduct",
     "Solar Energy Ultra Grid, Jaisalmer",
@@ -48,7 +53,6 @@ PROJECT_TEMPLATES = [
     "Bangalore Suburban Rail Corridor 2",
     "Bhadla Solar Power Complex Phase IV",
     "Delhi-Dehradun Economic Expressway",
-    "Chenab Rail Arch Bridge Segment",
     "Khavda Renewable Energy Hybrid Park",
     "JNPT Port Terminal Automated Wharf",
     "Kolkata East-West Metro Tunnel Package",

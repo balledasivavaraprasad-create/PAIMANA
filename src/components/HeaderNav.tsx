@@ -1,15 +1,25 @@
 import React from 'react';
 import { useTheme } from '../hooks/useTheme';
 
-export type ActiveTab = 'motion' | 'intelligence' | 'investigation' | 'analytics' | 'assistant' | 'alerts';
+export type ActiveTab = 'motion' | 'intelligence' | 'investigation' | 'analytics' | 'assistant' | 'alerts' | 'login';
 
 interface HeaderNavProps {
   currentTab: ActiveTab;
   onTabChange: (tab: ActiveTab) => void;
   alertCount?: number;
+  user?: { full_name?: string; ministry?: string; username?: string } | null;
+  onSignOut?: () => void;
+  onSignInClick?: () => void;
 }
 
-export function HeaderNav({ currentTab, onTabChange, alertCount = 0 }: HeaderNavProps) {
+export function HeaderNav({
+  currentTab,
+  onTabChange,
+  alertCount = 0,
+  user = null,
+  onSignOut,
+  onSignInClick
+}: HeaderNavProps) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -80,8 +90,46 @@ export function HeaderNav({ currentTab, onTabChange, alertCount = 0 }: HeaderNav
         })}
       </div>
 
-      {/* Top Right Controls - Clean, economical Theme Switcher */}
+      {/* Top Right Controls - User Status & Theme Switcher */}
       <div className="pointer-events-auto flex items-center gap-2 shrink-0">
+        {user ? (
+          <div className="flex items-center gap-1.5">
+            <div className={`hidden sm:flex flex-col text-right leading-none ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
+              <span className="text-[10px] font-bold font-mono-code truncate max-w-[140px]">
+                {user.full_name || user.username}
+              </span>
+              <span className="text-[8px] font-mono-code opacity-70 truncate max-w-[140px]">
+                {user.ministry || 'MoSPI Official'}
+              </span>
+            </div>
+            {onSignOut && (
+              <button
+                onClick={onSignOut}
+                title="Sign Out"
+                className={`px-2 py-1 rounded-md border text-[10px] font-mono-code transition-colors cursor-pointer ${
+                  isDark
+                    ? 'bg-rose-500/15 hover:bg-rose-500/25 border-rose-500/30 text-rose-300'
+                    : 'bg-rose-50 hover:bg-rose-100 border-rose-300 text-rose-700'
+                }`}
+              >
+                Sign Out
+              </button>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={() => onSignInClick ? onSignInClick() : onTabChange('login')}
+            className={`px-2.5 py-1 rounded-md border text-[11px] sm:text-xs font-mono-code font-bold transition-all cursor-pointer flex items-center gap-1 shadow-sm ${
+              isDark
+                ? 'bg-sky-500/20 hover:bg-sky-500/30 border-sky-400/40 text-sky-300'
+                : 'bg-sky-50 hover:bg-sky-100 border-sky-300 text-sky-800'
+            }`}
+          >
+            <span>✦</span>
+            <span>Sign In</span>
+          </button>
+        )}
+
         <button
           onClick={toggleTheme}
           aria-label="Toggle Theme"
