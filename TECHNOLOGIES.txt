@@ -1,0 +1,87 @@
+================================================================================
+PAIMANA — NATIONAL INFRASTRUCTURE INTELLIGENCE & AI DECISION-SUPPORT PLATFORM
+TECHNOLOGY STACK & ARCHITECTURE INVENTORY
+================================================================================
+
+1. FRONTEND ARCHITECTURE & USER INTERFACE
+--------------------------------------------------------------------------------
+• React (v19)                  - Core component-driven reactive UI library.
+• TypeScript (v5.7)            - Type-safe application development across all components and API layers.
+• Vite (v8)                    - Next-generation ultra-fast frontend build tool and dev server.
+• Tailwind CSS (v4)            - Utility-first modern CSS framework with custom glassmorphic styling tokens.
+• Vanilla CSS / CSS Modules    - Bespoke glassmorphism design system (-webkit-backdrop-filter blur 36px, 
+                                 dual-mode executive color palettes: Dark Obsidian & Light Pearl).
+• Lucide React (v1.45)         - High-precision modern UI iconography set.
+• HTML5 Media API              - Synchronized, non-looping dual-mode video background controller
+                                 (dashboard.mp4 for dark mode, dashboard_white.mp4 for light mode).
+• Canvas / Custom Visualizers  - Real-time DPHIS risk gauges, S-curve milestone velocity charts, and radar graphs.
+
+
+2. BACKEND API & CORE SERVICES
+--------------------------------------------------------------------------------
+• Python (v3.11)               - Core server-side runtime and statistical computation environment.
+• FastAPI (v0.115+)            - High-performance, asynchronous REST API framework with OpenAPI / Swagger docs.
+• Uvicorn (v0.30+)             - Production-grade lightning-fast ASGI web server implementation.
+• Pydantic & Pydantic-Settings - Strict data schema validation, serialization, and environment configuration.
+• Motor (v3.5+)                - Official asynchronous non-blocking Python driver for MongoDB.
+• PyMongo (v4.8+)              - Underlying MongoDB interaction toolkit and indexing utilities.
+• HTTPX (v0.27+)               - Asynchronous HTTP client for external service integration and webhook dispatch.
+• Python-Jose & Cryptography   - JWT (JSON Web Tokens) encoding/decoding for secure stateless authentication.
+• Passlib & Bcrypt (v4.0+)     - Industrial-grade cryptographic password hashing and verification.
+• Python-Multipart             - Streaming file upload parser for capital asset and CSV data ingestion.
+
+
+3. MACHINE LEARNING & EXPLAINABLE AI (XAI)
+--------------------------------------------------------------------------------
+• XGBoost (v2.0+)              - Gradient-boosted decision tree algorithms for:
+                                 - Cost Overrun Regressor (predicted budget escalation in INR Cr and %)
+                                 - Schedule Slippage Regressor (predicted timeline delay in months)
+                                 - Multi-class Risk Classifier (CRITICAL, HIGH, MODERATE, NOMINAL)
+• TreeSHAP (SHAP v0.45+)       - SHapley Additive exPlanations; isolates exact feature contributions
+                                 to decompose risk drivers (e.g. physical-financial progress disparity).
+• Scikit-learn (v1.5+)         - Machine learning pipelines, feature transformations, encoders, and metrics.
+• Pandas (v2.2+)               - High-performance dataframe manipulation and 18,000-snapshot longitudinal analysis.
+• NumPy (v1.26+)               - High-speed vector and matrix operations for composite score calculations.
+• Joblib (v1.4+)               - Optimized disk serialization and loading of trained machine learning models.
+• Custom DPHIS Engine          - Dynamic Project Health & Intervention Score (0-100) mathematical formulation
+                                 with longitudinal trend acceleration multipliers.
+
+
+4. GENERATIVE AI & AGENTIC INVESTIGATION
+--------------------------------------------------------------------------------
+• Google Gemini API            - Integrated LLM reasoning via gemini-2.0-flash for deep causal explanations.
+• Multi-Tool Agentic Engine    - Deterministic 6-tool evidence-first autonomous investigation pipeline
+                                 (project specs, 12-month trajectory, SHAP drivers, milestones, weather, peer comparison).
+• LangGraph Architecture       - Directed acyclic graph agentic workflow pattern for hallucination-free dossiers.
+• Multi-Provider LLM Fallback  - Flexible adapter supporting Google Gemini, OpenAI, Groq, and heuristic fallbacks.
+
+
+5. WORKFLOW AUTOMATION & NOTIFICATIONS
+--------------------------------------------------------------------------------
+• n8n Cloud                    - Event-driven autonomous workflow orchestration platform.
+• Webhooks (REST API)          - Bi-directional real-time event pipeline linking backend alerts to n8n workflows.
+• SMTP (Simple Mail Transfer)  - Authenticated email dispatch protocol (Gmail App Password, Port 465 SSL/TLS)
+                                 for delivering executive risk dossiers directly to stakeholders' inboxes.
+
+
+6. ENVIRONMENTAL & GEOSPATIAL TELEMETRY (GIS)
+--------------------------------------------------------------------------------
+• Open-Meteo Forecast API      - Live precipitation, storm risk, and weather impact telemetry for project corridors.
+• Open-Meteo Elevation API     - Topographical altitude and terrain slope analysis for corridor infrastructure.
+
+
+7. DATABASE & STORAGE INFRASTRUCTURE
+--------------------------------------------------------------------------------
+• MongoDB                      - Document-oriented NoSQL database housing:
+                                 - 1,500 strategic infrastructure capital assets
+                                 - 18,000 monthly longitudinal project snapshots
+                                 - Predictive audit logs, user identities, investigations, and alert history.
+
+
+8. DEVOPS, DEPLOYMENT & CLOUD HOSTING
+--------------------------------------------------------------------------------
+• Vercel                       - Global Edge CDN hosting for the high-performance React/Vite SPA.
+• Render                       - Cloud application container platform for the FastAPI backend (render.yaml).
+• Git & GitHub                 - Version control, team synchronization, and automated continuous deployment triggers.
+• Pytest & Pytest-Asyncio      - Comprehensive automated unit and asynchronous integration test suites.
+================================================================================
