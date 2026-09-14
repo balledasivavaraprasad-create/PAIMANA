@@ -28,8 +28,10 @@ export default function App() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const [currentTab, setCurrentTab] = useState<ActiveTab>('motion');
+  const [authChecking, setAuthChecking] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [currentTab, setCurrentTab] = useState<ActiveTab>('motion');
+  const [ministryFilterOnly, setMinistryFilterOnly] = useState<boolean>(false);
   const [pins, setPins] = useState<ProjectPin[]>(initialPins);
   const [selectedPin, setSelectedPin] = useState<ProjectPin>(initialPins[0]);
   const [activeSection, setActiveSection] = useState<'01' | '02' | '03' | '04'>('01');
@@ -41,21 +43,50 @@ export default function App() {
     criticalCount: 60
   });
 
+  // Check if project corridor belongs to user's ministry/jurisdiction
+  const isUserMinistryProject = (pin: ProjectPin) => {
+    if (!currentUser?.ministry) return true;
+    const min = currentUser.ministry.toLowerCase();
+    const pName = pin.name.toLowerCase();
+
+    if (min.includes('road') || min.includes('highway') || min.includes('transport') || min.includes('morth')) {
+      return pName.includes('highway') || pName.includes('expressway') || pName.includes('road') || pName.includes('nh-') || pName.includes('trans harbour') || pName.includes('connector');
+    }
+    if (min.includes('rail')) {
+      return pName.includes('rail') || pName.includes('freight') || pName.includes('chenab') || pName.includes('broad gauge') || pName.includes('usbrl');
+    }
+    if (min.includes('urban') || min.includes('housing')) {
+      return pName.includes('metro') || pName.includes('viaduct') || pName.includes('transit');
+    }
+    if (min.includes('power') || min.includes('energy')) {
+      return pName.includes('solar') || pName.includes('grid') || pName.includes('power') || pName.includes('gas cracker');
+    }
+    if (min.includes('port') || min.includes('shipping')) {
+      return pName.includes('port') || pName.includes('deepwater');
+    }
+    return true; // MoSPI / Admin sees all
+  };
+
   const handleLoginSuccess = (authData: any) => {
-    setCurrentUser({
+    const profile: UserProfile = {
       username: authData.username,
       role: authData.role,
       email: authData.email || '',
       full_name: authData.full_name || authData.username,
-      ministry: authData.ministry || 'MoSPI Official'
-    });
+      ministry: authData.ministry || 'Central Infrastructure',
+      designation: authData.designation || (authData.role === 'ADMIN' ? 'MoSPI Lead Director' : 'Project Officer'),
+      dphis_alert_threshold: authData.dphis_alert_threshold || 75.0,
+      alert_email: authData.email || '',
+      notify_via_email: true
+    };
+    setCurrentUser(profile);
     setCurrentTab('motion');
   };
 
   const handleSignOut = () => {
     clearAuthToken();
     setCurrentUser(null);
-    setCurrentTab('login');
+    setCurrentTab('motion');
   };
 
   // Scroll Progress Tracking for Video Dimming
@@ -65,8 +96,27 @@ export default function App() {
   const videoEnded = isDark ? darkVideoEnded : lightVideoEnded;
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // 1. Initial Authentication Preflight & Live Data Sync
   useEffect(() => {
-    // 1. Fetch live projects from FastAPI
+    // A. Verify authenticated session with backend
+    fetchCurrentUser()
+      .then(user => {
+        if (user) {
+          setCurrentUser(user);
+        } else {
+          clearAuthToken();
+          setCurrentUser(null);
+        }
+      })
+      .catch(() => {
+        clearAuthToken();
+        setCurrentUser(null);
+      })
+      .finally(() => {
+        setAuthChecking(false);
+      });
+
+    // B. Fetch live projects from FastAPI
     fetchProjects().then(dbProjects => {
       if (dbProjects && dbProjects.length > 0) {
         const mappedPins: ProjectPin[] = dbProjects.slice(0, 15).map(p => ({
@@ -85,12 +135,12 @@ export default function App() {
       }
     }).catch(console.warn);
 
-    // 2. Fetch live alerts count
+    // C. Fetch live alerts count
     fetchAlerts().then(items => {
       setAlertCount(items.filter(a => a.status === 'PENDING').length);
     }).catch(console.warn);
 
-    // 3. Fetch portfolio stats
+    // D. Fetch portfolio stats
     fetchAnalyticsOverview().then(ov => {
       if (ov) {
         setPortfolioStats({
@@ -100,12 +150,21 @@ export default function App() {
         });
       }
     }).catch(console.warn);
-
-    // 4. Check for active session
-    fetchCurrentUser().then(user => {
-      if (user) setCurrentUser(user);
-    }).catch(console.warn);
   }, []);
+
+  // 2. Re-prioritize Corridors for Logged In User's Specific Ministry
+  useEffect(() => {
+    if (!currentUser) return;
+    setPins(prev => {
+      const userCorridors = prev.filter(isUserMinistryProject);
+      const otherCorridors = prev.filter(p => !isUserMinistryProject(p));
+      if (userCorridors.length > 0) {
+        setSelectedPin(userCorridors[0]);
+        return [...userCorridors, ...otherCorridors];
+      }
+      return prev;
+    });
+  }, [currentUser?.ministry]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -168,6 +227,37 @@ export default function App() {
     { name: 'Right-of-Way (RoW) Liquidation Efficacy', impact: '-8.0 pts', text: 'Cadastral land acquisition 98.4% finalized with statutory encumbrance clearance', severity: 'low' },
   ];
 
+  // 1. Splash preflight screen while verifying active database session
+  if (authChecking) {
+    return (
+      <div className={`w-screen h-screen flex flex-col items-center justify-center transition-colors ${
+        isDark ? 'bg-[#0B0F17] text-white' : 'bg-[#F8FAFC] text-[#0F172A]'
+      }`}>
+        <div className="flex flex-col items-center gap-4 animate-pulse">
+          <div className="w-14 h-14 rounded-2xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center font-mono font-bold text-sky-400 text-2xl shadow-[0_0_30px_rgba(56,189,248,0.3)]">
+            P
+          </div>
+          <div className="text-center">
+            <div className="text-xs font-mono font-bold tracking-widest uppercase">
+              PAIMANA INSTITUTIONAL PLATFORM
+            </div>
+            <div className="text-[11px] font-mono text-slate-400 mt-1">
+              Verifying official credentials against sovereign database...
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. MANDATORY LOGIN PROMPT:
+  // Must show login prompt first; only if database credentials are verified does dashboard open
+  if (!currentUser) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  const displayedPins = ministryFilterOnly ? pins.filter(isUserMinistryProject) : pins;
+
   return (
     <div className={`relative w-screen h-screen overflow-hidden transition-colors duration-300 ${isDark ? 'bg-black text-white' : 'bg-[#F8FAFC] text-[#0F172A]'}`}>
       {/* Top Header Navigation */}
@@ -177,7 +267,6 @@ export default function App() {
         alertCount={alertCount}
         user={currentUser}
         onSignOut={handleSignOut}
-        onSignInClick={() => setCurrentTab('login')}
       />
 
       {/* BACKGROUND VIDEO & STATIC MAP AT END - VISIBLE ON ALL DASHBOARD PAGES */}
@@ -289,6 +378,35 @@ export default function App() {
               }`}>
                 Continuous econometric surveillance and stochastic risk decomposition across 28 sub-national infrastructure corridors.
               </p>
+
+              {/* User Ministerial Clearance Badge */}
+              <div className="pt-2 flex flex-wrap items-center gap-2.5">
+                <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 text-xs font-mono shadow-sm ${
+                  isDark ? 'bg-black/70 border-white/20 text-white' : 'bg-white/95 border-slate-300 text-slate-900 shadow-sm'
+                }`}>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>
+                    Officer: <strong className="text-sky-400">{currentUser.full_name}</strong>
+                  </span>
+                  <span className="opacity-40">|</span>
+                  <span>
+                    Jurisdiction: <strong>{currentUser.ministry}</strong>
+                  </span>
+                </div>
+
+                {currentUser.ministry && !currentUser.ministry.includes('MoSPI') && (
+                  <button
+                    onClick={() => setMinistryFilterOnly(!ministryFilterOnly)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all border cursor-pointer ${
+                      ministryFilterOnly
+                        ? 'bg-sky-500 text-slate-950 border-sky-400 shadow-md'
+                        : (isDark ? 'bg-white/10 text-white hover:bg-white/20 border-white/20' : 'bg-slate-200/90 text-slate-800 hover:bg-slate-300 border-slate-300')
+                    }`}
+                  >
+                    {ministryFilterOnly ? `Showing: ${currentUser.ministry} Corridors ✓` : `Focus: ${currentUser.ministry}`}
+                  </button>
+                )}
+              </div>
 
               <div className="pt-3 sm:pt-4 flex flex-wrap items-center gap-3">
                 <button
@@ -432,9 +550,26 @@ export default function App() {
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1.5 sm:space-y-2">
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
-                      National Infrastructure Portfolio Ledger & Capital Telemetry
-                    </h2>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
+                        Infrastructure Portfolio Ledger
+                      </h2>
+                      {currentUser.ministry && !currentUser.ministry.includes('MoSPI') && (
+                        <button
+                          onClick={() => setMinistryFilterOnly(!ministryFilterOnly)}
+                          className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer ${
+                            ministryFilterOnly
+                              ? 'bg-sky-400 text-black border-sky-300 shadow'
+                              : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                          }`}
+                        >
+                          {ministryFilterOnly ? `✓ ${currentUser.ministry} (${displayedPins.length})` : `Filter by ${currentUser.ministry}`}
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs sm:text-sm text-white/70">
+                      Displaying {displayedPins.length} active corridors {ministryFilterOnly ? `under ${currentUser.ministry}` : 'across national sovereign inventory'}.
+                    </p>
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
@@ -466,7 +601,7 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {pins.map(p => (
+                      {displayedPins.map(p => (
                         <tr
                           key={p.id}
                           onClick={() => setSelectedPin(p)}
@@ -530,6 +665,7 @@ export default function App() {
           {currentTab === 'assistant' && (
             <Assistant
               selectedProjectId={selectedPin.id}
+              currentUser={currentUser}
               onNavigateToProject={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
@@ -540,21 +676,13 @@ export default function App() {
 
           {currentTab === 'alerts' && (
             <Alerts
+              currentUser={currentUser}
               onNavigateToInvestigation={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
                 setCurrentTab('investigation');
               }}
             />
-          )}
-
-          {currentTab === 'login' && (
-            <div className="pt-11 sm:pt-12 min-h-screen">
-              <Login
-                onLoginSuccess={handleLoginSuccess}
-                onExploreGuest={() => setCurrentTab('motion')}
-              />
-            </div>
           )}
         </div>
       )}

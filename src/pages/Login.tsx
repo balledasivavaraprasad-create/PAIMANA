@@ -7,7 +7,6 @@ import {
 
 interface LoginProps {
   onLoginSuccess: (authData: AuthResponse) => void;
-  onExploreGuest?: () => void;
 }
 
 const SLIDES = [
@@ -25,7 +24,7 @@ const SLIDES = [
   }
 ];
 
-export default function Login({ onLoginSuccess, onExploreGuest }: LoginProps) {
+export default function Login({ onLoginSuccess }: LoginProps) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -116,13 +115,16 @@ export default function Login({ onLoginSuccess, onExploreGuest }: LoginProps) {
   };
 
   // Fast 1-click Demo Fill
-  const fillDemoCredentials = (role: 'admin' | 'analyst') => {
+  const fillDemoCredentials = (role: 'admin' | 'analyst' | 'morth') => {
     if (role === 'admin') {
       setLoginEmail('admin');
       setLoginPassword('paimana2026');
-    } else {
+    } else if (role === 'analyst') {
       setLoginEmail('analyst');
       setLoginPassword('paimana2026');
+    } else {
+      setLoginEmail('ramesh.kumar@morth.gov.in');
+      setLoginPassword('Password1234!');
     }
   };
 
@@ -245,20 +247,8 @@ export default function Login({ onLoginSuccess, onExploreGuest }: LoginProps) {
         }`} />
       </div>
 
-      {/* ---------------- Top Right: Theme Switcher & Guest Button ---------------- */}
+      {/* ---------------- Top Right: Theme Switcher ---------------- */}
       <div className="fixed top-4 right-4 sm:top-6 sm:right-8 z-50 flex items-center gap-2">
-        {onExploreGuest && (
-          <button
-            onClick={onExploreGuest}
-            className={`px-3 py-1.5 rounded-full text-xs font-mono font-medium border backdrop-blur-md shadow-md transition-all ${
-              isDark 
-                ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' 
-                : 'bg-white/80 hover:bg-white border-black/15 text-slate-800'
-            }`}
-          >
-            Explore as Guest →
-          </button>
-        )}
         <button
           onClick={toggleTheme}
           aria-label="Toggle Theme"
@@ -498,24 +488,36 @@ export default function Login({ onLoginSuccess, onExploreGuest }: LoginProps) {
                 <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-2">
                   Demo Evaluation Credentials
                 </span>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-3 gap-1.5">
                   <button
                     type="button"
                     onClick={() => fillDemoCredentials('admin')}
-                    className={`flex-1 py-1.5 px-2 rounded-md border text-[11px] font-mono transition-colors ${
+                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate ${
                       isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
                     }`}
+                    title="MoSPI Admin (paimana2026)"
                   >
-                    👑 Admin (MoSPI Lead)
+                    👑 MoSPI Admin
                   </button>
                   <button
                     type="button"
                     onClick={() => fillDemoCredentials('analyst')}
-                    className={`flex-1 py-1.5 px-2 rounded-md border text-[11px] font-mono transition-colors ${
+                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate ${
                       isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
                     }`}
+                    title="Risk Analyst (paimana2026)"
                   >
-                    📊 Risk Analyst
+                    📊 Lead Analyst
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fillDemoCredentials('morth')}
+                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate ${
+                      isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                    }`}
+                    title="Dr. Ramesh Kumar (Road Transport & Highways)"
+                  >
+                    🛣️ MoRTH Official
                   </button>
                 </div>
               </div>

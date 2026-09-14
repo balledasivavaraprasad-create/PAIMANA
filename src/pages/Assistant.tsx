@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import GlassCard from '../components/GlassCard';
-import { sendChatMessage } from '../lib/api';
+import { sendChatMessage, UserProfile } from '../lib/api';
 
 interface Message {
   id: string;
@@ -13,16 +13,21 @@ interface Message {
 
 interface Props {
   selectedProjectId?: string;
+  currentUser?: UserProfile | null;
   onNavigateToProject?: (projectId: string) => void;
 }
 
-export default function Assistant({ selectedProjectId = 'P1024' }: Props) {
+export default function Assistant({ selectedProjectId = 'P1024', currentUser }: Props) {
+  const officerName = currentUser?.full_name || 'Officer';
+  const ministryName = currentUser?.ministry || 'Infrastructure Administration';
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       sender: 'assistant',
-      text: `Welcome to the PAIMANA Institutional Decision-Support Copilot. Active connection verified with the FastAPI econometric reasoning layer and sovereign asset cluster. I provide multi-factor risk decomposition, additive Shapley latent variable analysis for assets such as ${selectedProjectId}, physical-financial disparity diagnostics, and statutory remediation directives. How may I direct your inquiry?`,
+      text: `Greetings ${officerName} (${ministryName}). PAIMANA Institutional Decision-Support Copilot is synchronized with your ministerial jurisdiction. Active connection verified with FastAPI econometric reasoning and sovereign telemetry cluster. How may I assist your corridor risk surveillance today?`,
       citations: [
+        { feature: 'Jurisdiction Filter', impact: ministryName, description: 'Corridor surveillance scoped to your ministerial portfolio' },
         { feature: 'Sovereign Asset Corpus', impact: '1,500 Monitored Assets', description: 'MongoDB longitudinal telemetry cluster active' },
         { feature: 'Additive Shapley Engine', impact: 'Deterministic', description: 'Empirical XGBoost factor decomposition available' },
       ],

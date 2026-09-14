@@ -1,22 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import GlassCard from '../components/GlassCard';
 import RiskBadge from '../components/RiskBadge';
-import { fetchAlerts, acknowledgeAlert, triggerN8nRiskEvent, AlertItem } from '../lib/api';
+import { fetchAlerts, acknowledgeAlert, triggerN8nRiskEvent, AlertItem, UserProfile } from '../lib/api';
 
 interface Props {
   onNavigateToInvestigation?: (projectId: string) => void;
+  currentUser?: UserProfile | null;
 }
 
-export default function Alerts({ onNavigateToInvestigation }: Props) {
+export default function Alerts({ onNavigateToInvestigation, currentUser }: Props) {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   // User-configurable alert threshold and n8n credentials
-  const [userThreshold, setUserThreshold] = useState<number>(75.0);
-  const [recipientEmail, setRecipientEmail] = useState<string>('balledasivavaraprasad@gmail.com');
+  const [userThreshold, setUserThreshold] = useState<number>(currentUser?.dphis_alert_threshold ?? 75.0);
+  const [recipientEmail, setRecipientEmail] = useState<string>(currentUser?.alert_email || currentUser?.email || 'balledasivavaraprasad@gmail.com');
   const [simulatedDphis, setSimulatedDphis] = useState<number>(84.5);
   const [isTriggering, setIsTriggering] = useState<boolean>(false);
   const [simulationResult, setSimulationResult] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (currentUser?.dphis_alert_threshold) {
+      setUserThreshold(currentUser.dphis_alert_threshold);
+    }
+    if (currentUser?.alert_email || currentUser?.email) {
+      setRecipientEmail(currentUser.alert_email || currentUser.email);
+    }
+  }, [currentUser]);
 
   const loadAlerts = () => {
     fetchAlerts().then(items => {
@@ -45,7 +55,7 @@ export default function Alerts({ onNavigateToInvestigation }: Props) {
         dphis: simulatedDphis,
         threshold: userThreshold,
         recipientEmail: recipientEmail,
-        recipientName: 'Executive Officer'
+        recipientName: currentUser?.full_name || 'Executive Officer'
       });
       setSimulationResult(res);
       // If alert was created, refresh alerts stream
