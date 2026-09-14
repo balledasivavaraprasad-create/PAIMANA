@@ -83,22 +83,13 @@ export default function Assistant({ selectedProjectId = 'P1024' }: Props) {
   return (
     <div className="pt-16 sm:pt-20 pb-6 px-4 sm:px-8 md:px-12 max-w-5xl mx-auto flex flex-col h-[calc(100vh-65px)] justify-between space-y-3 sm:space-y-4">
       {/* Header */}
-      <GlassCard variant="hero" padding={18} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold font-display text-white">
-            Institutional Decision-Support Copilot
-          </h2>
-          <p className="text-xs sm:text-sm text-white/70">
-            Executive macroeconomic reasoning engine grounded in deterministic FastAPI services, longitudinal MongoDB time-series, and additive Shapley attribution
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs font-mono-code px-3 py-1 rounded-full bg-white/10 text-white font-semibold border border-white/20 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-            <span>FastAPI: 8000</span>
-          </span>
-        </div>
+      <GlassCard variant="hero" padding={20} className="w-full space-y-1.5">
+        <h2 className="text-xl sm:text-2xl font-bold font-display text-white tracking-tight">
+          Institutional Decision-Support Copilot
+        </h2>
+        <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
+          Executive macroeconomic reasoning engine grounded in deterministic FastAPI services, longitudinal MongoDB time-series telemetry, and additive Shapley attribution.
+        </p>
       </GlassCard>
 
       {/* Chat Messages */}
