@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: paimana-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: MONGODB_URL
+        sync: false
+      - key: MONGODB_DB_NAME
+        value: paimana_intelligence
+      - key: SECRET_KEY
+        generateValue: true
+      - key: N8N_RISK_WEBHOOK_URL
+        value: https://sivavaraprasad.app.n8n.cloud/webhook/project-risk-event

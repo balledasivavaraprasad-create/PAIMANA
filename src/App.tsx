@@ -7,7 +7,7 @@ import Analytics from './pages/Analytics';
 import Assistant from './pages/Assistant';
 import Alerts from './pages/Alerts';
 import { useTheme } from './hooks/useTheme';
-import { fetchProjects, fetchAlerts, fetchAnalyticsOverview } from './lib/api';
+import { fetchProjects, fetchAlerts, fetchAnalyticsOverview, API_BASE } from './lib/api';
 
 const initialPins: ProjectPin[] = [
   { id: 'P1024', name: 'NH-48 Varanasi-Ranchi Expressway', state: 'Uttar Pradesh', latPct: 38, lngPct: 54, dphis: 91, risk: 'critical', cost: '₹4,218 Cr', delay: '28 mo' },
@@ -113,7 +113,7 @@ export default function App() {
     // Persist to FastAPI MongoDB backend
     try {
       const costNum = parseFloat(newPin.cost.replace(/[^0-9.]/g, '')) || 3500;
-      await fetch('http://localhost:8000/api/v1/projects', {
+      await fetch(`${API_BASE}/projects`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
