@@ -408,9 +408,14 @@ export default function App() {
                   <div className="flex items-center gap-3 shrink-0">
                     <button
                       onClick={() => setShowCeoModal(true)}
-                      className="px-5 py-2.5 rounded-xl bg-black text-white text-xs sm:text-sm font-bold font-mono-code cursor-pointer border border-white/30 shadow-[0_0_14px_rgba(255,255,255,0.22)] hover:bg-zinc-900 hover:border-white/60 transition-all duration-200 flex items-center gap-2"
+                      style={!isDark ? { color: '#000000' } : undefined}
+                      className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-mono-code cursor-pointer transition-all duration-200 flex items-center gap-2 ${
+                        isDark
+                          ? 'bg-black text-white border border-white/30 shadow-[0_0_14px_rgba(255,255,255,0.22)] hover:bg-zinc-900 hover:border-white/60'
+                          : 'bg-white/75 hover:bg-white/95 text-black border border-white/90 shadow-[0_4px_18px_rgba(0,0,0,0.08),inset_0_1.5px_2px_rgba(255,255,255,0.95)] backdrop-blur-md'
+                      }`}
                     >
-                      <span>+ Ingest Capital Asset</span>
+                      <span style={!isDark ? { color: '#000000' } : undefined}>+ Ingest Capital Asset</span>
                     </button>
                   </div>
                 </div>
@@ -518,10 +523,15 @@ export default function App() {
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
           <button
             onClick={() => setShowCeoModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0B0F17] hover:bg-[#141A26] border border-white/10 text-white text-xs font-mono-code font-medium shadow-md transition-colors duration-150 cursor-pointer"
+            style={!isDark ? { color: '#000000' } : undefined}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono-code font-bold transition-all duration-200 cursor-pointer ${
+              isDark
+                ? 'bg-[#0B0F17] hover:bg-[#141A26] border border-white/15 text-white shadow-lg'
+                : 'bg-white/80 hover:bg-white/95 text-black border border-white/95 shadow-[0_6px_24px_rgba(0,0,0,0.12),inset_0_1.5px_2px_rgba(255,255,255,0.95)] backdrop-blur-md'
+            }`}
           >
-            <span className="text-white/80 text-sm leading-none font-normal">+</span>
-            <span className="text-white">Ingest Capital Asset</span>
+            <span style={!isDark ? { color: '#000000' } : undefined} className={`text-sm leading-none font-bold ${isDark ? 'text-white/80' : 'text-black'}`}>+</span>
+            <span style={!isDark ? { color: '#000000' } : undefined} className={`font-bold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>Ingest Capital Asset</span>
           </button>
         </div>
       )}
