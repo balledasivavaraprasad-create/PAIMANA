@@ -1,0 +1,13 @@
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=246813579
+DB_NAME=paimana_db
+JWT_SECRET=change_this_to_a_long_random_string
+
+PORT=3000
+NODE_ENV=development
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=syntaxtrrors@gmail.com
+SMTP_PASS=szbfukaiioisvnly

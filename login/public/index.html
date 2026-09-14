@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign in · PAIMANA AI Monitoring Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B1220;
+    --text:#EAF0FA;
+    --text-muted:#9BB0CF;
+    --accent:#56B4FF;
+    --accent-dim: rgba(86,180,255,0.16);
+    --accent-2:#4FD6C4;
+    --accent-text:#071422;
+    --blue:#6EA8FE;
+    --green:#63C77C;
+    --danger:#FF6B7A;
+    --line: rgba(255,255,255,0.14);
+    --line-strong: rgba(255,255,255,0.25);
+    --placeholder:#667A99;
+    --glass-bg: rgba(10, 18, 34, 0.42);
+    --glass-card: rgba(14, 25, 46, 0.48);
+    --glass-border: rgba(255, 255, 255, 0.16);
+    --input-bg: rgba(8, 15, 28, 0.52);
+    --scrim: rgba(5, 9, 18, 0.22);
+    --radius: 8px;
+  }
+
+  :root[data-theme="light"]{
+    --bg:#F4F7FB;
+    --text:#0F1A2A;
+    --text-muted:#4A5B73;
+    --accent:#1D68DE;
+    --accent-dim: rgba(29,104,222,0.12);
+    --accent-2:#0D8F6E;
+    --accent-text:#FFFFFF;
+    --blue:#1D68DE;
+    --green:#0D8F6E;
+    --danger:#D6384E;
+    --line: rgba(15,26,42,0.14);
+    --line-strong: rgba(15,26,42,0.26);
+    --placeholder:#7A8CA3;
+    --glass-bg: rgba(255, 255, 255, 0.48);
+    --glass-card: rgba(255, 255, 255, 0.62);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --input-bg: rgba(255, 255, 255, 0.75);
+    --scrim: rgba(244, 247, 251, 0.18);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html, body{
+    margin:0; padding:0; min-height:100%;
+    background:transparent; color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  body{
+    display:flex; flex-direction:column;
+    min-height:100vh; position:relative;
+    padding:20px 24px 40px 24px;
+  }
+
+  /* ---------------- Dynamic Full-screen HD Background Slider ---------------- */
+
+  .bg-slider{
+    position:fixed; inset:0;
+    z-index:0;
+    overflow:hidden;
+    background:#070C16;
+  }
+
+  .bg-slide{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    background-size:cover;
+    background-position:center center;
+    background-repeat:no-repeat;
+    opacity:0;
+    transform:scale(1.04);
+    transition:opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1), transform 8s cubic-bezier(0.1, 0.8, 0.3, 1);
+    will-change:opacity, transform;
+    image-rendering:-webkit-optimize-contrast;
+    image-rendering:high-quality;
+  }
+
+  .bg-slide.active{
+    opacity:1;
+    transform:scale(1);
+  }
+
+  /* Subtle vignette for high contrast while maintaining transparent background visibility */
+  .bg-vignette{
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at center, rgba(7,12,22,0.08) 0%, rgba(5,8,16,0.55) 100%);
+    pointer-events:none;
+  }
+
+  .bg-scrim{
+    position:fixed; inset:0;
+    z-index:1;
+    background:var(--scrim);
+    pointer-events:none;
+    transition:background 0.3s ease;
+  }
+
+  /* ---------------- Theme toggle & Sector Badge ---------------- */
+
+  .theme-toggle{
+    position:fixed;
+    top:20px; right:24px;
+    z-index:60;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:5px;
+    border:1px solid var(--glass-border);
+    border-radius:999px;
+    background:var(--glass-card);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+
+  .theme-toggle button{
+    width:30px; height:30px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:background 0.15s ease, color 0.15s ease;
+  }
+
+  .theme-toggle button.active{
+    background:var(--accent-dim);
+    color:var(--accent);
+  }
+
+  .bg-asset-badge{
+    position:fixed;
+    bottom:18px; left:24px;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:6px 14px;
+    background:var(--glass-card);
+    border:1px solid var(--glass-border);
+    border-radius:999px;
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    font-size:11.5px;
+    color:var(--text);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  }
+
+  .bg-asset-badge .badge-dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--accent-2);
+    box-shadow:0 0 8px var(--accent-2);
+    animation:pulse 2s infinite;
+  }
+
+  @keyframes pulse{
+    0%{ opacity:0.6; transform:scale(0.9); }
+    50%{ opacity:1; transform:scale(1.2); }
+    100%{ opacity:0.6; transform:scale(0.9); }
+  }
+
+  .bg-dots{
+    position:fixed;
+    bottom:18px; right:24px;
+    z-index:50;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+
+  .bg-dot{
+    width:28px; height:4px;
+    border-radius:2px;
+    background:rgba(255,255,255,0.3);
+    border:none;
+    cursor:pointer;
+    padding:0;
+    transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  :root[data-theme="light"] .bg-dot{ background:rgba(15,26,42,0.3); }
+
+  .bg-dot.active{
+    background:var(--accent);
+    width:42px;
+  }
+
+  /* ---------------- TOP: Full-width Stat Info Box (Glassmorphic) ---------------- */
+
+  .top-stat-box{
+    position:relative;
+    z-index:10;
+    width:100%;
+    max-width:1440px;
+    margin:0 auto 28px auto;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    border-radius:14px;
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 16px 36px -10px rgba(0,0,0,0.35);
+    padding:22px 30px 18px 30px;
+  }
+
+  .top-header-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:16px;
+  }
+
+  .brand-identity{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+
+  .brand-title-wrap{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .brand-mark{
+    font-family:'Source Serif 4', serif;
+    font-weight:700;
+    font-size:23px;
+    letter-spacing:0.04em;
+    color:var(--text);
+  }
+
+  .brand-sub{
+    font-size:12.5px;
+    color:var(--text-muted);
+    font-weight:400;
+  }
+
+  .headline-pill{
+    font-family:'Source Serif 4', serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--accent);
+    margin-top:2px;
+  }
+
+  .portfolio-summary-tags{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+  .summary-pill{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11.5px;
+    color:var(--text-muted);
+    background:rgba(255,255,255,0.06);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:5px 12px;
+  }
+  .summary-pill strong{ color:var(--text); font-weight:600; }
+
+  /* 4-column Full Horizontal Telemetry Grid */
+  .metrics-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:14px;
+    margin-bottom:14px;
+  }
+
+  .metric-card{
+    background:var(--glass-card);
+    border:1px solid var(--glass-border);
+    border-radius:10px;
+    padding:13px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+
+  .metric-info{ display:flex; flex-direction:column; }
+  .metric-label{ font-size:11px; color:var(--text-muted); font-weight:500; text-transform:uppercase; letter-spacing:0.04em; }
+  .metric-value{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-variant-numeric:tabular-nums;
+    font-size:25px;
+    font-weight:600;
+    color:var(--text);
+    margin-top:2px;
+  }
+  .metric-value.warn{ color:var(--danger); }
+  .metric-value.info{ color:var(--accent); }
+  .metric-value.green{ color:var(--green); }
+
+  .metric-tag{
+    font-size:10.5px;
+    padding:3px 8px;
+    border-radius:4px;
+    background:rgba(255,255,255,0.06);
+    color:var(--text-muted);
+    border:1px solid var(--line);
+  }
+
+  /* Horizontal Sector Tags Bar */
+  .sector-bar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    overflow-x:auto;
+    padding-top:12px;
+    border-top:1px solid var(--line);
+  }
+  .sector-bar-label{
+    font-size:11px;
+    font-weight:600;
+    color:var(--text-muted);
+    white-space:nowrap;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  .sector-chips{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .sector-chips span{
+    font-size:11px;
+    color:var(--text-muted);
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:4px 10px;
+    white-space:nowrap;
+  }
+
+  /* ---------------- BOTTOM: Centered Login Credential Box (Glassmorphic) ---------------- */
+
+  .bottom-auth-container{
+    position:relative;
+    z-index:10;
+    display:flex;
+    justify-content:center;
+    width:100%;
+    margin-bottom:30px;
+  }
+
+  .login-card{
+    width:100%;
+    max-width:440px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    border-radius:14px;
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    padding:32px 34px 28px 34px;
+    box-shadow: 0 20px 45px -10px rgba(0,0,0,0.45);
+  }
+
+  .tabs{
+    display:flex;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:3px;
+    margin-bottom:26px;
+    background:rgba(0,0,0,0.22);
+  }
+  .tabs button{
+    flex:1;
+    padding:9px 0;
+    background:transparent;
+    border:none;
+    border-radius:6px;
+    color:var(--text-muted);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    cursor:pointer;
+    transition:background 0.15s ease, color 0.15s ease;
+  }
+  .tabs button.active{
+    background:var(--glass-card);
+    color:var(--text);
+    box-shadow:0 2px 8px rgba(0,0,0,0.25);
+  }
+
+  .panel-view{ display:none; }
+  .panel-view.active{ display:block; }
+
+  .form-head{ margin-bottom:22px; }
+  .form-head h1{
+    font-family:'Source Serif 4', serif;
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 6px 0;
+  }
+  .form-head p{
+    margin:0;
+    font-size:13px;
+    color:var(--text-muted);
+    line-height:1.5;
+  }
+
+  form{ display:flex; flex-direction:column; gap:15px; }
+
+  .field label{ display:block; font-size:12.5px; font-weight:500; margin-bottom:6px; color:var(--text); }
+  .field select, .field input{
+    width:100%; padding:11px 14px;
+    background:var(--input-bg);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    color:var(--text);
+    font-size:14px;
+    font-family:'IBM Plex Sans', sans-serif;
+    outline:none;
+    backdrop-filter: blur(8px);
+    transition:border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field select{
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239BB0CF'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center;
+  }
+  .field input::placeholder{ color:var(--placeholder); }
+  .field input:focus, .field select:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-dim);
+  }
+
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  .field-error{ display:none; margin-top:5px; font-size:12px; color:var(--danger); }
+  .field.has-error input, .field.has-error select{ border-color:var(--danger); }
+  .field.has-error .field-error{ display:block; }
+
+  .row-between{ display:flex; align-items:center; justify-content:space-between; font-size:12.5px; margin-top:-2px; }
+  .remember{ display:flex; align-items:center; gap:8px; color:var(--text-muted); cursor:pointer; user-select:none; }
+  .remember input{ width:15px; height:15px; accent-color:var(--accent); cursor:pointer; }
+  .row-between a{ color:var(--text-muted); text-decoration:none; }
+  .row-between a:hover{ color:var(--accent); }
+
+  .terms{ font-size:12px; color:var(--text-muted); display:flex; gap:8px; align-items:flex-start; line-height:1.5; }
+  .terms input{ margin-top:3px; width:14px; height:14px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
+  .terms a, .link-btn{ color:var(--accent); text-decoration:none; background:none; border:none; padding:0; font:inherit; cursor:pointer; }
+  .terms a:hover, .link-btn:hover{ text-decoration:underline; }
+
+  button.submit{
+    margin-top:6px; width:100%; padding:12px;
+    background:var(--accent); color:var(--accent-text);
+    border:none; border-radius:var(--radius);
+    font-size:14.5px; font-weight:600;
+    font-family:'IBM Plex Sans', sans-serif;
+    cursor:pointer;
+    transition:transform 0.12s ease, filter 0.15s ease;
+    box-shadow: 0 4px 14px rgba(86,180,255,0.3);
+  }
+  button.submit:hover{ filter:brightness(1.1); }
+  button.submit:active{ transform:translateY(1px); }
+  button.submit:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  button.ghost{
+    width:100%; padding:11px; margin-top:4px;
+    background:transparent; border:1px solid var(--line);
+    border-radius:var(--radius); color:var(--text-muted);
+    font-size:13.5px; font-family:'IBM Plex Sans', sans-serif; cursor:pointer;
+  }
+  button.ghost:hover{ border-color:var(--line-strong); color:var(--text); }
+
+  /* OTP step */
+  .otp-note{ font-size:13px; color:var(--text-muted); line-height:1.6; margin:0 0 18px 0; }
+  .otp-note strong{ color:var(--text); font-weight:500; }
+  .otp-boxes{ display:flex; gap:10px; margin-bottom:8px; }
+  .otp-boxes input{
+    width:100%; aspect-ratio:1; text-align:center;
+    font-family:'IBM Plex Sans', sans-serif; font-variant-numeric: tabular-nums; font-size:19px;
+    background:var(--input-bg); border:1px solid var(--line);
+    border-radius:var(--radius); color:var(--text); outline:none;
+  }
+  .otp-boxes input:focus{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+  .otp-status{ font-size:12.5px; color:var(--danger); min-height:16px; margin-bottom:12px; }
+
+  .resend-row{ display:flex; align-items:center; justify-content:space-between; font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+  .resend-row button{ background:none; border:none; color:var(--accent); font-size:13px; cursor:pointer; padding:0; }
+  .resend-row button:disabled{ color:var(--text-muted); cursor:not-allowed; }
+
+  .back-link{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--text-muted); text-decoration:none; margin-bottom:18px; cursor:pointer; background:none; border:none; padding:0; }
+  .back-link:hover{ color:var(--text); }
+
+  .success-box{ text-align:center; padding:20px 0 4px 0; }
+  .success-icon{ width:46px; height:46px; border-radius:50%; background:rgba(99,199,124,0.14); border:1px solid rgba(99,199,124,0.4); display:flex; align-items:center; justify-content:center; margin:0 auto 16px auto; }
+  .success-box h2{ font-family:'Source Serif 4', serif; font-size:19px; margin:0 0 8px 0; }
+  .success-box p{ font-size:13px; color:var(--text-muted); margin:0 0 20px 0; line-height:1.5; }
+
+  /* ---------------- Terms Modal ---------------- */
+
+  .modal-overlay{
+    display:none; position:fixed; inset:0;
+    background:rgba(5,9,18,0.7); z-index:100;
+    align-items:center; justify-content:center;
+    padding:24px; backdrop-filter: blur(6px);
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal{
+    width:100%; max-width:640px; max-height:82vh;
+    background:var(--glass-bg); border:1px solid var(--glass-border);
+    border-radius:12px; backdrop-filter: blur(24px);
+    display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 24px 60px rgba(0,0,0,0.6);
+  }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--line); }
+  .modal-head h2{ font-family:'Source Serif 4', serif; font-size:17px; margin:0; }
+  .modal-close{ background:none; border:1px solid var(--line); border-radius:5px; width:28px; height:28px; color:var(--text-muted); cursor:pointer; }
+  .modal-tabs{ display:flex; gap:4px; padding:10px 22px 0 22px; border-bottom:1px solid var(--line); }
+  .modal-tabs button{ background:none; border:none; padding:9px 4px 11px 4px; margin-right:20px; color:var(--text-muted); font-weight:500; cursor:pointer; border-bottom:2px solid transparent; }
+  .modal-tabs button.active{ color:var(--text); border-bottom-color:var(--accent); }
+  .modal-body{ padding:20px 22px; overflow-y:auto; font-size:13px; line-height:1.65; color:var(--text-muted); }
+  .modal-body .doc-section{ display:none; }
+  .modal-body .doc-section.active{ display:block; }
+  .modal-body h3{ font-family:'Source Serif 4', serif; font-size:14px; color:var(--text); margin:18px 0 6px 0; }
+  .modal-foot{ display:flex; justify-content:flex-end; padding:14px 22px; border-top:1px solid var(--line); }
+
+  @media (max-width:1024px){
+    .metrics-grid{ grid-template-columns:repeat(2, 1fr); }
+    .top-header-row{ flex-direction:column; align-items:flex-start; }
+    .portfolio-summary-tags{ justify-content:flex-start; }
+  }
+
+  @media (max-width:640px){
+    body{ padding:12px; }
+    .top-stat-box{ padding:18px 16px; margin-bottom:20px; }
+    .metrics-grid{ grid-template-columns:1fr; }
+    .two-col{ grid-template-columns:1fr; }
+    .login-card{ padding:24px 20px; }
+    .bg-asset-badge{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Dynamic HD Background Slideshow (Full Viewport) -->
+  <div class="bg-slider" id="bgSlider" aria-hidden="true">
+    <div class="bg-slide active" style="background-image: url('assets/bg-1-highway.png');" data-index="0" data-label="Road Transport & Logistics · National Expressways (1080p HD)"></div>
+    <div class="bg-slide" style="background-image: url('assets/bg-2-bridge.png');" data-index="1" data-label="Indian Railways · Chenab Megaproject USBRL (1080p HD)"></div>
+    <div class="bg-slide" style="background-image: url('assets/bg-3-metro.png');" data-index="2" data-label="Urban Transit · High-Speed Viaduct Corridor (1080p HD)"></div>
+    <div class="bg-vignette"></div>
+  </div>
+
+  <div class="bg-scrim"></div>
+
+  <!-- Sector Badge & Indicators -->
+  <div class="bg-asset-badge" id="bgAssetBadge">
+    <span class="badge-dot"></span>
+    <span id="bgAssetLabel">Road Transport &amp; Logistics · National Expressways (1080p HD)</span>
+  </div>
+
+  <div class="bg-dots" id="bgDots">
+    <button class="bg-dot active" data-index="0" aria-label="Slide 1"></button>
+    <button class="bg-dot" data-index="1" aria-label="Slide 2"></button>
+    <button class="bg-dot" data-index="2" aria-label="Slide 3"></button>
+  </div>
+
+  <!-- Theme Toggle -->
+  <div class="theme-toggle" role="group" aria-label="Theme">
+    <button type="button" id="darkModeBtn" class="active" aria-label="Dark mode" aria-pressed="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z" fill="currentColor"/></svg>
+    </button>
+    <button type="button" id="lightModeBtn" aria-label="Light mode" aria-pressed="false">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+    </button>
+  </div>
+
+  <!-- ================= TOP: FULL-WIDTH STAT INFO BOX (GLASSMORPHISM) ================= -->
+  <header class="top-stat-box">
+    <div class="top-header-row">
+      <div class="brand-identity">
+        <div class="brand-title-wrap">
+          <span class="brand-mark">PAIMANA</span>
+          <span class="brand-sub">Project Assessment, Infrastructure Monitoring and Analytics for Nation-building (MoSPI)</span>
+        </div>
+        <div class="headline-pill">See project risk before it becomes delay · AI-Powered Early Warning Platform</div>
+      </div>
+
+      <div class="portfolio-summary-tags">
+        <div class="summary-pill"><span>Original Portfolio:</span> <strong>₹37.13L cr</strong></div>
+        <div class="summary-pill"><span>Revised Cost:</span> <strong>₹42.78L cr</strong></div>
+        <div class="summary-pill"><span>Cumulative Exp:</span> <strong>₹20.36L cr</strong></div>
+      </div>
+    </div>
+
+    <!-- 4-Column Horizontal Metrics Grid -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-info">
+          <span class="metric-label">Projects Tracked</span>
+          <span class="metric-value">1,981</span>
+        </div>
+        <span class="metric-tag">₹150 Cr+</span>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-info">
+          <span class="metric-label">Ministries / Depts</span>
+          <span class="metric-value">17</span>
+        </div>
+        <span class="metric-tag">Central Sector</span>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-info">
+          <span class="metric-label">Sectors Covered</span>
+          <span class="metric-value info">22</span>
+        </div>
+        <span class="metric-tag">National Scope</span>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-info">
+          <span class="metric-label">Flagged At-Risk</span>
+          <span class="metric-value warn">187</span>
+        </div>
+        <span class="metric-tag">Early Warning</span>
+      </div>
+    </div>
+
+    <!-- Horizontal Sector Chips Bar -->
+    <div class="sector-bar">
+      <span class="sector-bar-label">Key Sectors:</span>
+      <div class="sector-chips">
+        <span>Transport &amp; Logistics</span>
+        <span>Indian Railways (USBRL)</span>
+        <span>National Highways &amp; Expressways</span>
+        <span>Energy &amp; Power</span>
+        <span>Water &amp; Sanitation</span>
+        <span>Coal, Steel &amp; Mining</span>
+        <span>Petroleum &amp; Natural Gas</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= BOTTOM: CENTERED LOGIN CREDENTIAL BOX ================= -->
+  <main class="bottom-auth-container">
+    <div class="login-card">
+
+      <!-- Login Flow -->
+      <div id="loginFlow">
+        <div class="tabs" id="authTabs">
+          <button type="button" class="active" data-target="loginFlow">Sign in</button>
+          <button type="button" data-target="signupFlow">Create account</button>
+        </div>
+
+        <div class="panel-view active" id="loginStep1">
+          <div class="form-head">
+            <h1>Sign in</h1>
+            <p>Enter your official credentials to access the PAIMANA predictive monitoring dashboard.</p>
+          </div>
+
+          <form id="loginForm" novalidate>
+            <div class="field" id="loginEmailField">
+              <label for="loginEmail">Official Email</label>
+              <input type="email" id="loginEmail" placeholder="name@ministry.gov.in" autocomplete="username" />
+              <div class="field-error">Enter a valid official email address.</div>
+            </div>
+
+            <div class="field" id="loginPasswordField">
+              <label for="loginPassword">Password</label>
+              <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password" />
+              <div class="field-error">Password is required.</div>
+            </div>
+
+            <div class="row-between">
+              <label class="remember">
+                <input type="checkbox" />
+                Keep me signed in
+              </label>
+              <a href="#">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="submit">Continue</button>
+          </form>
+        </div>
+
+        <!-- Login Step 2: OTP -->
+        <div class="panel-view" id="loginStep2">
+          <button class="back-link" id="loginBack">&larr; Back</button>
+          <div class="form-head">
+            <h1>Verify it's you</h1>
+            <p class="otp-note">We've sent a 6-digit code to <strong id="loginOtpTarget">name@ministry.gov.in</strong>. Enter it below to complete sign in.</p>
+          </div>
+
+          <div class="otp-boxes" id="loginOtpBoxes">
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+          </div>
+          <div class="otp-status" id="loginOtpStatus"></div>
+
+          <div class="resend-row">
+            <span id="loginResendText">Resend code in <span id="loginTimer">30</span>s</span>
+            <button type="button" id="loginResendBtn" disabled>Resend code</button>
+          </div>
+
+          <button type="button" class="submit" id="loginVerifyBtn">Verify &amp; sign in</button>
+        </div>
+
+        <!-- Success -->
+        <div class="panel-view" id="loginSuccess">
+          <div class="success-box">
+            <div class="success-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 6" stroke="#63C77C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h2>Verified</h2>
+            <p>Two-factor authentication successful. Redirecting to your PAIMANA dashboard...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signup Flow -->
+      <div id="signupFlow" style="display:none;">
+        <div class="tabs" id="authTabsSignup">
+          <button type="button" data-target="loginFlow">Sign in</button>
+          <button type="button" class="active" data-target="signupFlow">Create account</button>
+        </div>
+
+        <div class="panel-view active" id="signupStep1">
+          <div class="form-head">
+            <h1>Request access</h1>
+            <p>Register with your official credentials. Access is role-based and subject to verification.</p>
+          </div>
+
+          <form id="signupForm" novalidate>
+            <div class="field" id="fullNameField">
+              <label for="fullName">Full Name</label>
+              <input type="text" id="fullName" placeholder="As per official records" />
+              <div class="field-error">Full name is required.</div>
+            </div>
+
+            <div class="field" id="signupEmailField">
+              <label for="signupEmail">Official Email</label>
+              <input type="email" id="signupEmail" placeholder="name@ministry.gov.in" autocomplete="username" />
+              <div class="field-error">Enter a valid official email address.</div>
+            </div>
+
+            <div class="two-col">
+              <div class="field" id="deptField">
+                <label for="dept">Ministry / Dept</label>
+                <select id="dept">
+                  <option value="">Select</option>
+                  <option>Road Transport &amp; Highways</option>
+                  <option>Power</option>
+                  <option>Railways</option>
+                  <option>Jal Shakti</option>
+                  <option>Coal</option>
+                  <option>Steel</option>
+                  <option>Petroleum &amp; Natural Gas</option>
+                  <option>Other</option>
+                </select>
+                <div class="field-error">Select a department.</div>
+              </div>
+              <div class="field" id="designationField">
+                <label for="designation">Designation</label>
+                <input type="text" id="designation" placeholder="e.g. Project Officer" />
+                <div class="field-error">Designation is required.</div>
+              </div>
+            </div>
+
+            <div class="field" id="signupPasswordField">
+              <label for="signupPassword">Password</label>
+              <input type="password" id="signupPassword" placeholder="At least 8 characters" autocomplete="new-password" />
+              <div class="field-error">Password must be at least 8 characters.</div>
+            </div>
+
+            <div class="field" id="confirmPasswordField">
+              <label for="confirmPassword">Confirm Password</label>
+              <input type="password" id="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password" />
+              <div class="field-error">Passwords do not match.</div>
+            </div>
+
+            <label class="terms">
+              <input type="checkbox" id="termsCheck" />
+              <span>I agree to the <button type="button" class="link-btn" data-open-modal="terms">Terms &amp; Conditions and Privacy Policy</button>.</span>
+            </label>
+            <div class="field-error" id="termsError" style="margin-top:-6px;">Please confirm to continue.</div>
+
+            <label class="terms">
+              <input type="checkbox" id="aiAckCheck" />
+              <span>I acknowledge project data will be processed by <button type="button" class="link-btn" data-open-modal="privacy">AI/ML predictive systems</button> for risk scoring and early warning.</span>
+            </label>
+            <div class="field-error" id="aiAckError" style="margin-top:-6px;">Please confirm to continue.</div>
+
+            <button type="submit" class="submit">Create account</button>
+          </form>
+        </div>
+
+        <div class="panel-view" id="signupStep2">
+          <button class="back-link" id="signupBack">&larr; Back</button>
+          <div class="form-head">
+            <h1>Verify your email</h1>
+            <p class="otp-note">Enter the 6-digit code sent to <strong id="signupOtpTarget">name@ministry.gov.in</strong>.</p>
+          </div>
+
+          <div class="otp-boxes" id="signupOtpBoxes">
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+          </div>
+          <div class="otp-status" id="signupOtpStatus"></div>
+
+          <div class="resend-row">
+            <span id="signupResendText">Resend code in <span id="signupTimer">30</span>s</span>
+            <button type="button" id="signupResendBtn" disabled>Resend code</button>
+          </div>
+
+          <button type="button" class="submit" id="signupVerifyBtn">Verify &amp; create account</button>
+        </div>
+
+        <div class="panel-view" id="signupSuccess">
+          <div class="success-box">
+            <div class="success-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 6" stroke="#63C77C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h2>Account Created</h2>
+            <p>Your access request has been submitted for role verification.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ================= Terms & Privacy Modal ================= -->
+  <div class="modal-overlay" id="policyModal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h2>Terms &amp; Conditions and Privacy Policy</h2>
+        <button type="button" class="modal-close" id="policyModalClose">&times;</button>
+      </div>
+
+      <div class="modal-tabs">
+        <button type="button" class="active" data-doc="docTerms">Terms &amp; Conditions</button>
+        <button type="button" data-doc="docPrivacy">Privacy Policy</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="doc-section active" id="docTerms">
+          <h3>1. Acceptance of terms</h3>
+          <p>By using the PAIMANA platform, you agree to official data-governance standards and authorized usage.</p>
+          <h3>2. AI/ML Processing</h3>
+          <p>Project parameters are processed by ML forecasting algorithms for schedule slip and cost escalation early detection.</p>
+        </div>
+        <div class="doc-section" id="docPrivacy">
+          <h3>1. Data Governance</h3>
+          <p>Official user credentials and project data are governed by MoSPI security guidelines.</p>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="ghost" id="policyModalCloseFoot" style="width:auto; padding:8px 18px;">Close</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Dynamic HD Background Slideshow
+  const slides = document.querySelectorAll('.bg-slide');
+  const dots = document.querySelectorAll('.bg-dot');
+  const assetLabel = document.getElementById('bgAssetLabel');
+  let currentSlide = 0;
+  const slideDuration = 6000;
+  let slideTimer;
+
+  function setSlide(index){
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === index));
+    dots.forEach((d, idx) => d.classList.toggle('active', idx === index));
+    if(assetLabel && slides[index]){
+      assetLabel.textContent = slides[index].getAttribute('data-label') || '';
+    }
+    currentSlide = index;
+  }
+
+  function nextSlide(){
+    let next = (currentSlide + 1) % slides.length;
+    setSlide(next);
+  }
+
+  function startSlideshow(){
+    clearInterval(slideTimer);
+    slideTimer = setInterval(nextSlide, slideDuration);
+  }
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      setSlide(parseInt(e.target.dataset.index, 10));
+      startSlideshow();
+    });
+  });
+
+  startSlideshow();
+
+  // Auth Tabs
+  const flows = { loginFlow: document.getElementById('loginFlow'), signupFlow: document.getElementById('signupFlow') };
+  document.querySelectorAll('#authTabs button, #authTabsSignup button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      Object.keys(flows).forEach(k => flows[k].style.display = k === target ? 'block' : 'none');
+      document.querySelectorAll('#authTabs button, #authTabsSignup button').forEach(b => b.classList.toggle('active', b.dataset.target === target));
+      showStep(target === 'loginFlow' ? 'login' : 'signup', 1);
+    });
+  });
+
+  function showStep(flow, step){
+    const ids = flow === 'login'
+      ? ['loginStep1','loginStep2','loginSuccess']
+      : ['signupStep1','signupStep2','signupSuccess'];
+    ids.forEach((id, idx) => {
+      const el = document.getElementById(id);
+      if(el) el.classList.toggle('active', idx === step - 1);
+    });
+  }
+
+  // OTP Helpers
+  function wireOtpBoxes(containerId){
+    const boxes = document.querySelectorAll('#' + containerId + ' input');
+    boxes.forEach((box, i) => {
+      box.addEventListener('input', () => {
+        box.value = box.value.replace(/[^0-9]/g, '');
+        if(box.value && i < boxes.length - 1) boxes[i+1].focus();
+      });
+      box.addEventListener('keydown', (e) => {
+        if(e.key === 'Backspace' && !box.value && i > 0) boxes[i-1].focus();
+      });
+    });
+  }
+  wireOtpBoxes('loginOtpBoxes');
+  wireOtpBoxes('signupOtpBoxes');
+
+  function getOtpValue(cid){
+    return Array.from(document.querySelectorAll('#' + cid + ' input')).map(i => i.value).join('');
+  }
+
+
+  // ================= PAIMANA BACKEND API INTEGRATION =================
+  const API_BASE = '/api'; // relative — always matches whatever port this page is served from
+  let registeredEmail = '';
+  let loginEmailVal = '';
+
+  // 1. Auto-fetch and populate Ministries from backend
+  async function loadMinistries() {
+    const deptSelect = document.getElementById('dept');
+    if (!deptSelect) return;
+    try {
+      const res = await fetch(`${API_BASE}/ministries`);
+      if (res.ok) {
+        const ministries = await res.json();
+        deptSelect.innerHTML = '<option value="">Select Ministry / Department</option>';
+        ministries.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = m.name;
+          deptSelect.appendChild(opt);
+        });
+        console.log('[+] Loaded ' + ministries.length + ' ministries from PostgreSQL backend');
+      }
+    } catch (e) {
+      console.warn('Could not reach the backend to load ministries. Is the server running?');
+    }
+  }
+  loadMinistries();
+
+  // ---------- Resend OTP countdown ----------
+  const resendTimers = {}; // keyed by 'login' | 'signup'
+
+  function startResendTimer(flow) {
+    const timerEl = document.getElementById(flow + 'Timer');
+    const textEl = document.getElementById(flow + 'ResendText');
+    const btn = document.getElementById(flow + 'ResendBtn');
+    if (!timerEl || !textEl || !btn) return;
+
+    clearInterval(resendTimers[flow]);
+    let seconds = 30;
+    timerEl.textContent = seconds;
+    textEl.style.display = 'inline';
+    btn.style.display = 'none';
+    btn.disabled = true;
+
+    resendTimers[flow] = setInterval(() => {
+      seconds -= 1;
+      timerEl.textContent = seconds;
+      if (seconds <= 0) {
+        clearInterval(resendTimers[flow]);
+        textEl.style.display = 'none';
+        btn.style.display = 'inline';
+        btn.disabled = false;
+      }
+    }, 1000);
+  }
+
+  async function resendOtp(flow, email, purpose) {
+    const statusEl = document.getElementById(flow + 'OtpStatus');
+    try {
+      const res = await fetch(`${API_BASE}/auth/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, purpose })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (statusEl) statusEl.textContent = data.error || 'Could not resend code.';
+        return;
+      }
+      if (statusEl) statusEl.textContent = '';
+      startResendTimer(flow);
+    } catch (err) {
+      if (statusEl) statusEl.textContent = 'Could not reach the server. Is it running?';
+    }
+  }
+
+  const loginResendBtn = document.getElementById('loginResendBtn');
+  // (login no longer uses OTP, so the resend button for it is unused)
+
+  const signupResendBtn = document.getElementById('signupResendBtn');
+  if (signupResendBtn) signupResendBtn.addEventListener('click', () => resendOtp('signup', registeredEmail, 'signup'));
+
+  // 2. Login Flow with Backend — password only, no OTP step.
+  // On success the backend emails a login alert automatically.
+  const loginForm = document.getElementById('loginForm');
+  let loginSubmitting = false;
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (loginSubmitting) return; // guard against double-submit (double click / double Enter)
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const emailField = document.getElementById('loginEmailField');
+    const passField = document.getElementById('loginPasswordField');
+
+    let valid = true;
+    if (!email) { emailField.classList.add('has-error'); valid = false; } else { emailField.classList.remove('has-error'); }
+    if (!password) { passField.classList.add('has-error'); valid = false; } else { passField.classList.remove('has-error'); }
+    if (!valid) return;
+
+    loginEmailVal = email;
+
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    loginSubmitting = true;
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Login failed. Please check credentials.');
+        return;
+      }
+      if (data.token) localStorage.setItem('paimana_token', data.token);
+      showStep('login', 3); // straight to success — no OTP screen for login
+    } catch (err) {
+      alert('Could not reach the server at ' + API_BASE + '. Make sure "npm run dev" is running in your backend folder.');
+    } finally {
+      loginSubmitting = false;
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+
+  // 3. Signup Flow with Backend
+  const signupForm = document.getElementById('signupForm');
+  let signupSubmitting = false;
+  signupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (signupSubmitting) return; // guard against double-submit
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const ministryId = document.getElementById('dept').value;
+    const designation = document.getElementById('designation').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const termsCheck = document.getElementById('termsCheck');
+    const aiAckCheck = document.getElementById('aiAckCheck');
+
+    let valid = true;
+    if (!fullName) { document.getElementById('fullNameField').classList.add('has-error'); valid = false; }
+    else document.getElementById('fullNameField').classList.remove('has-error');
+
+    if (!email) { document.getElementById('signupEmailField').classList.add('has-error'); valid = false; }
+    else document.getElementById('signupEmailField').classList.remove('has-error');
+
+    if (!password || password.length < 8) { document.getElementById('signupPasswordField').classList.add('has-error'); valid = false; }
+    else document.getElementById('signupPasswordField').classList.remove('has-error');
+
+    if (password !== confirmPassword) { document.getElementById('confirmPasswordField').classList.add('has-error'); valid = false; }
+    else document.getElementById('confirmPasswordField').classList.remove('has-error');
+
+    const termsError = document.getElementById('termsError');
+    if (termsCheck && !termsCheck.checked) { if (termsError) termsError.style.display = 'block'; valid = false; }
+    else if (termsError) termsError.style.display = 'none';
+
+    const aiAckError = document.getElementById('aiAckError');
+    if (aiAckCheck && !aiAckCheck.checked) { if (aiAckError) aiAckError.style.display = 'block'; valid = false; }
+    else if (aiAckError) aiAckError.style.display = 'none';
+
+    if (!valid) return;
+
+    registeredEmail = email;
+    document.getElementById('signupOtpTarget').textContent = email;
+
+    const submitBtn = signupForm.querySelector('button[type="submit"]');
+    signupSubmitting = true;
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName, email, ministryId: parseInt(ministryId) || null, designation, password,
+          termsAccepted: termsCheck ? termsCheck.checked : false,
+          aiAckAccepted: aiAckCheck ? aiAckCheck.checked : false
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Registration failed.');
+        return;
+      }
+      showStep('signup', 2);
+      startResendTimer('signup');
+    } catch (err) {
+      alert('Could not reach the server at ' + API_BASE + '. Make sure "npm run dev" is running in your backend folder.');
+    } finally {
+      signupSubmitting = false;
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+
+  // Verify Signup OTP
+  document.getElementById('signupVerifyBtn').addEventListener('click', async () => {
+    const otp = getOtpValue('signupOtpBoxes');
+    const status = document.getElementById('signupOtpStatus');
+    if (otp.length !== 6) {
+      status.textContent = 'Enter all 6 digits.';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail, otp })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        status.textContent = data.error || 'Invalid code.';
+        return;
+      }
+      status.textContent = '';
+      showStep('signup', 3);
+    } catch (err) {
+      status.textContent = 'Could not reach the server. Is it running?';
+    }
+  });
+
+
+  // Modal
+  const modal = document.getElementById('policyModal');
+  document.querySelectorAll('[data-open-modal]').forEach(b => {
+    b.addEventListener('click', () => { modal.classList.add('open'); });
+  });
+  document.getElementById('policyModalClose').addEventListener('click', () => modal.classList.remove('open'));
+  document.getElementById('policyModalCloseFoot').addEventListener('click', () => modal.classList.remove('open'));
+
+  // Theme Toggle
+  const darkBtn = document.getElementById('darkModeBtn');
+  const lightBtn = document.getElementById('lightModeBtn');
+  function setTheme(theme){
+    if(theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    else document.documentElement.removeAttribute('data-theme');
+    darkBtn.classList.toggle('active', theme !== 'light');
+    lightBtn.classList.toggle('active', theme === 'light');
+  }
+  darkBtn.addEventListener('click', () => setTheme('dark'));
+  lightBtn.addEventListener('click', () => setTheme('light'));
+</script>
+</body>
+</html>
