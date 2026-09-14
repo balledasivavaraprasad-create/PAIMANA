@@ -214,3 +214,125 @@
 :root[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.8);
 }
+
+/* =========================================================================
+   LIGHT MODE: HIGH-CONTRAST SOLID BLACK TEXT
+   All text turns solid black in light mode to prevent blending with white background
+   ========================================================================= */
+:root[data-theme="light"] {
+  --text-primary: #000000;
+  --text-secondary: rgba(0, 0, 0, 0.88);
+  --text-muted: rgba(0, 0, 0, 0.70);
+  --accent: #000000;
+  --accent-hover: #000000;
+  color: #000000;
+}
+
+:root[data-theme="light"] body,
+:root[data-theme="light"] h1,
+:root[data-theme="light"] h2,
+:root[data-theme="light"] h3,
+:root[data-theme="light"] h4,
+:root[data-theme="light"] h5,
+:root[data-theme="light"] h6,
+:root[data-theme="light"] p,
+:root[data-theme="light"] label,
+:root[data-theme="light"] .oled-solid-card,
+:root[data-theme="light"] .glass-panel,
+:root[data-theme="light"] .glass-hero {
+  color: #000000 !important;
+}
+
+/* Force text-white and light-toned utility classes to black in light mode */
+:root[data-theme="light"] .text-white,
+:root[data-theme="light"] [class*="text-white"]:not(button[class*="bg-black"] *):not(button[class*="bg-black"]):not(.bg-black):not(.bg-black *):not(button[class*="bg-zinc-900"] *):not(button[class*="bg-slate-900"] *) {
+  color: #000000 !important;
+}
+
+:root[data-theme="light"] [class*="text-white/90"],
+:root[data-theme="light"] [class*="text-white/80"],
+:root[data-theme="light"] [class*="text-slate-100"],
+:root[data-theme="light"] [class*="text-slate-200"],
+:root[data-theme="light"] [class*="text-zinc-100"],
+:root[data-theme="light"] [class*="text-zinc-200"] {
+  color: rgba(0, 0, 0, 0.90) !important;
+}
+
+:root[data-theme="light"] [class*="text-white/70"],
+:root[data-theme="light"] [class*="text-white/60"],
+:root[data-theme="light"] [class*="text-slate-300"],
+:root[data-theme="light"] [class*="text-slate-400"],
+:root[data-theme="light"] [class*="text-zinc-300"],
+:root[data-theme="light"] [class*="text-zinc-400"] {
+  color: rgba(0, 0, 0, 0.72) !important;
+}
+
+:root[data-theme="light"] thead th {
+  background-color: #E2E8F0 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+:root[data-theme="light"] tbody td {
+  color: #000000 !important;
+}
+
+:root[data-theme="light"] input,
+:root[data-theme="light"] select,
+:root[data-theme="light"] textarea {
+  color: #000000 !important;
+  background-color: rgba(255, 255, 255, 0.90) !important;
+  border-color: rgba(0, 0, 0, 0.25) !important;
+}
+
+:root[data-theme="light"] input::placeholder,
+:root[data-theme="light"] textarea::placeholder {
+  color: rgba(0, 0, 0, 0.50) !important;
+}
+
+/* Explicit Header Nav Bar styling in Light Mode */
+:root[data-theme="light"] header button,
+:root[data-theme="light"] header button span,
+:root[data-theme="light"] header div {
+  color: #000000 !important;
+}
+
+/* Ensure solid dark buttons retain white text for high contrast */
+:root[data-theme="light"] button.bg-black,
+:root[data-theme="light"] button.bg-black > *,
+:root[data-theme="light"] button.bg-zinc-900,
+:root[data-theme="light"] button.bg-zinc-900 > *,
+:root[data-theme="light"] button.bg-slate-900,
+:root[data-theme="light"] button.bg-slate-900 > * {
+  color: #FFFFFF !important;
+}
+
+/* Light mode scrollbar */
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+}
+:root[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Status colors in light mode with strong contrast */
+:root[data-theme="light"] .text-red-400,
+:root[data-theme="light"] .text-red-300 {
+  color: #DC2626 !important;
+}
+
+:root[data-theme="light"] .text-emerald-400,
+:root[data-theme="light"] .text-emerald-300 {
+  color: #059669 !important;
+}
+
+:root[data-theme="light"] .text-amber-400,
+:root[data-theme="light"] .text-amber-300 {
+  color: #D97706 !important;
+}
+
+:root[data-theme="light"] .text-orange-400,
+:root[data-theme="light"] .text-orange-300 {
+  color: #EA580C !important;
+}
+

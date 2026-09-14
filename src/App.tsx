@@ -38,7 +38,9 @@ export default function App() {
 
   // Scroll Progress Tracking for Video Dimming
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [videoEnded, setVideoEnded] = useState(false);
+  const [darkVideoEnded, setDarkVideoEnded] = useState(false);
+  const [lightVideoEnded, setLightVideoEnded] = useState(false);
+  const videoEnded = isDark ? darkVideoEnded : lightVideoEnded;
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -149,50 +151,84 @@ export default function App() {
       />
 
       {/* BACKGROUND VIDEO & STATIC MAP AT END - VISIBLE ON ALL PAGES */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-black">
-        {/* Static India Map image displayed seamlessly when video completes */}
-        <img
-          src="/india_map_final.png"
-          alt="National Infrastructure Spatial Map"
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out"
-          style={{
-            opacity: videoEnded
-              ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
-              : 0,
-            filter: currentTab === 'motion'
-              ? `brightness(${Math.max(0.93, 1 - scrollProgress * 0.07)})`
-              : 'brightness(0.94)'
-          }}
-        />
+      <div className={`fixed inset-0 z-0 overflow-hidden pointer-events-none transition-colors duration-500 ${isDark ? 'bg-black' : 'bg-[#EAECEF]'}`}>
+        {isDark ? (
+          <React.Fragment key="dark-mode-media">
+            {/* Dark Mode Stationary Map (Final Frame) */}
+            <img
+              src="/india_map_final.png"
+              alt="National Infrastructure Spatial Map - Dark Mode"
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out"
+              style={{
+                opacity: darkVideoEnded
+                  ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
+                  : 0,
+                filter: currentTab === 'motion'
+                  ? `brightness(${Math.max(0.93, 1 - scrollProgress * 0.07)})`
+                  : 'brightness(1.0)'
+              }}
+            />
 
-        <video
-          autoPlay
-          muted
-          playsInline
-          onEnded={() => {
-            setVideoEnded(true);
-          }}
-          className="w-full h-full object-cover transition-opacity duration-700 ease-out"
-          style={{
-            opacity: !videoEnded
-              ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
-              : 0,
-            filter: currentTab === 'motion'
-              ? `brightness(${Math.max(0.93, 1 - scrollProgress * 0.07)})`
-              : 'brightness(0.94)'
-          }}
-        >
-          <source src="/dashboard.mp4" type="video/mp4" />
-          <source src="/video.mp4" type="video/mp4" />
-        </video>
+            {/* Dark Mode Video: dashboard.mp4 */}
+            <video
+              key="video-dark"
+              src="/dashboard.mp4"
+              autoPlay
+              muted
+              playsInline
+              onEnded={() => setDarkVideoEnded(true)}
+              className="w-full h-full object-cover transition-opacity duration-700 ease-out"
+              style={{
+                opacity: !darkVideoEnded
+                  ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
+                  : 0,
+                filter: currentTab === 'motion'
+                  ? `brightness(${Math.max(0.93, 1 - scrollProgress * 0.07)})`
+                  : 'brightness(1.0)'
+              }}
+            />
+          </React.Fragment>
+        ) : (
+          <React.Fragment key="light-mode-media">
+            {/* Light Mode Stationary Map (Final Frame) */}
+            <img
+              src="/india_white_final.png"
+              alt="National Infrastructure Spatial Map - Light Mode"
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out"
+              style={{
+                opacity: lightVideoEnded
+                  ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
+                  : 0,
+                filter: 'brightness(1.0)'
+              }}
+            />
 
-        {/* Scroll-Driven Darkening Overlay - subtle so background and foreground blend seamlessly */}
+            {/* Light Mode Video: dashboard_white.mp4 */}
+            <video
+              key="video-white"
+              src="/dashboard_white.mp4"
+              autoPlay
+              muted
+              playsInline
+              onEnded={() => setLightVideoEnded(true)}
+              className="w-full h-full object-cover transition-opacity duration-700 ease-out"
+              style={{
+                opacity: !lightVideoEnded
+                  ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
+                  : 0,
+                filter: 'brightness(1.0)'
+              }}
+            />
+          </React.Fragment>
+        )}
+
+        {/* Scroll-Driven Darkening Overlay - subtle in dark mode, clean in light mode */}
         <div
-          className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out bg-black"
+          className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out ${isDark ? 'bg-black' : 'bg-transparent'}`}
           style={{
-            opacity: currentTab === 'motion'
-              ? Math.min(0.12, scrollProgress * 0.12)
-              : 0.10
+            opacity: isDark
+              ? (currentTab === 'motion' ? Math.min(0.12, scrollProgress * 0.12) : 0.10)
+              : 0
           }}
         />
       </div>
@@ -206,26 +242,40 @@ export default function App() {
           {/* SECTION 01 / 04 — HERO "India, in motion." */}
           <section className="snap-start w-full h-screen relative flex items-center justify-between px-6 sm:px-12 md:px-20 pointer-events-none">
             <div className="max-w-xl space-y-4 sm:space-y-6 pointer-events-auto mt-12 sm:mt-16">
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-display tracking-tight text-white leading-[0.9] drop-shadow-[0_8px_32px_rgba(0,0,0,0.95)]">
+              <h1 className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-display tracking-tight leading-[0.9] ${
+                isDark
+                  ? 'text-white drop-shadow-[0_8px_32px_rgba(0,0,0,0.95)]'
+                  : 'text-black drop-shadow-[0_4px_16px_rgba(255,255,255,0.8)]'
+              }`}>
                 India,<br />
                 in<br />
                 motion.
               </h1>
 
-              <p className="text-xs sm:text-sm md:text-base text-white/90 font-medium leading-relaxed max-w-md pt-2 drop-shadow-md">
+              <p className={`text-xs sm:text-sm md:text-base font-semibold leading-relaxed max-w-md pt-2 ${
+                isDark ? 'text-white/90 drop-shadow-md' : 'text-black'
+              }`}>
                 Continuous econometric surveillance and stochastic risk decomposition across 28 sub-national infrastructure corridors.
               </p>
 
               <div className="pt-3 sm:pt-4 flex flex-wrap items-center gap-3">
                 <button
                   onClick={() => setCurrentTab('intelligence')}
-                  className="px-5 py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold shadow-2xl hover:bg-slate-200 transition-all cursor-pointer"
+                  className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-mono-code font-bold shadow-2xl transition-all cursor-pointer ${
+                    isDark
+                      ? 'bg-white text-black hover:bg-slate-200'
+                      : 'bg-black text-white hover:bg-zinc-800 shadow-md'
+                  }`}
                 >
                   Inspect Portfolio Risk Matrix →
                 </button>
                 <button
                   onClick={() => setCurrentTab('assistant')}
-                  className="px-5 py-2.5 rounded-xl bg-black/60 text-white border border-white/30 text-xs sm:text-sm font-mono-code font-bold hover:bg-black/80 transition-all cursor-pointer"
+                  className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-mono-code font-bold transition-all cursor-pointer ${
+                    isDark
+                      ? 'bg-black/60 text-white border border-white/30 hover:bg-black/80'
+                      : 'bg-white/80 text-black border border-black/20 hover:bg-white shadow-sm'
+                  }`}
                 >
                   Consult Analytical Copilot 💬
                 </button>
