@@ -9,7 +9,7 @@ import Alerts from './pages/Alerts';
 import Login from './pages/Login';
 import { useTheme } from './hooks/useTheme';
 import {
-  fetchProjects, fetchAlerts, fetchAnalyticsOverview, API_BASE,
+  fetchProjects, fetchMyProjects, fetchAlerts, fetchAnalyticsOverview, API_BASE,
   fetchCurrentUser, clearAuthToken, UserProfile
 } from './lib/api';
 
@@ -152,16 +152,13 @@ export default function App() {
     }).catch(console.warn);
   }, []);
 
-  // 2. Re-prioritize and Fetch Corridors for Logged In User's Specific Ministry
+  // 2. Fetch Corridors Strictly Associated with the Logged-In User from Sovereign Database
   useEffect(() => {
     if (!currentUser) return;
-    const targetMin = (currentUser.ministry && currentUser.ministry !== 'Central Infrastructure' && currentUser.ministry !== 'MoSPI')
-      ? currentUser.ministry
-      : undefined;
 
-    fetchProjects(undefined, 50, targetMin).then(dbProjects => {
+    fetchMyProjects(currentUser.username).then(dbProjects => {
       if (dbProjects && dbProjects.length > 0) {
-        const mappedPins: ProjectPin[] = dbProjects.slice(0, 20).map(p => ({
+        const mappedPins: ProjectPin[] = dbProjects.map(p => ({
           id: p.project_id,
           name: p.project_name,
           state: p.state,
@@ -178,7 +175,7 @@ export default function App() {
         }
       }
     }).catch(console.warn);
-  }, [currentUser?.ministry]);
+  }, [currentUser?.username]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -270,7 +267,8 @@ export default function App() {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
-  const displayedPins = ministryFilterOnly ? pins.filter(isUserMinistryProject) : pins;
+  // Strictly display only the corridors associated with this authenticated user
+  const displayedPins = pins;
 
   return (
     <div className={`relative w-screen h-screen overflow-hidden transition-colors duration-300 ${isDark ? 'bg-black text-white' : 'bg-[#F8FAFC] text-[#0F172A]'}`}>
@@ -568,21 +566,12 @@ export default function App() {
                       <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
                         Infrastructure Portfolio Ledger
                       </h2>
-                      {currentUser.ministry && !currentUser.ministry.includes('MoSPI') && (
-                        <button
-                          onClick={() => setMinistryFilterOnly(!ministryFilterOnly)}
-                          className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer ${
-                            ministryFilterOnly
-                              ? 'bg-sky-400 text-black border-sky-300 shadow'
-                              : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
-                          }`}
-                        >
-                          {ministryFilterOnly ? `✓ ${currentUser.ministry} (${displayedPins.length})` : `Filter by ${currentUser.ministry}`}
-                        </button>
-                      )}
+                      <span className="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-400/30">
+                        Official Jurisdiction: {currentUser.ministry || 'Assigned Sovereign Portfolios'}
+                      </span>
                     </div>
                     <p className="text-xs sm:text-sm text-white/70">
-                      Displaying {displayedPins.length} active corridors {ministryFilterOnly ? `under ${currentUser.ministry}` : 'across national sovereign inventory'}.
+                      Displaying {displayedPins.length} active corridors associated with your official account ({currentUser.full_name} · {currentUser.designation || 'Project Officer'}).
                     </p>
                   </div>
 
@@ -615,14 +604,21 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {displayedPins.map(p => (
-                        <tr
-                          key={p.id}
-                          onClick={() => setSelectedPin(p)}
-                          className={`cursor-pointer hover:bg-white/5 transition-colors ${
-                            selectedPin?.id === p.id ? 'bg-white/10' : ''
-                          }`}
-                        >
+                      {displayedPins.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="p-8 text-center font-mono text-xs text-slate-400">
+                            No infrastructure corridors currently assigned to this user profile in the database.
+                          </td>
+                        </tr>
+                      ) : (
+                        displayedPins.map(p => (
+                          <tr
+                            key={p.id}
+                            onClick={() => setSelectedPin(p)}
+                            className={`cursor-pointer hover:bg-white/5 transition-colors ${
+                              selectedPin?.id === p.id ? 'bg-white/10' : ''
+                            }`}
+                          >
                           <td className="p-4 font-mono-code font-bold text-white">{p.id}</td>
                           <td className="p-4 font-semibold text-white">{p.name}</td>
                           <td className="p-4 text-white/80">{p.state}</td>
@@ -642,7 +638,8 @@ export default function App() {
                             </button>
                           </td>
                         </tr>
-                      ))}
+                      ))
+                    )}
                     </tbody>
                   </table>
                 </div>

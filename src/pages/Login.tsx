@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import {
   fetchMinistries, loginUser, registerUser, verifyOtp, resendOtp,
-  MinistryItem, AuthResponse
+  fetchPublicRiskOverview, MinistryItem, AuthResponse, PublicRiskOverview
 } from '../lib/api';
 
 interface LoginProps {
@@ -60,6 +60,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [resendTimer, setResendTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
 
+  // Dynamic Risk & Statistics Overview from Live Database
+  const [publicOverview, setPublicOverview] = useState<PublicRiskOverview | null>(null);
+  const [showRiskWatch, setShowRiskWatch] = useState(false);
+
   // Ministries list
   const [ministries, setMinistries] = useState<MinistryItem[]>([]);
 
@@ -77,9 +81,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     return () => clearInterval(timer);
   }, []);
 
-  // 2. Fetch ministries
+  // 2. Fetch live sovereign metrics and ministries from database
   useEffect(() => {
     fetchMinistries().then(setMinistries).catch(console.warn);
+    fetchPublicRiskOverview().then(setPublicOverview).catch(console.warn);
   }, []);
 
   // 3. Resend OTP countdown
@@ -290,17 +295,31 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               isDark ? 'bg-white/5 border-white/15 text-slate-300' : 'bg-slate-100 border-black/10 text-slate-700'
             }`}>
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Surveillance: <strong className={isDark ? 'text-white' : 'text-black'}>1,842 Projects</strong>
+              Surveillance: <strong className={isDark ? 'text-white' : 'text-black'}>
+                {publicOverview ? `${publicOverview.total_projects.toLocaleString()} Projects` : '3,394 Projects'}
+              </strong>
             </span>
             <span className={`text-xs px-3 py-1 rounded-full border ${
               isDark ? 'bg-white/5 border-white/15 text-slate-300' : 'bg-slate-100 border-black/10 text-slate-700'
             }`}>
-              Model Engine: <strong className={isDark ? 'text-white' : 'text-black'}>XGBoost + DPHIS v2</strong>
+              Model Engine: <strong className={isDark ? 'text-white' : 'text-black'}>LightGBM + DPHIS v2</strong>
             </span>
+            <button
+              type="button"
+              onClick={() => setShowRiskWatch(prev => !prev)}
+              className={`text-xs px-3 py-1 rounded-full border font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                showRiskWatch 
+                  ? 'bg-amber-400 text-black border-amber-300 shadow'
+                  : (isDark ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' : 'bg-slate-200 hover:bg-slate-300 text-black border-slate-300')
+              }`}
+            >
+              <span>⚠️ Live Risk Watch</span>
+              <span className="text-[10px]">{showRiskWatch ? '▲ Hide' : '▼ View'}</span>
+            </button>
           </div>
         </div>
 
-        {/* 4-Metric Grid */}
+        {/* 4-Metric Grid (Updated dynamically from MongoDB instance) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 my-4">
           <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${
             isDark ? 'bg-[#0E192E]/70 border-white/10' : 'bg-white/80 border-slate-200'
@@ -309,9 +328,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               Active Corridors
             </span>
             <div className={`text-xl sm:text-2xl font-bold font-mono my-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              1,842
+              {publicOverview ? publicOverview.total_projects.toLocaleString() : '3,394'}
             </div>
-            <span className="text-[10px] text-emerald-400 font-medium">1,262 Nominal Velocity</span>
+            <span className="text-[10px] text-emerald-400 font-medium">
+              {publicOverview ? `${publicOverview.ministries_count} Ministries · ${publicOverview.sectors_count} Sectors` : '17 Ministries · 22 Sectors'}
+            </span>
           </div>
 
           <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${
@@ -320,10 +341,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <span className="text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
               Total Capex Monitored
             </span>
-            <div className={`text-xl sm:text-2xl font-bold font-mono my-1 text-sky-400`}>
-              ₹28.4L Cr
+            <div className="text-xl sm:text-2xl font-bold font-mono my-1 text-sky-400">
+              ₹{publicOverview ? publicOverview.total_capex_lakh_cr : '74.5'}L Cr
             </div>
-            <span className="text-[10px] text-slate-400">Disbursed: ₹19.1L Cr</span>
+            <span className="text-[10px] text-slate-400">Verified Sovereign Outlay</span>
           </div>
 
           <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${
@@ -332,8 +353,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <span className="text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
               Corridors At Risk
             </span>
-            <div className={`text-xl sm:text-2xl font-bold font-mono my-1 text-amber-400`}>
-              412
+            <div className="text-xl sm:text-2xl font-bold font-mono my-1 text-amber-400">
+              {publicOverview ? publicOverview.at_risk_count.toLocaleString() : '223'}
             </div>
             <span className="text-[10px] text-amber-400">Moderate / High Escalation</span>
           </div>
@@ -344,22 +365,76 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <span className="text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
               Critical Slippage
             </span>
-            <div className={`text-xl sm:text-2xl font-bold font-mono my-1 text-rose-500`}>
-              168
+            <div className="text-xl sm:text-2xl font-bold font-mono my-1 text-rose-500">
+              {publicOverview ? publicOverview.critical_count.toLocaleString() : '18'}
             </div>
             <span className="text-[10px] text-rose-400 font-medium">Intervention Mandate Triggered</span>
           </div>
         </div>
 
-        {/* Sector Chips Bar */}
+        {/* Live Sovereign Risk Intelligence Watchlist (Restricted Sanitized Columns Only) */}
+        {showRiskWatch && publicOverview && publicOverview.risk_watchlist.length > 0 && (
+          <div className="mb-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 backdrop-blur-md transition-all animate-fadeIn">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 mb-3 border-b border-amber-500/20">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-300">
+                  Live Sovereign Risk Watchlist · Existing Flagged Corridors
+                </h3>
+              </div>
+              <span className="text-[10px] font-mono text-slate-400 bg-black/40 px-2.5 py-0.5 rounded-full border border-white/10">
+                🔒 Public Restrictive View · Direct DB Access Prohibited
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-white/10 text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                    <th className="py-2 px-3">Infrastructure Nomenclature</th>
+                    <th className="py-2 px-3">Sector</th>
+                    <th className="py-2 px-3">Jurisdiction State</th>
+                    <th className="py-2 px-3">DPHIS Index</th>
+                    <th className="py-2 px-3">Sanctioned Outlay</th>
+                    <th className="py-2 px-3">Critical Delay</th>
+                    <th className="py-2 px-3">Risk Tier</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 font-mono text-[11px]">
+                  {publicOverview.risk_watchlist.map((p, idx) => (
+                    <tr key={idx} className="hover:bg-white/5 transition-colors">
+                      <td className="py-2.5 px-3 font-semibold text-white max-w-xs truncate" title={p.project_name}>
+                        {p.project_name}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-300">{p.sector}</td>
+                      <td className="py-2.5 px-3 text-slate-300">{p.state}</td>
+                      <td className="py-2.5 px-3 font-bold text-amber-400">{p.dphis}</td>
+                      <td className="py-2.5 px-3 text-sky-400">₹{p.cost_revised_cr.toLocaleString()} Cr</td>
+                      <td className="py-2.5 px-3 text-rose-400">+{p.schedule_slippage_months} mo</td>
+                      <td className="py-2.5 px-3">
+                        <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+                          p.risk_level === 'critical' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                        }`}>
+                          {p.risk_level}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Sector Chips Bar (Dynamic from Database) */}
         <div className="flex items-center gap-2 pt-3 border-t border-white/10 overflow-x-auto scrollbar-none text-xs">
           <span className="font-mono text-slate-400 uppercase text-[10px] tracking-wider whitespace-nowrap">
             Key Sectors:
           </span>
-          {[
-            'Road Transport & Logistics', 'Indian Railways (USBRL)', 'National Highways & Expressways',
-            'Energy & Power', 'Water Resources & Sanitation', 'Coal & Steel Mining', 'Petroleum & Natural Gas'
-          ].map((sec, i) => (
+          {(publicOverview?.top_sectors || [
+            'Road Transport & Highways', 'Indian Railways (USBRL)', 'National Highways & Expressways',
+            'Energy & Power', 'Water Resources & Sanitation', 'Coal & Mining', 'Petroleum & Natural Gas'
+          ]).map((sec, i) => (
             <span
               key={i}
               className={`px-2.5 py-1 rounded-md border text-[11px] whitespace-nowrap ${

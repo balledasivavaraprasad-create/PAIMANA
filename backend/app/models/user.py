@@ -1,5 +1,5 @@
-from typing import Optional
-from pydantic import BaseModel, EmailStr
+from typing import Optional, List
+from pydantic import BaseModel, EmailStr, Field
 from enum import Enum
 from datetime import datetime, timezone
 
@@ -22,6 +22,7 @@ class UserBase(BaseModel):
     dphis_alert_threshold: float = 75.0
     alert_email: Optional[EmailStr] = None
     notify_via_email: bool = True
+    assigned_projects: List[str] = Field(default_factory=list)
 
 class UserPreferencesUpdate(BaseModel):
     dphis_alert_threshold: Optional[float] = 75.0
@@ -70,6 +71,7 @@ class Token(BaseModel):
     email: Optional[str] = None
     full_name: Optional[str] = None
     ministry: Optional[str] = None
+    assigned_projects: List[str] = Field(default_factory=list)
 
 class TokenData(BaseModel):
     username: Optional[str] = None

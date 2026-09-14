@@ -53,6 +53,12 @@ async def health_check():
         "database": "connected"
     }
 
+from app.api.routes.projects import get_public_risk_overview
+@app.get(f"{settings.API_V1_STR}/public/risk-overview", tags=["Public"])
+@app.get("/api/public/risk-overview", tags=["Public"])
+async def public_risk_overview_alias():
+    return await get_public_risk_overview()
+
 # Include API Routers under /api/v1 and /api aliases
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(auth_router, prefix="/api")

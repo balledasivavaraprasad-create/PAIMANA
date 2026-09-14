@@ -34,6 +34,7 @@ async def list_projects(
     sector: Optional[str] = None,
     ministry: Optional[str] = None,
     search: Optional[str] = None,
+    username: Optional[str] = None,
     limit: int = Query(default=50, le=500),
     skip: int = Query(default=0, ge=0)
 ):
@@ -42,6 +43,14 @@ async def list_projects(
         return []
 
     filter_q = {}
+
+    if username and username.strip():
+        u = await db.users.find_one({"username": username.strip()})
+        if u and u.get("assigned_projects"):
+            filter_q["project_id"] = {"$in": u["assigned_projects"]}
+        else:
+            filter_q["assigned_users"] = username.strip()
+
     if risk:
         filter_q["risk_level"] = risk.lower()
     if state:
@@ -73,6 +82,124 @@ async def list_projects(
 
     cursor = db.projects.find(filter_q, {"_id": 0}).sort("dphis", -1).skip(skip).limit(limit)
     return await cursor.to_list(length=limit)
+
+@router.get("/public-risk-overview")
+async def get_public_risk_overview():
+    """
+    Public Institutional Telemetry Endpoint.
+    Strictly read-only and pre-sanitized: returns dynamic macro statistics and top
+    at-risk projects exposing ONLY public non-confidential columns.
+    Direct access to database tables or private fields is prohibited.
+    """
+    db = get_database()
+    if db is None:
+        return {
+            "total_projects": 3394,
+            "total_capex_lakh_cr": 74.5,
+            "at_risk_count": 223,
+            "critical_count": 18,
+            "ministries_count": 17,
+            "sectors_count": 22,
+            "top_sectors": ["Roads & Highways", "Railways", "Urban Transit & Metro", "Power", "Coal"],
+            "risk_watchlist": [],
+            "governance_mode": "RESTRICTED_PUBLIC_PREVIEW"
+        }
+
+    total = await db.projects.count_documents({})
+    critical = await db.projects.count_documents({"$or": [{"risk_level": "critical"}, {"dphis": {"$gte": 75}}]})
+    at_risk = await db.projects.count_documents({"$or": [{"risk_level": {"$in": ["critical", "high"]}}, {"dphis": {"$gte": 65}}]})
+
+    # Capex Sum Aggregation
+    agg_res = await db.projects.aggregate([
+        {"$group": {"_id": None, "total_cost": {"$sum": "$cost.revised"}}}
+    ]).to_list(length=1)
+    total_cost = agg_res[0]["total_cost"] if agg_res else 0.0
+    total_capex_lakh_cr = round(total_cost / 100000.0, 2)
+
+    distinct_ministries = await db.projects.distinct("ministry")
+    distinct_sectors = await db.projects.distinct("sector")
+    top_sectors = [s for s in distinct_sectors if s][:8]
+
+    # Query top at-risk projects with STRICT COLUMN RESTRICTION
+    # Only exposing project_name, sector, state, risk_level, dphis, cost_revised_cr, schedule_slippage_months
+    cursor = db.projects.find(
+        {"$or": [{"risk_level": {"$in": ["high", "critical"]}}, {"dphis": {"$gte": 70}}]},
+        {"_id": 0, "project_name": 1, "sector": 1, "state": 1, "dphis": 1, "risk_level": 1, "cost.revised": 1, "schedule_slippage_months": 1}
+    ).sort("dphis", -1).limit(5)
+
+    projects_raw = await cursor.to_list(length=5)
+    watchlist = []
+    for p in projects_raw:
+        watchlist.append({
+            "project_name": p.get("project_name", "National Corridor"),
+            "sector": p.get("sector", "Infrastructure"),
+            "state": p.get("state", "National"),
+            "dphis": round(float(p.get("dphis", 50.0)), 1),
+            "risk_level": p.get("risk_level", "high"),
+            "cost_revised_cr": round(float(p.get("cost", {}).get("revised", 0.0)), 2),
+            "schedule_slippage_months": round(float(p.get("schedule_slippage_months", 0.0)), 1)
+        })
+
+    return {
+        "total_projects": total,
+        "total_capex_lakh_cr": total_capex_lakh_cr,
+        "at_risk_count": at_risk,
+        "critical_count": critical,
+        "ministries_count": len(distinct_ministries),
+        "sectors_count": len(distinct_sectors),
+        "top_sectors": top_sectors,
+        "risk_watchlist": watchlist,
+        "governance_mode": "RESTRICTED_PUBLIC_PREVIEW",
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+@router.get("/my-projects", response_model=List[dict])
+async def get_my_projects(
+    username: Optional[str] = None,
+    limit: int = Query(default=50, le=200)
+):
+    """
+    Returns only the projects associated with the specified or authenticated user.
+    Consults user.assigned_projects in MongoDB.
+    """
+    db = get_database()
+    if db is None:
+        return []
+
+    if not username:
+        # Return empty if unassigned/unspecified
+        return []
+
+    user = await db.users.find_one({"username": username.strip()})
+    if not user:
+        return []
+
+    assigned_ids = user.get("assigned_projects", [])
+    if assigned_ids:
+        cursor = db.projects.find(
+            {"project_id": {"$in": assigned_ids}},
+            {"_id": 0}
+        ).sort("dphis", -1).limit(limit)
+        return await cursor.to_list(length=limit)
+
+    # Fallback to projects tagged with assigned_users
+    cursor = db.projects.find(
+        {"assigned_users": username.strip()},
+        {"_id": 0}
+    ).sort("dphis", -1).limit(limit)
+    res = await cursor.to_list(length=limit)
+    if res:
+        return res
+
+    # If user belongs to a specific ministry, return sample projects of that ministry
+    user_min = user.get("ministry")
+    if user_min and "mospi" not in user_min.lower() and "admin" not in user_min.lower():
+        min_tokens = [re.escape(t) for t in user_min.replace("&", " ").split() if t.lower() not in ("of", "and", "the", "ministry", "department")]
+        pat = re.compile(".*".join(min_tokens), re.IGNORECASE) if min_tokens else re.compile(re.escape(user_min), re.IGNORECASE)
+        cursor = db.projects.find({"ministry": pat}, {"_id": 0}).sort("dphis", -1).limit(limit)
+        return await cursor.to_list(length=limit)
+
+    return []
 
 
 

@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 from datetime import datetime
 
@@ -32,6 +32,7 @@ class ProjectBase(BaseModel):
     dphis: Optional[float] = 50.0
     risk_level: Optional[str] = "moderate"
     data_quality_score: Optional[float] = 95.0
+    assigned_users: List[str] = Field(default_factory=list)
 
 class ProjectCreate(ProjectBase):
     pass
@@ -49,6 +50,7 @@ class ProjectUpdate(BaseModel):
     dphis: Optional[float] = None
     risk_level: Optional[str] = None
     data_quality_score: Optional[float] = None
+    assigned_users: Optional[List[str]] = None
 
 class ProjectInDB(ProjectBase):
     created_at: datetime = Field(default_factory=datetime.utcnow)

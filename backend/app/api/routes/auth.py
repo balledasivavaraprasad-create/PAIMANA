@@ -100,11 +100,25 @@ async def register(req: UserRegisterRequest, request: Request):
 
     # Hash password & create user record
     hashed = get_password_hash(req.password)
+    resolved_ministry = ministry_name or "Road Transport & Highways"
+
+    # Automatically associate 8 relevant projects from the selected ministry
+    assigned_ids = []
+    if db is not None:
+        try:
+            import re
+            min_tokens = [re.escape(t) for t in resolved_ministry.replace("&", " ").split() if t.lower() not in ("of", "and", "the", "ministry", "department")]
+            pat = re.compile(".*".join(min_tokens), re.IGNORECASE) if min_tokens else re.compile(re.escape(resolved_ministry), re.IGNORECASE)
+            assigned_cursor = db.projects.find({"ministry": pat}, {"project_id": 1}).sort("dphis", -1).limit(8)
+            assigned_ids = [p["project_id"] for p in await assigned_cursor.to_list(length=8)]
+        except Exception as e:
+            logger.warning(f"Failed to auto-assign projects on registration: {e}")
+
     user_doc = {
         "username": username,
         "email": email_clean,
         "full_name": req.fullName,
-        "ministry": ministry_name or "Road Transport & Highways",
+        "ministry": resolved_ministry,
         "designation": req.designation or "Project Officer",
         "role": UserRole.PROJECT_OFFICER,
         "hashed_password": hashed,
@@ -117,11 +131,17 @@ async def register(req: UserRegisterRequest, request: Request):
         "notify_via_email": True,
         "terms_accepted": True,
         "ai_ack_accepted": True,
+        "assigned_projects": assigned_ids,
         "created_at": datetime.now(timezone.utc)
     }
 
     if db is not None:
         await db.users.insert_one(user_doc)
+        if assigned_ids:
+            await db.projects.update_many(
+                {"project_id": {"$in": assigned_ids}},
+                {"$addToSet": {"assigned_users": username}}
+            )
 
         # Issue single-use 6-digit OTP
         code = generate_otp()
@@ -264,6 +284,7 @@ async def login(
 
     # 1. Backdoor / Demo accounts
     if user_identifier.lower() in ("admin", "admin@paimana.gov.in") and password in ("admin123", "paimana2026"):
+        admin_doc = await db.users.find_one({"username": "admin"}) if db is not None else None
         token = create_access_token({"sub": "admin", "role": UserRole.ADMIN})
         return Token(
             access_token=token,
@@ -272,9 +293,11 @@ async def login(
             username="admin",
             email="admin@paimana.gov.in",
             full_name="National Director (MoSPI)",
-            ministry="Ministry of Statistics and Programme Implementation"
+            ministry="Ministry of Statistics and Programme Implementation",
+            assigned_projects=admin_doc.get("assigned_projects", []) if admin_doc else []
         )
     if user_identifier.lower() in ("analyst", "analyst@paimana.gov.in") and password in ("analyst123", "paimana2026"):
+        analyst_doc = await db.users.find_one({"username": "analyst"}) if db is not None else None
         token = create_access_token({"sub": "analyst", "role": UserRole.MO_SPI_ANALYST})
         return Token(
             access_token=token,
@@ -283,7 +306,8 @@ async def login(
             username="analyst",
             email="analyst@paimana.gov.in",
             full_name="Lead Infrastructure Risk Analyst",
-            ministry="Central Project Intelligence Unit"
+            ministry="Central Project Intelligence Unit",
+            assigned_projects=analyst_doc.get("assigned_projects", []) if analyst_doc else []
         )
 
     # 2. Database verification
@@ -319,7 +343,8 @@ async def login(
                     username=user["username"],
                     email=user["email"],
                     full_name=user.get("full_name", user["username"]),
-                    ministry=user.get("ministry", "Central Infrastructure")
+                    ministry=user.get("ministry", "Central Infrastructure"),
+                    assigned_projects=user.get("assigned_projects", [])
                 )
 
     raise HTTPException(
@@ -341,7 +366,8 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "designation": current_user.get("designation"),
         "dphis_alert_threshold": current_user.get("dphis_alert_threshold", 75.0),
         "alert_email": current_user.get("alert_email") or current_user.get("email"),
-        "notify_via_email": current_user.get("notify_via_email", True)
+        "notify_via_email": current_user.get("notify_via_email", True),
+        "assigned_projects": current_user.get("assigned_projects", [])
     }
 
 @router.get("/auth/preferences")

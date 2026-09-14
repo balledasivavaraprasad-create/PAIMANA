@@ -121,12 +121,105 @@ export interface AlertItem {
   created_at: string;
 }
 
-export async function fetchProjects(risk?: string, limit = 50, ministry?: string, search?: string): Promise<ProjectData[]> {
+export interface PublicProjectRiskSummary {
+  project_name: string;
+  sector: string;
+  state: string;
+  risk_level: 'critical' | 'high' | 'moderate' | 'low';
+  dphis: number;
+  cost_revised_cr: number;
+  schedule_slippage_months: number;
+}
+
+export interface PublicRiskOverview {
+  total_projects: number;
+  total_capex_lakh_cr: number;
+  at_risk_count: number;
+  critical_count: number;
+  ministries_count: number;
+  sectors_count: number;
+  top_sectors: string[];
+  risk_watchlist: PublicProjectRiskSummary[];
+  governance_mode?: string;
+  timestamp?: string;
+}
+
+export async function fetchPublicRiskOverview(): Promise<PublicRiskOverview> {
+  try {
+    const res = await fetch(`${API_BASE}/projects/public-risk-overview`);
+    if (!res.ok) throw new Error('Failed to fetch public risk overview');
+    return await res.json();
+  } catch (err) {
+    console.warn('Backend offline, returning fallback public overview:', err);
+    return {
+      total_projects: 3394,
+      total_capex_lakh_cr: 74.5,
+      at_risk_count: 223,
+      critical_count: 18,
+      ministries_count: 17,
+      sectors_count: 22,
+      top_sectors: [
+        'Road Transport & Highways',
+        'Railways & Freight',
+        'Urban Transit & Metro',
+        'Power & Grid',
+        'Coal & Mining'
+      ],
+      risk_watchlist: [
+        {
+          project_name: 'Araria-Supaul Railway Corridor (92 km)',
+          sector: 'Railways',
+          state: 'Bihar',
+          risk_level: 'high',
+          dphis: 77.9,
+          cost_revised_cr: 2621.05,
+          schedule_slippage_months: 34.0
+        },
+        {
+          project_name: 'Punpun Barrage Irrigation Project',
+          sector: 'Water Resources',
+          state: 'Bihar',
+          risk_level: 'high',
+          dphis: 77.2,
+          cost_revised_cr: 658.12,
+          schedule_slippage_months: 75.0
+        },
+        {
+          project_name: 'Chhota Udepur-Dhar Broad Gauge (157 km)',
+          sector: 'Railways',
+          state: 'Gujarat / MP',
+          risk_level: 'high',
+          dphis: 77.1,
+          cost_revised_cr: 1993.65,
+          schedule_slippage_months: 0.0
+        }
+      ],
+      governance_mode: 'RESTRICTED_PUBLIC_PREVIEW'
+    };
+  }
+}
+
+export async function fetchMyProjects(username?: string, limit = 50): Promise<ProjectData[]> {
+  try {
+    const url = new URL(`${API_BASE}/projects/my-projects`);
+    if (username) url.searchParams.set('username', username);
+    url.searchParams.set('limit', String(limit));
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error('Failed to fetch user-specific projects');
+    return await res.json();
+  } catch (err) {
+    console.warn('Backend offline or failed to fetch user-associated projects', err);
+    return [];
+  }
+}
+
+export async function fetchProjects(risk?: string, limit = 50, ministry?: string, search?: string, username?: string): Promise<ProjectData[]> {
   try {
     const url = new URL(`${API_BASE}/projects`);
     if (risk) url.searchParams.set('risk', risk);
     if (ministry && ministry.trim()) url.searchParams.set('ministry', ministry.trim());
     if (search && search.trim()) url.searchParams.set('search', search.trim());
+    if (username && username.trim()) url.searchParams.set('username', username.trim());
     url.searchParams.set('limit', String(limit));
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error('Failed to fetch projects');
@@ -320,6 +413,7 @@ export interface UserProfile {
   dphis_alert_threshold?: number;
   alert_email?: string;
   notify_via_email?: boolean;
+  assigned_projects?: string[];
 }
 
 export interface MinistryItem {
@@ -336,6 +430,7 @@ export interface AuthResponse {
   email?: string;
   full_name?: string;
   ministry?: string;
+  assigned_projects?: string[];
 }
 
 export function getAuthToken(): string | null {
