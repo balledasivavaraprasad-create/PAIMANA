@@ -50,7 +50,7 @@ function DHPISGauge({ score }: { score: number }) {
             {score}
           </span>
           <span className="mt-1 text-xs sm:text-sm font-mono-code font-bold text-white uppercase tracking-wider">
-            {score >= 75 ? 'Critical Risk Tier' : score >= 50 ? 'Elevated Variance Tier' : 'Nominal Baseline'}
+            {score >= 80 ? 'Critical Risk Tier' : score >= 66 ? 'High Risk Tier' : score >= 50 ? 'Medium Risk Tier' : score >= 33 ? 'Watch Risk Tier' : 'Nominal / Low Baseline'}
           </span>
           <span className="text-xs font-mono-code text-white/70 mt-0.5">
             Composite DPHIS: {score} / 100
@@ -138,16 +138,15 @@ export default function ProjectIntelligence({ projectId, onNavigateToInvestigati
           {risk?.components && (
             <div className="space-y-3 pt-3 border-t border-white/15 text-sm">
               <div className="text-xs font-mono-code font-bold uppercase text-white/70">
-                Weighted Risk Vector Factor Decomposition
+                Calibrated Risk Vector Factor Decomposition
               </div>
               <div className="space-y-2.5">
                 {[
-                  { name: 'Critical Path Schedule Variance', val: risk.components.time },
-                  { name: 'Stochastic Cost Escalation Exposure', val: risk.components.cost },
-                  { name: 'Physical Progress Stagnation Gap', val: risk.components.progress },
-                  { name: 'Phase-Gate Milestone Slippage', val: risk.components.milestone },
-                  { name: 'CapEx Disbursement-Absorption Ratio', val: risk.components.financial },
-                  { name: 'Geospatial & Climatic Vulnerability', val: risk.components.implementation },
+                  { name: 'Schedule Risk Probability (T · 30%)', val: risk.components.time },
+                  { name: 'Cost Escalation Risk (C · 30%)', val: risk.components.cost },
+                  { name: 'Physical Progress Stagnation (P · 25%)', val: risk.components.progress },
+                  { name: 'Financial Efficiency Gap (F · 10%)', val: risk.components.financial },
+                  { name: 'Multi-Model Consistency (ML · 5%)', val: risk.components.implementation },
                 ].map(comp => (
                   <div key={comp.name} className="space-y-1">
                     <div className="flex justify-between font-mono-code text-xs sm:text-sm">
@@ -185,11 +184,11 @@ export default function ProjectIntelligence({ projectId, onNavigateToInvestigati
                   activeTab === 'predictions' ? 'bg-white text-black' : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
-                Econometric ML Projections (XGBoost)
+                Econometric ML Projections (LightGBM)
               </button>
             </div>
             <span className="text-xs font-mono-code text-white/80 font-semibold">
-              Validated Gradient Boosting Architecture
+              Calibrated LightGBM Early-Warning Model
             </span>
           </div>
 

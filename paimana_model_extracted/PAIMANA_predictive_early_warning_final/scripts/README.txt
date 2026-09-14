@@ -1,0 +1,1 @@
+Run the supplied build_enhanced_pipeline.py from a Python environment with pandas, numpy, lightgbm, scikit-learn, matplotlib and joblib. The script recreates the models and score tables from the input engineered dataset.

@@ -1,0 +1,353 @@
+tree
+version=v4
+num_class=1
+num_tree_per_iteration=1
+label_index=0
+max_feature_idx=41
+objective=binary sigmoid:1
+feature_names=original_cost_cr revised_cost_cr cumulative_expenditure_cr physical_progress_pct cost_overrun_pct expenditure_original_cost_pct expenditure_revised_cost_pct progress_expenditure_gap_pct project_age_months planned_duration_months remaining_duration_months remaining_progress_pct schedule_slippage_months completion_date_revised_flag monthly_progress_change_pct monthly_expenditure_change_cr monthly_revised_cost_change_cr monthly_cost_growth_pct progress_velocity_pct_per_month expenditure_growth_pct required_progress_velocity_pct_per_month velocity_gap_pct_points prev_cost_overrun_pct prev_physical_progress_pct prev_completion_revised_flag cost_overrun_trend_1m progress_trend_1m rolling_progress_velocity_3m rolling_cost_growth_3m rolling_expenditure_growth_3m snapshots_so_far expected_progress_pct progress_gap_enhanced_pct progress_gap_change_1m expenditure_progress_efficiency_gap efficiency_gap_change_1m progress_velocity_change_1m expenditure_growth_change_1m ministry sector state implementing_agency
+feature_infos=[68:150000] [0.10000000000000001:188000] [-5.1500000000000004:124623] [0:100] [-99.958099388299999:1231.52801849] [-0.20339732779399999:10333.2813102] [-0.14229192224000001:10333.2813102] [-100:10241.2813102] [-18.960000000000001:487.02999999999997] [-190:487.02999999999997] [-141.03999999999999:98.040000000000006] [0:100] [-356.04000000000002:299.99000000000001] [0:1] [-39:84] [-3559.4400000000001:87227] [-418.63999999999999:2478.52] [-40.180423561200001:87.751321339] [-39:84] [-100:13986.026843199999] [0:101.01010101] [-101.01010101:65.317725752499996] [-45.703782758199999:1231.52801849] [0:100] [0:1] [-63.442034925800002:1080.984540229] [-66:97] [-39:70] [-20.090211780600001:87.751321339] [-100:4930] [1:7] [0:100] [-55:100] [-88:61.232711513095907] [-100:10241.2813102] [-772.34905891029996:10252.9229286971] [-53:80] [-9179.4457315762102:13982.44657277532] -1:14:15:6:11:13:8:4:1:5:16:3:12:9:10:7:2 -1:11:13:1:10:18:21:4:3:20:0:19:15:6:16:5:9:14:12:7:2:17 -1:18:9:13:108:98:5:110:17:4:1:14:103:3:106:7:105:12:102:15:10:109:11:99:19:42:86:2:30:100:104:97:21:25:46:88:20:27:77:107:31:50:79:57:81:38:64:65:69:85:89:22:29:47:51:55:62:71:90:93:16:49:91:0:6:8:23:26:40:41:44:52:53:56:60:63:82:87:101:24:32:34:35:37:39:43:45:48:59:61:66:68:73:74:78:80:84:92:94:96:33:75:95:54:67:72 -1:168:138:117:113:215:2:108:111:123:116:58:185:56:189:197:155:161:192:172:59:53:163:9:48:182:178:61:149:148:151:129:29:87:219:220:180:49:70:55:93:154:157:147:132:41:104:140:60:84:98:115:159:217:137:4:164:191:44:103:175:102:170:187:203:206:12:120:27:66:71:199:63:92:106:173:15:28:43:52:68:96:114:119:131:153:210:37:69:201:6:13:54:64:99:101:130:158:195:214:216:91:169:177:186:190:1:47:0:73:171:122:174:5:19:23:31:33:36:39:45:50:77:78:79:80:81:85:94:121:125:126:133:141:143:144:146:160:162:166:179:200:205:207:208:209:211:212:213:8:11:16:20:21:24:34:35:40:57:74:75:82:90:100:105:107:109:112:118:134:135:136:145:152:156:167:181:204:7:14:17:25:26:32:51:97:124:128:142:176:184:193:46:62:72:110:139:150:196:42:76:86:165:198:218
+tree_sizes=1749 2013 2020 2025 2135 2100 2082 2073 2178
+
+Tree=0
+num_leaves=15
+num_cat=1
+split_feature=10 10 41 30 9 10 31 10 33 2 2 5 21 31
+split_gain=616.835 119.342 59.4379 45.6284 25.7324 17.8652 16.1694 9.88733 9.66422 6.01279 5.9157 3.84262 3.65431 3.58001
+threshold=2.5000000000000004 -6.9999999999999991 0 5.5000000000000009 98.990000000000009 7.9650000000000007 32.200460829493096 1.4800000000000002 -0.3464052287581651 1348.8700000000001 9801.5450000000019 36.527822840750012 -7.0847588791149994 96.981089086352256
+decision_type=8 10 9 2 10 10 8 10 8 2 2 2 8 10
+left_child=1 11 5 4 -3 6 -2 -5 -8 -7 12 -1 -4 -14
+right_child=2 3 10 7 -6 9 8 -9 -10 -11 -12 -13 13 -15
+leaf_value=-2.6859355229365045 -2.7051390612555113 -2.6024869128742512 -2.6969855891379453 -2.6687912521675803 -2.6845341124003794 -2.7091716760614277 -2.6988368585021485 -2.7023613856336675 -2.6671713683538503 -2.6873755744718748 -2.6959037964111516 -2.7031150316867829 -2.7171130952129667 -2.7057736993865698
+leaf_weight=6.4527155421674234 5.5055279396474388 31.730784684419632 6.2159186415374279 4.8543364629149419 4.0847465358674517 14.030216362327339 4.1439457610249519 3.6703519597649574 21.666916407644752 3.6111527346074572 7.0447077937424174 6.7487116679549217 189.4375205039978 32.73717151209712
+leaf_count=109 93 536 105 82 69 237 70 62 366 61 119 114 3200 553
+internal_value=-2.69629 -2.6342 -2.70988 -2.61876 -2.60868 -2.68867 -2.67842 -2.68016 -2.67195 -2.70335 -2.71397 -2.69439 -2.7153 -2.71576
+internal_weight=341.935 57.5416 284.393 44.3402 35.8155 48.9578 31.3164 8.52469 25.8109 17.6414 235.435 13.2014 228.391 222.175
+internal_count=5776 972 4804 749 605 827 529 144 436 298 3977 223 3858 3753
+cat_boundaries=0 7
+cat_threshold=805306388 675282944 0 524353 1074266624 1048832 33554440
+is_linear=0
+shrinkage=1
+
+
+Tree=1
+num_leaves=17
+num_cat=1
+split_feature=10 10 41 22 10 10 9 31 9 20 2 2 9 31 2 21
+split_gain=574.128 103.768 58.483 30.6421 30.2198 16.947 16.9189 15.7421 9.75786 8.04477 6.39564 5.79029 3.75787 2.44803 2.32554 1.23129
+threshold=2.5000000000000004 -6.9999999999999991 0 44.283750813250002 1.4800000000000002 7.9650000000000007 57.970000000000006 32.200460829493096 27.945000000000004 8.3718224570900031 9801.5450000000019 1348.8700000000001 28.995000000000005 99.78813559322036 70.170000000000016 -14.168918918899999
+decision_type=8 10 9 10 10 10 10 8 8 10 2 2 8 10 2 10
+left_child=1 12 5 4 -3 7 -6 -2 -9 10 13 -7 14 -4 -1 -11
+right_child=2 3 9 -5 6 11 -8 8 -10 15 -12 -13 -14 -15 -16 -17
+leaf_value=0.0042378014081942946 -0.0087111930203768624 0.092511104179220899 -0.020730114488741808 0.0083631602236649283 0.041003476975710593 -0.012590550367472626 -0.0039640739592389194 0.035706988931194825 0.006558521098453265 0.0055410049508264319 0.00049219569506460371 0.0088163932664426098 0.01214139653502095 -0.0087553869013088596 -0.010859845280293691 -0.004909067316898625
+leaf_weight=3.6439495384693128 5.404371082782748 27.191627390682697 193.01649554073811 5.1494778618216506 11.089222744107245 13.521879807114603 3.7418310865759841 11.520080085843798 13.867187906056646 5.491006214171648 6.9878770485520354 3.6393742337822905 3.975681595504283 23.378870092332363 5.6002735942602158 4.2515561282634717
+leaf_count=61 92 429 3318 84 175 231 61 191 229 94 118 61 67 398 95 72
+internal_value=1.60208e-05 0.0583345 -0.0134523 0.0720572 0.0777277 0.00775159 0.0315203 0.0178449 0.0242579 -0.0175137 -0.0190793 -0.00670545 0.00187361 -0.0197322 -0.00522218 0.000498403
+internal_weight=341.471 60.3921 281.079 47.1722 42.0227 47.9529 14.8311 30.7916 25.3873 233.126 223.383 17.1613 13.2199 216.395 9.24422 9.74256
+internal_count=5776 972 4804 749 665 804 236 512 420 4000 3834 292 223 3716 156 166
+cat_boundaries=0 7
+cat_threshold=805306388 675282944 0 65 1074266624 1048832 33554440
+is_linear=0
+shrinkage=0.022
+
+
+Tree=2
+num_leaves=17
+num_cat=1
+split_feature=10 10 41 30 9 10 31 33 10 2 2 6 5 21 31 7
+split_gain=536.92 91.0687 57.0097 34.2443 18.0576 16.2187 14.9766 11.8093 9.06958 5.80223 5.79024 4.69387 3.69092 3.61462 3.6602 1.70561
+threshold=2.5000000000000004 -6.9999999999999991 0 5.5000000000000009 98.990000000000009 7.9650000000000007 37.066905615292718 -0.3464052287581651 1.4800000000000002 1348.8700000000001 9801.5450000000019 9.9862694159050012 36.527822840750012 -7.0847588791149994 96.981089086352256 -33.520969641349993
+decision_type=8 10 9 2 10 10 10 8 10 2 2 2 2 8 10 2
+left_child=1 12 5 4 15 6 11 -8 -5 -7 13 -2 -1 -4 -15 -3
+right_child=2 3 10 8 -6 9 7 -9 -10 -11 -12 -13 -14 14 -16 -17
+leaf_value=0.010102740554955332 -0.0099474282156146298 0.022835361726522962 -0.00061867298299398701 0.025441556127943434 0.011015725173510356 -0.012686015590827457 -0.0027366161281340467 0.032891292193403095 -0.0061499044225949047 0.0087174790415902176 0.00037797647235535825 0.0097570753588116736 -0.006724844526400953 -0.02066943469811925 -0.0092321231252800503 0.085686557782318054
+leaf_weight=6.5421273708343488 8.063594024628399 5.9116342961788133 6.1785405687987804 5.2940385192632657 4.290538825094699 13.718479156494142 4.2303250208497047 15.892318297177555 3.7110095918178558 3.6674618870019904 7.0498478487133971 4.0236960202455512 6.6806598007678986 182.76134268566966 32.129211004823446 30.634090900421146
+leaf_count=109 136 86 105 82 69 237 70 257 62 61 119 66 114 3200 553 450
+internal_value=6.15971e-05 0.055086 -0.0133148 0.0673879 0.0754845 0.00729623 0.0168667 0.0262826 0.0148028 -0.00685767 -0.0174575 -0.00202322 0.00186936 -0.0188143 -0.0192815 0.0803031
+internal_weight=340.779 63.0641 277.715 49.8413 40.8363 49.5959 32.2099 20.1226 9.00505 17.3859 228.119 12.0873 13.2228 221.069 214.891 36.5457
+internal_count=5776 972 4804 749 605 827 529 327 144 298 3977 202 223 3858 3753 536
+cat_boundaries=0 7
+cat_threshold=805306388 675282944 0 524353 1074266624 1048832 33554440
+is_linear=0
+shrinkage=0.022
+
+
+Tree=3
+num_leaves=18
+num_cat=2
+split_feature=10 38 30 38 9 20 20 9 11 2 10 2 31 9 10 2 33
+split_gain=503.5 87.9452 43.3885 38.3648 18.9314 17.1392 9.52297 9.2214 8.70961 8.43134 7.122 4.61166 4.67051 3.87416 1.95326 1.78944 1.58045
+threshold=2.5000000000000004 0 5.5000000000000009 1 25.015000000000004 12.547071195600003 8.3718224570900031 24.510000000000002 96.125000000000014 1390.3700000000001 1.0050000000000001 9801.5450000000019 96.761080514030965 18.975000000000005 -5.9799999999999995 1637.9500000000003 1.7777777777777752
+decision_type=8 9 2 9 10 8 10 8 2 2 8 2 10 10 8 2 8
+left_child=1 7 -3 4 5 9 11 13 -7 -2 14 12 -5 -1 -9 -6 -8
+right_child=3 2 -4 6 15 8 16 10 -10 -11 -12 -13 -14 -15 -16 -17 -18
+leaf_value=0.0093803089919013791 -0.0099968058794437011 0.10161117698803972 0.013533575007704175 -0.019748229395582892 -0.013000007042817358 0.043339003828902677 -0.0036805202634260996 0.0040087589296931856 0.0022269435795818043 0.015685945267466569 -0.00053966073967066778 0 -0.0081951443470639259 -0.0077027143830614674 0.029702133571815049 0.00044903857955976646 0.0080359209611965687
+leaf_weight=4.1191678121685973 9.7478429041802901 24.727041579782966 5.3692749291658393 184.30426540970802 10.092740483582018 5.8954977020621282 5.838110685348509 4.5167979635298252 4.3946818187832832 4.188998330384492 6.065952107310296 6.3425993584096423 33.886023744940758 11.528385121375321 9.3160440623760206 5.1785577796399584 4.5823534913361073
+leaf_count=63 165 343 86 3268 174 95 99 74 73 68 90 107 587 181 135 89 79
+internal_value=0.00010375 0.0521693 0.0711896 -0.0131792 0.00616951 0.0180826 -0.0161147 0.00873916 0.0334059 0 0.0189417 -0.017722 -0.0182459 -0.00159811 0.0253407 -0.00934057 0.00219047
+internal_weight=340.094 65.6427 30.0963 274.452 39.4983 24.227 234.953 35.5463 10.2902 13.9368 19.8988 224.533 218.19 15.6476 13.8328 15.2713 10.4205
+internal_count=5776 972 429 4804 664 401 4140 543 168 233 299 3962 3855 244 209 263 178
+cat_boundaries=0 1 2
+cat_threshold=118786 8224
+is_linear=0
+shrinkage=0.022
+
+
+Tree=4
+num_leaves=18
+num_cat=2
+split_feature=41 3 3 21 32 29 7 30 40 21 15 32 5 32 21 5 32
+split_gain=217.729 64.6177 31.2888 26.885 19.4361 20.2931 18.4948 20.7895 16.7799 18.1366 16.2962 10.3957 7.06653 6.98452 6.13925 6.08411 4.60353
+threshold=0 82.500000000000014 74.500000000000014 -8.9492385786799975 18.920997920997923 8.2220057651616667 3.8629621531850007 5.5000000000000009 1 -8.7456445993049972 28.710000000000004 21.674796747967488 101.75430635500001 -2.2469512195121948 -10.631581446149999 20.721015091150004 59.056760204081641
+decision_type=9 2 2 10 10 10 2 2 9 10 8 8 2 10 8 2 10
+left_child=1 3 12 4 15 -6 7 13 11 10 -10 -4 14 -3 -2 -1 -16
+right_child=2 6 8 -5 5 -7 -8 -9 9 -11 -12 -13 -14 -15 16 -17 -18
+leaf_value=-0.0099361841054347606 0.0047641389627141612 0.017439920461040825 -0.014265885207363679 -0.0077987537929237157 0.044524468535521645 -0.001158603947199299 0.0037685558046234458 0.0055108986282612609 0.04164013505679412 -0.0072656157375794892 0.0065669755495343972 0.0099752893137475436 0.0024192234615267065 0.072534628577144961 -0.019185356581947394 0.011176784891919998 -0.0061671609070032638
+leaf_weight=6.4374366961419573 3.4505921937525272 6.417468346655375 35.937664158642292 17.40350329503417 14.08192775025964 5.4563195630908004 4.5797309167683116 4.7384688928723326 5.1781574711203593 15.234739124774931 23.334278542548418 5.9265144728124133 7.7325449474155894 18.028950985521078 133.17866969108582 8.0478673055767995 24.077012918889523
+leaf_count=110 55 100 599 302 226 87 70 80 77 261 384 99 135 262 2382 133 414
+internal_value=0.000156079 0.0276833 -0.0101534 0.0125511 0.0227065 0.0342766 0.0521831 0.0576858 0.000267506 0.00843243 0.0192278 -0.00818827 -0.0158906 0.0645393 -0.0168599 0.00136338 -0.0175258
+internal_weight=339.242 85.1917 254.05 51.4271 34.0236 19.5382 33.7646 29.1849 85.6114 43.7472 28.5124 41.8642 168.439 24.4464 160.706 14.4853 157.256
+internal_count=5776 1370 4406 858 556 313 512 442 1420 722 461 698 2986 362 2851 243 2796
+cat_boundaries=0 7 11
+cat_threshold=536870933 536903680 1 425985 67633676 1050882 17039488 952852 0 16777216 5722
+is_linear=0
+shrinkage=0.022
+
+
+Tree=5
+num_leaves=18
+num_cat=1
+split_feature=10 10 41 10 10 31 9 37 33 20 10 2 2 9 31 2 21
+split_gain=463.864 68.8089 56.3283 24.8969 14.8616 13.9405 12.9849 12.8503 9.45807 7.95671 7.79331 5.49145 4.75993 3.57003 2.54233 2.25893 1.23479
+threshold=2.5000000000000004 -6.9999999999999991 0 1.4800000000000002 7.9650000000000007 32.200460829493096 98.990000000000009 19.999881539050005 -0.3464052287581651 8.3718224570900031 -1.0049999999999997 1348.8700000000001 9801.5450000000019 28.995000000000005 99.78813559322036 70.170000000000016 -14.168918918899999
+decision_type=8 10 9 10 10 8 10 8 8 10 10 2 2 8 10 2 10
+left_child=1 13 4 6 5 -2 10 -5 -7 12 -3 -6 14 15 -4 -1 -11
+right_child=2 3 9 7 11 8 -8 -9 -10 16 -12 -13 -14 -15 -16 -17 -18
+leaf_value=0.0041781555123395053 -0.0085445567421001019 0.02724348935061302 -0.020465627242842493 0.0012366750805938094 -0.012269833747799254 -0.0030574384072816342 0.012044790851881098 0.036351819516508781 0.027006677972499862 0.0056681072048949703 0.084937240891423377 0.0085770166501380283 0 0.011811320243552288 -0.0083756689711371075 -0.010710812868413246 -0.0048158517613963708
+leaf_weight=3.6634882017970067 5.2892765887081614 9.5884286984801275 181.31386839225888 8.2952043600380403 13.032224375754597 4.3871891908347607 4.5937057062983504 10.872585389763119 22.763276740908626 5.4433674365282059 22.316175386309627 3.7074836939573279 6.7319210395216933 4.0643797926604739 22.711373772472143 5.4801489785313606 4.204384367913006
+leaf_count=61 92 128 3314 125 231 72 69 142 357 94 285 61 113 67 398 95 72
+internal_value=0.00020783 0.0487778 -0.0129728 0.0585477 0.00747658 0.0165865 0.069847 0.0252914 0.0223087 -0.0172075 0.0748004 -0.006366 -0.0188397 0.00188918 -0.0194237 -0.00509033 0.000653093
+internal_weight=338.458 68.8741 269.584 55.6661 49.1795 32.4397 36.4983 19.1678 27.1505 220.405 31.9046 16.7397 210.757 13.208 204.025 9.14364 9.64775
+internal_count=5776 972 4804 749 813 521 482 267 429 3991 413 292 3825 223 3712 156 166
+cat_boundaries=0 7
+cat_threshold=805306388 675282944 0 65 1074266632 1048832 33554440
+is_linear=0
+shrinkage=0.022
+
+
+Tree=6
+num_leaves=18
+num_cat=2
+split_feature=10 38 41 10 10 9 37 9 20 3 10 2 33 2 2 10 33
+split_gain=438.734 70.8183 55.0208 34.1952 14.099 12.8825 8.32506 8.10617 7.86409 7.19446 6.76388 5.39282 4.98674 4.71192 3.79594 1.76991 1.10566
+threshold=2.5000000000000004 0 1 1.4800000000000002 7.9650000000000007 27.025000000000002 1.7329431556546002 24.510000000000002 8.3718224570900031 6.5000000000000009 1.0050000000000001 1348.8700000000001 1.1173533083645426 9801.5450000000019 70.170000000000016 -1.0000000180025095e-35 3.145833333333329
+decision_type=8 9 9 10 10 8 8 8 10 2 8 2 10 2 2 10 8
+left_child=1 7 4 -3 5 12 -5 14 13 -7 15 -6 -2 -4 -1 -9 -10
+right_child=2 3 8 6 11 9 -8 10 16 -11 -12 -13 -14 -15 -16 -17 -18
+leaf_value=0.008414834243692269 0.035006723928522547 0.097061016090153954 -0.019333556367182855 0.002540539437501264 -0.012175589259485569 -0.011386462807754589 0.039697533910724926 0.0076209556529238257 -0.0037681279283501221 0.010341277446992158 -0.00097890783080907041 0.0084804391201956739 0.003148170610023249 0 -0.0081840313423753898 0.031091341955285606 0.0061782731613693707
+leaf_weight=5.1156739965081206 9.0742909200489503 19.810296967625618 200.60462287068367 5.0649349614977819 12.892169293016197 6.0987373441457775 9.6241844072937948 8.8900532424449903 5.8957964070141298 12.9182987883687 6.2756170518696317 3.7352332063019267 4.832753609865903 6.7319210395216933 10.617163065820931 5.7001251578331003 3.761361937969923
+leaf_count=80 139 234 3712 75 231 103 120 133 101 205 90 61 74 113 164 76 65
+internal_value=0.000254411 0.0466004 -0.0128414 0.0626646 0.00728768 0.0160616 0.0316037 0.00803773 -0.0170953 0.00209368 0.0173169 -0.006274 0.0284977 -0.018743 -0.0017006 0.0234456 0.00063763
+internal_weight=337.643 71.098 266.545 34.4994 49.5515 32.9241 14.6891 36.5986 216.994 19.017 20.8658 16.6274 13.907 207.337 15.7328 14.5902 9.65716
+internal_count=5776 972 4804 429 813 521 195 543 3991 308 299 292 213 3825 244 209 166
+cat_boundaries=0 1 8
+cat_threshold=118786 805306388 675282944 0 65 1074266632 1048832 33554440
+is_linear=0
+shrinkage=0.022
+
+
+Tree=7
+num_leaves=18
+num_cat=2
+split_feature=10 38 41 30 10 31 33 20 9 2 2 6 6 31 8 8 33
+split_gain=415.833 56.9327 53.7584 37.4792 13.6123 12.7091 10.9771 6.88428 6.10275 5.40544 4.65635 4.39461 3.82358 2.84974 2.80233 1.76718 1.54517
+threshold=2.5000000000000004 0 1 5.5000000000000009 7.9650000000000007 37.066905615292718 -0.3464052287581651 8.6188815008500015 80.015000000000015 1348.8700000000001 9801.5450000000019 9.9862694159050012 42.697594401100005 99.78813559322036 81.510000000000005 62.995000000000005 3.145833333333329
+decision_type=8 9 9 2 10 10 8 10 10 2 2 2 2 10 10 8 8
+left_child=1 12 4 8 5 11 -7 10 -3 -6 13 -2 15 -4 -5 -1 -9
+right_child=2 3 7 14 9 6 -8 16 -10 -11 -12 -13 -14 -15 -16 -17 -18
+leaf_value=0.010195019853554161 -0.0098443951821398264 0.075144469121911264 -0.020309892458566268 0.019030948778835065 -0.012271118872280226 -0.0032462537579919376 0.029583155177041021 -0.0049566325195841872 0.023126312114403007 0.0083848132206835544 0 0.0091595187063983861 -0.009377976430027574 -0.0078534676659759352 0 -0.0027149551118718254 0.0070157590313731262
+leaf_weight=7.106136333197357 7.9665904156863672 34.320094846189022 174.77455960959196 4.3900902867317182 13.075643464922907 4.4757372997701168 17.618926469236616 5.4723394326865655 8.6154479309916479 3.7628410682082167 6.7319210395216933 4.1967178024351597 8.9261512197554094 21.805571842938662 5.6306622698903084 4.2089771218597889 3.4919110983610153
+leaf_count=105 136 396 3309 62 237 72 264 94 117 61 113 66 138 392 86 68 60
+internal_value=0.000317283 0.044643 -0.0127015 0.0518472 0.00689902 0.0152795 0.0234641 -0.01704 0.0689342 -0.00642424 -0.0186303 -0.00212492 -0.000940273 -0.0192288 0.0122566 0.00579843 0.000282593
+internal_weight=336.57 73.1976 263.373 52.9563 51.0965 34.258 22.0947 212.276 42.9355 16.8385 203.312 12.1633 20.2413 196.58 10.0208 11.3151 8.96425
+internal_count=5776 972 4804 661 836 538 336 3968 513 298 3814 202 311 3701 148 173 154
+cat_boundaries=0 1 8
+cat_threshold=36864 805306388 675282944 0 524353 1074266632 1048832 33554440
+is_linear=0
+shrinkage=0.022
+
+
+Tree=8
+num_leaves=18
+num_cat=3
+split_feature=41 31 31 41 20 3 20 29 8 34 6 20 40 12 11 32 20
+split_gain=193.537 134.556 50.0822 26.5213 35.8512 41.4724 25.6346 20.0896 20.3563 9.33036 7.25633 6.57102 5.82334 3.15943 2.45738 0.656633 0.851304
+threshold=0 96.761080514030965 96.981089086352256 1 7.7803192711100015 55.500000000000007 12.547071195600003 2.9771149688966672 35.00500000000001 27.139317008500004 89.314932139450022 13.717583807750001 2 2.4800000000000004 22.500000000000004 60.153409090909093 8.6188815008500015
+decision_type=9 10 8 9 8 2 10 10 10 2 2 10 9 8 2 10 10
+left_child=1 6 11 12 10 -6 7 8 -1 -3 -5 15 -4 -14 -9 16 -2
+right_child=2 9 3 4 5 -7 -8 14 -10 -11 -12 -13 13 -15 -16 -17 -18
+leaf_value=0.023287722216963173 -0.020061174761110856 0.078697534569890537 0.0054021904059812706 -0.014186787449414583 -0.0053349022773786486 0.044092676559991648 0.041678647269529037 0.0013590137449829255 -0.0043457381481738881 0.019243895440142648 0.0069090626502257479 0.0042971167471567663 0.0022490063617033552 -0.014996987119121605 -0.014756232940301353 -0.0054256581704560372 -0.0027468377035285638
+leaf_weight=24.989784236997366 127.25565176457167 15.40950967743993 5.9584776423871517 14.537084281444551 10.58443468809128 17.346262637525797 4.8236743658781043 3.8408550769090679 18.844477482140064 6.8584073930978766 7.8039017319679251 3.5692834556102744 3.5402287803590298 42.201280560344458 15.852772951126097 8.2757563851773721 4.2289740778505793
+leaf_count=389 2432 177 103 261 189 235 67 60 318 92 124 51 62 716 274 156 70
+internal_value=0.000345135 0.0253149 -0.00985663 0.00150174 0.0111577 0.0275686 0.0101644 0.0043022 0.0122047 0.068552 -0.00672112 -0.0183701 -0.008446 -0.0112715 -0.0118158 -0.0191398 -0.0196885
+internal_weight=335.921 90.6195 245.301 101.972 50.2717 27.9307 68.3516 63.5279 43.8343 22.2679 22.341 143.33 51.7 45.7415 19.6936 139.76 131.485
+internal_count=5776 1377 4399 1690 809 424 1108 1041 707 269 385 2709 881 778 334 2658 2502
+cat_boundaries=0 7 14 18
+cat_threshold=536870933 536903680 1 425985 67633676 1050882 17039744 0 2298480640 142606352 137363456 134218768 37750280 276826113 1073881088 0 0 130
+is_linear=0
+shrinkage=0.022
+
+
+end of trees
+
+feature_importances:
+remaining_duration_months=27
+cumulative_expenditure_cr=18
+planned_duration_months=13
+expected_progress_pct=13
+required_progress_velocity_pct_per_month=10
+implementing_agency=9
+progress_gap_change_1m=8
+velocity_gap_pct_points=7
+snapshots_so_far=5
+progress_gap_enhanced_pct=5
+physical_progress_pct=4
+expenditure_original_cost_pct=4
+expenditure_revised_cost_pct=4
+ministry=4
+project_age_months=3
+progress_expenditure_gap_pct=2
+remaining_progress_pct=2
+rolling_expenditure_growth_3m=2
+expenditure_growth_change_1m=2
+state=2
+schedule_slippage_months=1
+monthly_expenditure_change_cr=1
+prev_cost_overrun_pct=1
+expenditure_progress_efficiency_gap=1
+
+parameters:
+[boosting: gbdt]
+[objective: binary]
+[metric: auc,binary_logloss]
+[tree_learner: serial]
+[device_type: cpu]
+[data_sample_strategy: bagging]
+[data: ]
+[valid: ]
+[num_iterations: 600]
+[learning_rate: 0.022]
+[num_leaves: 18]
+[num_threads: 4]
+[seed: 42]
+[deterministic: 0]
+[force_col_wise: 0]
+[force_row_wise: 0]
+[histogram_pool_size: -1]
+[max_depth: 5]
+[min_data_in_leaf: 60]
+[min_sum_hessian_in_leaf: 0.001]
+[bagging_fraction: 0.85]
+[pos_bagging_fraction: 1]
+[neg_bagging_fraction: 1]
+[bagging_freq: 0]
+[bagging_seed: 400]
+[bagging_by_query: 0]
+[feature_fraction: 0.85]
+[feature_fraction_bynode: 1]
+[feature_fraction_seed: 30056]
+[extra_trees: 0]
+[extra_seed: 12879]
+[early_stopping_round: 0]
+[early_stopping_min_delta: 0]
+[first_metric_only: 0]
+[max_delta_step: 0]
+[lambda_l1: 0.25]
+[lambda_l2: 6]
+[linear_lambda: 0]
+[min_gain_to_split: 0]
+[drop_rate: 0.1]
+[max_drop: 50]
+[skip_drop: 0.5]
+[xgboost_dart_mode: 0]
+[uniform_drop: 0]
+[drop_seed: 17869]
+[top_rate: 0.2]
+[other_rate: 0.1]
+[min_data_per_group: 100]
+[max_cat_threshold: 32]
+[cat_l2: 10]
+[cat_smooth: 10]
+[max_cat_to_onehot: 4]
+[top_k: 20]
+[monotone_constraints: ]
+[monotone_constraints_method: basic]
+[monotone_penalty: 0]
+[feature_contri: ]
+[forcedsplits_filename: ]
+[refit_decay_rate: 0.9]
+[cegb_tradeoff: 1]
+[cegb_penalty_split: 0]
+[cegb_penalty_feature_lazy: ]
+[cegb_penalty_feature_coupled: ]
+[path_smooth: 0]
+[interaction_constraints: ]
+[verbosity: -1]
+[saved_feature_importance_type: 0]
+[use_quantized_grad: 0]
+[num_grad_quant_bins: 4]
+[quant_train_renew_leaf: 0]
+[stochastic_rounding: 1]
+[linear_tree: 0]
+[max_bin: 255]
+[max_bin_by_feature: ]
+[min_data_in_bin: 3]
+[bin_construct_sample_cnt: 200000]
+[data_random_seed: 175]
+[is_enable_sparse: 1]
+[enable_bundle: 1]
+[use_missing: 1]
+[zero_as_missing: 0]
+[feature_pre_filter: 1]
+[pre_partition: 0]
+[two_round: 0]
+[header: 0]
+[label_column: ]
+[weight_column: ]
+[group_column: ]
+[ignore_column: ]
+[categorical_feature: 38,39,40,41]
+[forcedbins_filename: ]
+[precise_float_parser: 0]
+[parser_config_file: ]
+[objective_seed: 16083]
+[num_class: 1]
+[is_unbalance: 0]
+[scale_pos_weight: 1]
+[sigmoid: 1]
+[boost_from_average: 1]
+[reg_sqrt: 0]
+[alpha: 0.9]
+[fair_c: 1]
+[poisson_max_delta_step: 0.7]
+[tweedie_variance_power: 1.5]
+[lambdarank_truncation_level: 30]
+[lambdarank_norm: 1]
+[label_gain: ]
+[lambdarank_position_bias_regularization: 0]
+[eval_at: ]
+[multi_error_top_k: 1]
+[auc_mu_weights: ]
+[num_machines: 1]
+[local_listen_port: 12400]
+[time_out: 120]
+[machine_list_filename: ]
+[machines: ]
+[gpu_platform_id: -1]
+[gpu_device_id: -1]
+[gpu_use_dp: 0]
+[num_gpu: 1]
+
+end of parameters
+
+pandas_categorical:[["Department for Promotion of Industry & Internal Trade", "Department of Higher Education", "Department of Sports", "Department of Telecommunications", "Department of Water Resources, River Development & GR", "Ministry of Civil Aviation", "Ministry of Coal", "Ministry of Health & Family Welfare", "Ministry of Housing & Urban Affairs", "Ministry of Labour and Employment", "Ministry of Mines", "Ministry of Petroleum & Natural Gas", "Ministry of Ports, Shipping and Waterways", "Ministry of Power", "Ministry of Railways", "Ministry of Road Transport & Highways", "Ministry of Steel"], ["Aviation & Aviation Infrastructure", "Coal", "Construction", "Education", "Electricity Generation", "Energy Storage", "Healthcare", "Inland Waterways", "Logistics Infrastructure", "Metals & Mining", "Oil & Gas", "Railways", "Real Estate", "Roads & Highways", "Shipping", "Steel", "Telecommunication", "Tourism, Hospitality & Wellness", "Transmission & Distribution", "Urban Public Transport", "Waste & Water", "Water Resources"], ["Andaman & Nicobar", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Dadra & Nagar Haveli and Daman & Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Multi-States (Andhra Pradesh, Bihar, Chhattisgarh, Jharkhand, Madhya Pradesh, Maharashtra, Odisha, Telangana, Uttar Pradesh, West Bengal)", "Multi-States (Andhra Pradesh, Chhattisgarh, Jharkhand, Maharashtra, Odisha)", "Multi-States (Andhra Pradesh, Chhattisgarh, Odisha)", "Multi-States (Andhra Pradesh, Karnataka)", "Multi-States (Andhra Pradesh, Maharashtra, Telangana)", "Multi-States (Andhra Pradesh, Odisha)", "Multi-States (Andhra Pradesh, Odisha, Telangana)", "Multi-States (Andhra Pradesh, Tamil Nadu)", "Multi-States (Andhra Pradesh, Telangana)", "Multi-States (Arunachal Pradesh, Assam)", "Multi-States (Arunachal Pradesh, Assam, Manipur, Meghalaya, Mizoram, Nagaland, Sikkim, Tripura, West Bengal)", "Multi-States (Arunachal Pradesh, Gujarat, Rajasthan)", "Multi-States (Arunachal Pradesh, Sikkim)", "Multi-States (Assam, Bihar, Jharkhand, Odisha, West Bengal)", "Multi-States (Assam, Bihar, West Bengal)", "Multi-States (Assam, Manipur, Meghalaya, Mizoram, Nagaland, Tripura)", "Multi-States (Assam, Nagaland)", "Multi-States (Assam, West Bengal)", "Multi-States (Bihar, Delhi, Jharkhand, Uttar Pradesh, West Bengal)", "Multi-States (Bihar, Gujarat, Himachal Pradesh, Jammu and Kashmir, Ladakh, Rajasthan, Uttar Pradesh)", "Multi-States (Bihar, Jharkhand)", "Multi-States (Bihar, Jharkhand, Uttar Pradesh, West Bengal)", "Multi-States (Bihar, Madhya Pradesh, Rajasthan, Uttar Pradesh)", "Multi-States (Bihar, Odisha, West Bengal)", "Multi-States (Bihar, Uttar Pradesh)", "Multi-States (Bihar, West Bengal)", "Multi-States (Chhattisgarh, Madhya Pradesh, Maharashtra, Odisha)", "Multi-States (Chhattisgarh, Maharashtra)", "Multi-States (Chhattisgarh, Odisha)", "Multi-States (Dadra & Nagar Haveli and Daman & Diu, Gujarat, Maharashtra)", "Multi-States (Delhi, Gujarat, Madhya Pradesh, Maharashtra, Rajasthan)", "Multi-States (Delhi, Haryana)", "Multi-States (Delhi, Haryana, Rajasthan)", "Multi-States (Delhi, Rajasthan)", "Multi-States (Delhi, Uttar Pradesh)", "Multi-States (Goa, Karnataka)", "Multi-States (Goa, Karnataka, Maharashtra, Telangana)", "Multi-States (Gujarat, Haryana, Maharashtra, Rajasthan, Uttar Pradesh)", "Multi-States (Gujarat, Haryana, Punjab, Rajasthan)", "Multi-States (Gujarat, Haryana, Rajasthan)", "Multi-States (Gujarat, Madhya Pradesh)", "Multi-States (Gujarat, Madhya Pradesh, Uttar Pradesh)", "Multi-States (Gujarat, Maharashtra)", "Multi-States (Gujarat, Rajasthan)", "Multi-States (Haryana, Himachal Pradesh)", "Multi-States (Haryana, Punjab)", "Multi-States (Haryana, Punjab, Rajasthan)", "Multi-States (Haryana, Rajasthan)", "Multi-States (Haryana, Uttar Pradesh)", "Multi-States (Himachal Pradesh, Punjab)", "Multi-States (Jammu and Kashmir, Ladakh)", "Multi-States (Jammu and Kashmir, Punjab)", "Multi-States (Jharkhand, Odisha)", "Multi-States (Jharkhand, Odisha, West Bengal)", "Multi-States (Jharkhand, Uttar Pradesh)", "Multi-States (Jharkhand, West Bengal)", "Multi-States (Karnataka, Kerala, Tamil Nadu)", "Multi-States (Karnataka, Maharashtra)", "Multi-States (Karnataka, Maharashtra, Telangana, Uttar Pradesh)", "Multi-States (Karnataka, Tamil Nadu)", "Multi-States (Karnataka, Telangana)", "Multi-States (Kerala, Puducherry)", "Multi-States (Kerala, Tamil Nadu)", "Multi-States (Madhya Pradesh, Maharashtra)", "Multi-States (Madhya Pradesh, Rajasthan)", "Multi-States (Madhya Pradesh, Rajasthan, Uttar Pradesh)", "Multi-States (Madhya Pradesh, Uttar Pradesh)", "Multi-States (Maharashtra, Telangana)", "Multi-States (Odisha, West Bengal)", "Multi-States (Puducherry, Tamil Nadu)", "Multi-States (Punjab, Rajasthan)", "Multi-States (Rajasthan, Uttar Pradesh)", "Multi-States (Sikkim, West Bengal)", "Multi-States (Uttar Pradesh, Uttarakhand)", "Multi-States (Uttar Pradesh, West Bengal)", "Nagaland", "Odisha", "Offshore", "PAN India", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"], ["Adani Airport Holdings Limited", "Adani Transmission Limited", "Airport Authority of India [AAI]", "BCCL - CIL", "BSNL", "Banaras Hindu University", "Bengaluru Metro Rail", "Bharat Coking Coal Limited (BCCL", "Bharat Coking Coal Limited [BCCL]", "Bharat Petroleum Corporation Limited [BPCL]", "CAO/C/ECoR", "CAO/C/II/NR", "CAO/C/NCR", "CAO/C/NR", "CAO/C/SECR", "CAO/C/SER", "CCL - CIL", "CERL", "CORE", "CPM/ICF", "CR", "CSPCC Projects", "Central Coalfields Limited [CCL]", "Central Organisation for Railway Electrification [CORE]", "Central Public Works Department (CPWD", "Central Public Works Department - CPWD", "Central Public Works Department [CPWD]", "Central Railway", "Central Railway (CR) - II", "Central Railway [CR] - II", "Central Railways", "Central Tribal University of Andhra Pradesh", "Central University of Gujarat", "Central University of Punjab", "Central University, Himachal Pradesh", "CentralRailway", "Chennai Metro Rail Limited [CMRL]", "Chennai Petroleum Corporation Limited [CPCL]", "Cochin Shipyard", "Construction NER", "DFCCIL", "Damodar Valley Corporation", "Deendayal Port Trust", "Deendayal Port Trust [DPT]", "Delhi Metro Rail Corporation Limited [DMRC]", "Delhi University", "Department of Sports & Youth Affairs", "Department of Telecommunications", "Department of Telecommunications [DoT]", "Department of Water Resources, River Development & GR", "Department of Water Resources-JH", "Department of Water Resources-MH", "Department of Water Resources-PB", "Department of water resources-MH - II", "ECL - CIL", "EDTK[MC]/RB", "East Central Railway [ECR] - I", "East Central Railway [ECR] - II", "East Coast Railway [ECoR] - II", "Eastern Coal Fields Limited [ECL]", "Eastern Railway [ER] - I", "Employee's State Insurance Company [ESIC]", "GAIL Gas", "GM/C/ NFR", "Gas Authority of India Limited [GAIL]", "Gujarat", "Gujarat Metro Rail Corporation Limited [GMRCL]", "Gurugram Metro Rail Limited (GMRL", "Haldia Dock Complex, Syama Prasad Mookerjee Port Authority", "Hindustan Copper Limited [HCL]", "Hindustan Petroleum Corporation Limited", "Hindustan Petroleum Corporation Limited [HPCL]", "IISC Bangalore", "INDIAN INSTITUTE OF TECHNOLOGY PALAKKAD", "Indian Institute of Management, Jammu", "Indian Institute of Management, Sirmaur", "Indian Institute of Technology, Bhilai", "Indian Institute of Technology, Bombay", "Indian Institute of Technology, Hyderabad", "Indian Institute of Technology, Indore", "Indian Institute of Technology, Kharagpur", "Indian Institute of Technology, Mandi", "Indian Institutes of Science Education and Research, Behrampur", "Indian Oil Corporation Limited (IOCL", "Indian Oil Corporation Limited [IOCL]", "Indian Port Rail & Ropeway Corporation Ltd. [IPRCL]", "Indian Railway", "Indian Railway Construction International Limited [IRCON]", "Indian Railway and Govt of Odisha", "Indian Railways", "Indian intitue of Management, Amritsar", "Inland Waterways Authority of India [IWAI]", "Irrigation & Water Resources-UP", "Irrigation and CAD-TG", "Irrigation-UK", "Jawaharlal Nehru Port Authority [JNPA]", "Karnataka Rail Infrastructure Development Company Limited [K-RIDE]", "M/S SRC company Infra Private Limited", "MCL - CIL", "MIS MoCoal Integration Logins", "MRIDC", "Madhya Pradesh Metro Rail Co Limited [MPMRCL]", "Mahanadi Coalfields Limited (MCL", "Mahanadi Coalfields Limited [MCL]", "Maharashtra Metro Rail Corporation Limited [MMRCL]", "Mangalore Refinary and Petrochemicals Limited", "Medical Education, Ministry of Health and Family Welfare", "Metro Railway, Kolkata", "Ministry of Coal", "Ministry of Education", "Ministry of Health & Family Welfare", "Ministry of Housing & Urban Affairs", "Ministry of Mines", "Ministry of Petroleum & Natural Gas", "Ministry of Petroleum and Natural Gas", "Ministry of Railways", "MinistryofPetroleumNaturalGas", "MoRTH", "Mumbai Metro Rail Corporation Limited [MMRC]", "Mumbai Port Trust [MPT]", "Mumbai Rail Vikas Corporation Ltd.[MRVC]", "NER", "NHAI", "NHIDCL", "NIT Mizoram", "NIT Nagaland", "NIT Patna", "NIT Rourkela", "NIT Sikkim", "NLC India Limited [NLCIL]", "NRL", "Narmada and Water Resources, Water Supply and Kalpsar Department-GJ", "National Aluminium Company Limited [NALCO]", "National Buildings Construction Corporation [NBCC]", "National Capital Region Transport Corporation [NCRTC]", "National Communication Academy - Finance (Erstwhile NICF", "National High Speed Rail Corporation [NHSRC]", "National Highways & Infrastructure Development Corporation Ltd. [NHIDCL]", "National Highways Authority of India [NHAI]", "National Hydroelectric Power Corporation Limited (NHPC", "National Hydroelectric Power Corporation Limited [NHPC]", "National Industrial Corridor Development Corporation", "National Institute of Technology Delhi", "National Institute of Technology Uttarakhand", "National Institute of Technology, Arunachal Pradesh", "National Institute of Technology, Meghalaya", "National Institute of Technology, Puducherry", "National Mineral Development Corporation Limited [NMDC]", "National Mission for Clean Ganga", "National Thermal Power Corporation [NTPC]", "New Mangalore Port Authority", "North Central Railway", "North Central Railway (NCR) - II", "North Eastern Electric Power Corporation Limited", "North Eastern Railway [NER]", "North Western Railway [NWR]", "Northeast Frontier Railway (NFR) - II", "Northeast Frontier Railway [NFR]", "Northen Railway [NR]", "Northern Coalfields Limited [NCL]", "Northern Railways", "Oil and Natural Gas Corporation Limited [ONGC]", "PCE/NCR", "PCE/WR", "PMSSY AND Institute of NATIONAL Importance", "PMSSY/Institute of National Importance (INI", "Paradip Port Trust [PPT]", "Patna Metro Rail Corporation Ltd. [PMRCL]", "Power Grid Corporation of India Limited [POWERGRID]", "RCIL", "RVNL", "RVNL - I", "RVNL - II", "Rail Land Development Authority", "Rail Vikas Nigam Limited", "Railway", "Reliance Industries Ltd", "SECL - CIL", "SECR", "SR-ERS", "Satluj Jal Vidyut Nigam [SJVN] Thermal Limited", "Sikkim University", "Singareni Collieries Company Limited [SCCL]", "Smart City Mission", "South Central Railway [SCR] - I", "South Central Railway [SCR] - II", "South East Central Railway", "South East Central Railway [SECR] - II", "South Eastern Central Railway", "South Eastern Coalfields Limited [SECL]", "South Eastern Railway - JH", "South Eastern Railway [SER] - I", "South Western Railway [SWR] - II", "Southern Railway (SR) - I", "Southern Railway [SR] - I", "Southern Railway [SR] - II", "Southern Railways [SR] - construction", "Steel Authority of India Limited [SAIL]", "Sterlite Power", "THDC India Limited", "Tezpur University", "Uttar Pradesh metro rail corporation [UPMRC]", "WCL - CIL", "WPO/Patna", "WR", "Water Resources Department-MN", "Water Resources-AP", "Water Resources-BR", "Water Resources-CT", "Water Resources-KA", "Water Resources-MP", "Water Resources-OR", "Water resource-mp", "West Central Railway WCR I", "West Central Railway [WCR] - II", "Western Coalfields Limited [WCL]", "Western Railway", "Western Railway (WR) - II", "Western Railway WR - II", "Western Railway [WR] - II", "ministry of housing and urban affairs"]]

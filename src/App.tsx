@@ -152,18 +152,32 @@ export default function App() {
     }).catch(console.warn);
   }, []);
 
-  // 2. Re-prioritize Corridors for Logged In User's Specific Ministry
+  // 2. Re-prioritize and Fetch Corridors for Logged In User's Specific Ministry
   useEffect(() => {
     if (!currentUser) return;
-    setPins(prev => {
-      const userCorridors = prev.filter(isUserMinistryProject);
-      const otherCorridors = prev.filter(p => !isUserMinistryProject(p));
-      if (userCorridors.length > 0) {
-        setSelectedPin(userCorridors[0]);
-        return [...userCorridors, ...otherCorridors];
+    const targetMin = (currentUser.ministry && currentUser.ministry !== 'Central Infrastructure' && currentUser.ministry !== 'MoSPI')
+      ? currentUser.ministry
+      : undefined;
+
+    fetchProjects(undefined, 50, targetMin).then(dbProjects => {
+      if (dbProjects && dbProjects.length > 0) {
+        const mappedPins: ProjectPin[] = dbProjects.slice(0, 20).map(p => ({
+          id: p.project_id,
+          name: p.project_name,
+          state: p.state,
+          latPct: Math.round(((p.location.latitude - 8) / (36 - 8)) * 100),
+          lngPct: Math.round(((p.location.longitude - 68) / (97 - 68)) * 100),
+          dphis: Math.round(p.dphis || 50),
+          risk: p.risk_level || 'moderate',
+          cost: `₹${p.cost.revised} Cr`,
+          delay: `${Math.round(p.dphis > 70 ? 24 : 6)} mo`
+        }));
+        setPins(mappedPins);
+        if (mappedPins.length > 0) {
+          setSelectedPin(mappedPins[0]);
+        }
       }
-      return prev;
-    });
+    }).catch(console.warn);
   }, [currentUser?.ministry]);
 
   useEffect(() => {

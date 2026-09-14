@@ -1,0 +1,290 @@
+{
+  "purpose": "Prototype predictive analytics and early warning system for PAIMANA infrastructure projects",
+  "excluded_components": [
+    "M_milestone_risk",
+    "I_implementation_risk"
+  ],
+  "models": {
+    "cost_risk_1m": {
+      "features": [
+        "original_cost_cr",
+        "revised_cost_cr",
+        "cumulative_expenditure_cr",
+        "physical_progress_pct",
+        "cost_overrun_pct",
+        "expenditure_original_cost_pct",
+        "expenditure_revised_cost_pct",
+        "progress_expenditure_gap_pct",
+        "project_age_months",
+        "planned_duration_months",
+        "remaining_duration_months",
+        "remaining_progress_pct",
+        "schedule_slippage_months",
+        "completion_date_revised_flag",
+        "monthly_progress_change_pct",
+        "monthly_expenditure_change_cr",
+        "monthly_revised_cost_change_cr",
+        "monthly_cost_growth_pct",
+        "progress_velocity_pct_per_month",
+        "expenditure_growth_pct",
+        "required_progress_velocity_pct_per_month",
+        "velocity_gap_pct_points",
+        "prev_cost_overrun_pct",
+        "prev_physical_progress_pct",
+        "prev_completion_revised_flag",
+        "cost_overrun_trend_1m",
+        "progress_trend_1m",
+        "rolling_progress_velocity_3m",
+        "rolling_cost_growth_3m",
+        "rolling_expenditure_growth_3m",
+        "snapshots_so_far",
+        "expected_progress_pct",
+        "progress_gap_enhanced_pct",
+        "progress_gap_change_1m",
+        "expenditure_progress_efficiency_gap",
+        "efficiency_gap_change_1m",
+        "progress_velocity_change_1m",
+        "expenditure_growth_change_1m",
+        "ministry",
+        "sector",
+        "state",
+        "implementing_agency"
+      ],
+      "best_iteration": 70,
+      "train_months": [
+        "2025-07",
+        "2025-08",
+        "2025-09",
+        "2025-10",
+        "2025-11",
+        "2025-12",
+        "2026-01"
+      ],
+      "validation_months": [
+        "2026-02",
+        "2026-03"
+      ],
+      "test_months": [
+        "2026-04",
+        "2026-05",
+        "2026-06"
+      ],
+      "decision_threshold": 0.1,
+      "train": {
+        "accuracy": 0.9939404432132964,
+        "f1": 0.9877408056042032,
+        "roc_auc": 0.9955206933916706,
+        "pr_auc": 0.9930359347321412,
+        "brier": 0.006069126699849082
+      },
+      "validation": {
+        "accuracy": 0.9972972972972973,
+        "f1": 0.9949531362653208,
+        "roc_auc": 0.996379219313258,
+        "pr_auc": 0.995646994361121,
+        "brier": 0.002833681278000265
+      },
+      "test": {
+        "accuracy": 0.9883805374001452,
+        "f1": 0.9782016348773842,
+        "roc_auc": 0.9811467268260596,
+        "pr_auc": 0.9689436402427196,
+        "brier": 0.011504016726910177
+      },
+      "train_test_auc_gap": 0.014373966565610963
+    },
+    "schedule_risk_1m": {
+      "features": [
+        "original_cost_cr",
+        "revised_cost_cr",
+        "cumulative_expenditure_cr",
+        "physical_progress_pct",
+        "cost_overrun_pct",
+        "expenditure_original_cost_pct",
+        "expenditure_revised_cost_pct",
+        "progress_expenditure_gap_pct",
+        "project_age_months",
+        "planned_duration_months",
+        "remaining_duration_months",
+        "remaining_progress_pct",
+        "schedule_slippage_months",
+        "completion_date_revised_flag",
+        "monthly_progress_change_pct",
+        "monthly_expenditure_change_cr",
+        "monthly_revised_cost_change_cr",
+        "monthly_cost_growth_pct",
+        "progress_velocity_pct_per_month",
+        "expenditure_growth_pct",
+        "required_progress_velocity_pct_per_month",
+        "velocity_gap_pct_points",
+        "prev_cost_overrun_pct",
+        "prev_physical_progress_pct",
+        "prev_completion_revised_flag",
+        "cost_overrun_trend_1m",
+        "progress_trend_1m",
+        "rolling_progress_velocity_3m",
+        "rolling_cost_growth_3m",
+        "rolling_expenditure_growth_3m",
+        "snapshots_so_far",
+        "expected_progress_pct",
+        "progress_gap_enhanced_pct",
+        "progress_gap_change_1m",
+        "expenditure_progress_efficiency_gap",
+        "efficiency_gap_change_1m",
+        "progress_velocity_change_1m",
+        "expenditure_growth_change_1m",
+        "ministry",
+        "sector",
+        "state",
+        "implementing_agency"
+      ],
+      "best_iteration": 9,
+      "train_months": [
+        "2025-07",
+        "2025-08",
+        "2025-09",
+        "2025-10",
+        "2025-11",
+        "2025-12",
+        "2026-01"
+      ],
+      "validation_months": [
+        "2026-02",
+        "2026-03"
+      ],
+      "test_months": [
+        "2026-04",
+        "2026-05",
+        "2026-06"
+      ],
+      "decision_threshold": 0.33999999999999997,
+      "train": {
+        "accuracy": 0.5,
+        "f1": 0.19911259012756516,
+        "roc_auc": 0.9210297136983769,
+        "pr_auc": 0.5288424757598214,
+        "brier": 0.13622368529383275
+      },
+      "validation": {
+        "accuracy": 0.7231660231660232,
+        "f1": 0.6900129701686122,
+        "roc_auc": 0.7855161253034332,
+        "pr_auc": 0.5785280578008957,
+        "brier": 0.2225650118397552
+      },
+      "test": {
+        "accuracy": 0.6103848946986202,
+        "f1": 0.42925531914893617,
+        "roc_auc": 0.7861011379743965,
+        "pr_auc": 0.46343550661300864,
+        "brier": 0.1719583537865002
+      },
+      "train_test_auc_gap": 0.13492857572398043
+    },
+    "combined_risk_1m": {
+      "features": [
+        "original_cost_cr",
+        "revised_cost_cr",
+        "cumulative_expenditure_cr",
+        "physical_progress_pct",
+        "cost_overrun_pct",
+        "expenditure_original_cost_pct",
+        "expenditure_revised_cost_pct",
+        "progress_expenditure_gap_pct",
+        "project_age_months",
+        "planned_duration_months",
+        "remaining_duration_months",
+        "remaining_progress_pct",
+        "schedule_slippage_months",
+        "completion_date_revised_flag",
+        "monthly_progress_change_pct",
+        "monthly_expenditure_change_cr",
+        "monthly_revised_cost_change_cr",
+        "monthly_cost_growth_pct",
+        "progress_velocity_pct_per_month",
+        "expenditure_growth_pct",
+        "required_progress_velocity_pct_per_month",
+        "velocity_gap_pct_points",
+        "prev_cost_overrun_pct",
+        "prev_physical_progress_pct",
+        "prev_completion_revised_flag",
+        "cost_overrun_trend_1m",
+        "progress_trend_1m",
+        "rolling_progress_velocity_3m",
+        "rolling_cost_growth_3m",
+        "rolling_expenditure_growth_3m",
+        "snapshots_so_far",
+        "expected_progress_pct",
+        "progress_gap_enhanced_pct",
+        "progress_gap_change_1m",
+        "expenditure_progress_efficiency_gap",
+        "efficiency_gap_change_1m",
+        "progress_velocity_change_1m",
+        "expenditure_growth_change_1m",
+        "ministry",
+        "sector",
+        "state",
+        "implementing_agency"
+      ],
+      "best_iteration": 45,
+      "train_months": [
+        "2025-07",
+        "2025-08",
+        "2025-09",
+        "2025-10",
+        "2025-11",
+        "2025-12",
+        "2026-01"
+      ],
+      "validation_months": [
+        "2026-02",
+        "2026-03"
+      ],
+      "test_months": [
+        "2026-04",
+        "2026-05",
+        "2026-06"
+      ],
+      "decision_threshold": 0.27,
+      "train": {
+        "accuracy": 0.8438365650969529,
+        "f1": 0.7823359073359073,
+        "roc_auc": 0.9800965926057544,
+        "pr_auc": 0.9709910620171225,
+        "brier": 0.0725926234016728
+      },
+      "validation": {
+        "accuracy": 0.8424710424710424,
+        "f1": 0.8434382194934766,
+        "roc_auc": 0.9131389980122084,
+        "pr_auc": 0.920778316914063,
+        "brier": 0.13722219229212773
+      },
+      "test": {
+        "accuracy": 0.8202614379084967,
+        "f1": 0.7919293820933165,
+        "roc_auc": 0.9223769181094131,
+        "pr_auc": 0.9109147982218028,
+        "brier": 0.10784176260171847
+      },
+      "train_test_auc_gap": 0.0577196744963413
+    }
+  },
+  "scoring": {
+    "current_risk": "100*(0.30*T + 0.30*C + 0.25*P + 0.10*F + 0.05*ML_combined)",
+    "emerging_risk": "bounded function of 1-month risk velocity and acceleration",
+    "dphis": "0.78*current_risk + 0.22*emerging_risk",
+    "tiers": "Low <33; Watch 33-50; Medium 50-66; High 66-80; Critical >=80"
+  },
+  "progress_formula": "P=0.45*normalized(progress_gap)+0.35*normalized(required_velocity-actual_velocity)+0.20*normalized(-velocity_change), with robust percentile scaling.",
+  "financial_formula": "F=stage_adjusted(0.55*normalized(expenditure%-physical_progress%)+0.25*normalized(gap_change)+0.20*normalized(expenditure_growth_change)).",
+  "trend": "risk_velocity=current risk - previous project snapshot; risk_acceleration=current velocity - previous velocity",
+  "confidence": "0.55 data quality + 0.30 model agreement + 0.15 stability",
+  "data_quality": "history depth plus completeness of core progress/financial/schedule fields",
+  "leakage_controls": [
+    "No y_* or next_* fields used as model inputs",
+    "Validation/test are later report months than training",
+    "Calibration is fit only on validation predictions",
+    "Feature engineering uses current and historical project observations only"
+  ]
+}

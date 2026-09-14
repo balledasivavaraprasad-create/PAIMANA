@@ -12,11 +12,28 @@ from app.services.alert_service import evaluate_and_trigger_alert
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
+import re
+
+MINISTRY_ALIASES = {
+    "morth": "Road Transport",
+    "railway": "Railways",
+    "railways": "Railways",
+    "coal": "Coal",
+    "power": "Power",
+    "petroleum": "Petroleum",
+    "urban": "Housing & Urban Affairs",
+    "telecom": "Telecommunications",
+    "shipping": "Ports",
+    "ports": "Ports",
+}
+
 @router.get("", response_model=List[dict])
 async def list_projects(
     risk: Optional[str] = None,
     state: Optional[str] = None,
     sector: Optional[str] = None,
+    ministry: Optional[str] = None,
+    search: Optional[str] = None,
     limit: int = Query(default=50, le=500),
     skip: int = Query(default=0, ge=0)
 ):
@@ -31,9 +48,33 @@ async def list_projects(
         filter_q["state"] = state
     if sector:
         filter_q["sector"] = sector
+    if ministry and ministry.strip() and ministry.lower() not in ("all", "central infrastructure", "mospi"):
+        target_str = ministry.strip()
+        lower_min = target_str.lower()
+        # Check alias
+        for alias_key, alias_val in MINISTRY_ALIASES.items():
+            if alias_key in lower_min:
+                target_str = alias_val
+                break
+
+        tokens = [re.escape(tok) for tok in target_str.replace("&", " ").split() if tok.lower() not in ("of", "and", "&", "the", "ministry", "department")]
+        if tokens:
+            pat = re.compile(".*".join(tokens), re.IGNORECASE)
+        else:
+            pat = re.compile(re.escape(target_str), re.IGNORECASE)
+        filter_q["ministry"] = pat
+
+    if search and search.strip():
+        s_pat = re.compile(re.escape(search.strip()), re.IGNORECASE)
+        filter_q["$or"] = [
+            {"project_name": s_pat},
+            {"project_id": s_pat}
+        ]
 
     cursor = db.projects.find(filter_q, {"_id": 0}).sort("dphis", -1).skip(skip).limit(limit)
     return await cursor.to_list(length=limit)
+
+
 
 @router.post("", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def create_project(payload: ProjectCreate):
