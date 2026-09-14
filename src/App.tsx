@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import HeaderNav, { ActiveTab } from './components/HeaderNav';
 import CeoPinManager, { ProjectPin } from './components/CeoPinManager';
+import AddProjectModal from './components/AddProjectModal';
 import ProjectIntelligence from './pages/ProjectIntelligence';
 import Investigation from './pages/Investigation';
 import Analytics from './pages/Analytics';
@@ -13,17 +14,6 @@ import {
   fetchCurrentUser, clearAuthToken, UserProfile
 } from './lib/api';
 
-const initialPins: ProjectPin[] = [
-  { id: 'P1024', name: 'NH-48 Varanasi-Ranchi Expressway', state: 'Uttar Pradesh', latPct: 38, lngPct: 54, dphis: 91, risk: 'critical', cost: '₹4,218 Cr', delay: '28 mo' },
-  { id: 'P0847', name: 'Metro Rail Phase III', state: 'Tamil Nadu', latPct: 82, lngPct: 46, dphis: 84, risk: 'critical', cost: '₹12,450 Cr', delay: '14 mo' },
-  { id: 'P1156', name: 'Solar Energy Grid, Jaisalmer', state: 'Rajasthan', latPct: 34, lngPct: 24, dphis: 78, risk: 'high', cost: '₹6,820 Cr', delay: '11 mo' },
-  { id: 'P0392', name: 'Port Modernisation Project', state: 'Andhra Pradesh', latPct: 68, lngPct: 58, dphis: 76, risk: 'high', cost: '₹3,190 Cr', delay: '9 mo' },
-  { id: 'P0771', name: 'Broad Gauge Rail Conversion', state: 'Bihar', latPct: 40, lngPct: 64, dphis: 74, risk: 'high', cost: '₹2,870 Cr', delay: '18 mo' },
-  { id: 'P0512', name: 'Mumbai Trans Harbour Link', state: 'Maharashtra', latPct: 58, lngPct: 30, dphis: 45, risk: 'low', cost: '₹17,840 Cr', delay: '4 mo' },
-  { id: 'P0982', name: 'Dedicated Freight Corridor', state: 'Gujarat', latPct: 48, lngPct: 18, dphis: 32, risk: 'low', cost: '₹8,120 Cr', delay: '2 mo' },
-  { id: 'P0411', name: 'Assam Gas Cracker Project', state: 'Assam', latPct: 34, lngPct: 84, dphis: 55, risk: 'moderate', cost: '₹5,410 Cr', delay: '6 mo' },
-];
-
 export default function App() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -32,10 +22,11 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [currentTab, setCurrentTab] = useState<ActiveTab>('motion');
   const [ministryFilterOnly, setMinistryFilterOnly] = useState<boolean>(false);
-  const [pins, setPins] = useState<ProjectPin[]>(initialPins);
-  const [selectedPin, setSelectedPin] = useState<ProjectPin>(initialPins[0]);
+  const [pins, setPins] = useState<ProjectPin[]>([]);
+  const [selectedPin, setSelectedPin] = useState<ProjectPin | null>(null);
   const [activeSection, setActiveSection] = useState<'01' | '02' | '03' | '04'>('01');
   const [showCeoModal, setShowCeoModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [alertCount, setAlertCount] = useState<number>(0);
   const [portfolioStats, setPortfolioStats] = useState({
     avgDphis: 78.4,
@@ -116,31 +107,12 @@ export default function App() {
         setAuthChecking(false);
       });
 
-    // B. Fetch live projects from FastAPI
-    fetchProjects().then(dbProjects => {
-      if (dbProjects && dbProjects.length > 0) {
-        const mappedPins: ProjectPin[] = dbProjects.slice(0, 15).map(p => ({
-          id: p.project_id,
-          name: p.project_name,
-          state: p.state,
-          latPct: Math.round(((p.location.latitude - 8) / (36 - 8)) * 100),
-          lngPct: Math.round(((p.location.longitude - 68) / (97 - 68)) * 100),
-          dphis: Math.round(p.dphis || 50),
-          risk: p.risk_level || 'moderate',
-          cost: `₹${p.cost.revised} Cr`,
-          delay: `${Math.round(p.dphis > 70 ? 24 : 6)} mo`
-        }));
-        setPins(mappedPins);
-        setSelectedPin(mappedPins[0]);
-      }
-    }).catch(console.warn);
-
-    // C. Fetch live alerts count
+    // B. Fetch live alerts count
     fetchAlerts().then(items => {
       setAlertCount(items.filter(a => a.status === 'PENDING').length);
     }).catch(console.warn);
 
-    // D. Fetch portfolio stats
+    // C. Fetch portfolio stats
     fetchAnalyticsOverview().then(ov => {
       if (ov) {
         setPortfolioStats({
@@ -154,7 +126,11 @@ export default function App() {
 
   // 2. Fetch Corridors Strictly Associated with the Logged-In User from Sovereign Database
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setPins([]);
+      setSelectedPin(null);
+      return;
+    }
 
     fetchMyProjects(currentUser.username).then(dbProjects => {
       if (dbProjects && dbProjects.length > 0) {
@@ -162,20 +138,45 @@ export default function App() {
           id: p.project_id,
           name: p.project_name,
           state: p.state,
-          latPct: Math.round(((p.location.latitude - 8) / (36 - 8)) * 100),
-          lngPct: Math.round(((p.location.longitude - 68) / (97 - 68)) * 100),
+          latPct: Math.round((((p.location?.latitude || 20) - 8) / (36 - 8)) * 100),
+          lngPct: Math.round((((p.location?.longitude || 78) - 68) / (97 - 68)) * 100),
           dphis: Math.round(p.dphis || 50),
           risk: p.risk_level || 'moderate',
-          cost: `₹${p.cost.revised} Cr`,
-          delay: `${Math.round(p.dphis > 70 ? 24 : 6)} mo`
+          cost: `₹${p.cost?.revised || 4000} Cr`,
+          delay: `${Math.round((p.dphis || 50) > 70 ? 24 : 6)} mo`
         }));
         setPins(mappedPins);
-        if (mappedPins.length > 0) {
-          setSelectedPin(mappedPins[0]);
-        }
+        setSelectedPin(mappedPins[0]);
+      } else {
+        // New user has 0 projects!
+        setPins([]);
+        setSelectedPin(null);
       }
-    }).catch(console.warn);
+    }).catch(err => {
+      console.warn('Failed to fetch user projects', err);
+      setPins([]);
+      setSelectedPin(null);
+    });
   }, [currentUser?.username]);
+
+  const handleProjectAdded = (newProject: any) => {
+    const costCr = newProject?.cost?.revised || 4000;
+    const newPin: ProjectPin = {
+      id: newProject.project_id,
+      name: newProject.project_name,
+      state: newProject.state || 'National Corridor',
+      latPct: Math.round((((newProject.location?.latitude || 20) - 8) / (36 - 8)) * 100),
+      lngPct: Math.round((((newProject.location?.longitude || 78) - 68) / (97 - 68)) * 100),
+      dphis: Math.round(newProject.dphis || 50),
+      risk: newProject.risk_level || 'moderate',
+      cost: `₹${costCr} Cr`,
+      delay: `${Math.round((newProject.dphis || 50) > 70 ? 24 : 6)} mo`
+    };
+
+    setPins(prev => [newPin, ...prev.filter(p => p.id !== newPin.id)]);
+    setSelectedPin(newPin);
+    setCurrentTab('intelligence');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -499,7 +500,9 @@ export default function App() {
                       Empirical Risk Decomposition & Additive Shapley Attribution
                     </h2>
                     <p className="text-xs sm:text-sm text-white/80">
-                      Isolating marginal covariate contributions driving probabilistic failure escalation on corridor {selectedPin.id}.
+                      {selectedPin
+                        ? `Isolating marginal covariate contributions driving probabilistic failure escalation on corridor ${selectedPin.id}.`
+                        : 'Continuous econometric surveillance and feature attribution across active portfolio assets.'}
                     </p>
                   </div>
 
@@ -511,47 +514,62 @@ export default function App() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pt-2">
-                  <div className="oled-solid-card p-5 sm:p-6 space-y-3 sm:space-y-4">
-                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                      <span className="font-mono-code font-bold text-white">{selectedPin.id}</span>
-                      <span className="px-2.5 py-1 rounded bg-white/10 text-white text-xs font-mono-code font-bold border border-white/20">
-                        DPHIS: {selectedPin.dphis} · Critical Risk Cohort
-                      </span>
-                    </div>
-                    <h4 className="text-sm sm:text-base font-bold text-white">{selectedPin.name}</h4>
-                    <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-                      Certified physical completion (34%) exhibits severe hysteresis relative to cumulative financial disbursement (62%), inducing acute milestone recovery friction.
-                    </p>
-
-                    <div className="pt-2 space-y-2 text-xs sm:text-sm">
-                      <div className="flex justify-between font-mono-code text-white/80">
-                        <span>Physical Capitalization: 34%</span>
-                        <span className="text-white font-bold">Sanctioned Target Baseline: 78%</span>
+                {selectedPin ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pt-2">
+                    <div className="oled-solid-card p-5 sm:p-6 space-y-3 sm:space-y-4">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                        <span className="font-mono-code font-bold text-white">{selectedPin.id}</span>
+                        <span className="px-2.5 py-1 rounded bg-white/10 text-white text-xs font-mono-code font-bold border border-white/20">
+                          DPHIS: {selectedPin.dphis} · Critical Risk Cohort
+                        </span>
                       </div>
-                      <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
-                        <div className="h-full bg-white rounded-full" style={{ width: '34%' }} />
-                      </div>
-                    </div>
-                  </div>
+                      <h4 className="text-sm sm:text-base font-bold text-white">{selectedPin.name}</h4>
+                      <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
+                        Certified physical completion exhibits severe hysteresis relative to cumulative financial disbursement, inducing acute milestone recovery friction.
+                      </p>
 
-                  <div className="oled-solid-card p-5 sm:p-6 space-y-3">
-                    <h4 className="text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider text-white/80 mb-2">
-                      Top Additive Shapley Attribution Vectors (SHAP)
-                    </h4>
-                    {shapDrivers.map(d => (
-                      <div key={d.name} className="p-3 rounded-xl bg-white/5 border border-white/15 space-y-1">
-                        <div className="flex items-center justify-between text-xs sm:text-sm">
-                          <span className="font-semibold text-white">{d.name}</span>
-                          <span className="font-mono-code font-bold text-white">
-                            {d.impact}
-                          </span>
+                      <div className="pt-2 space-y-2 text-xs sm:text-sm">
+                        <div className="flex justify-between font-mono-code text-white/80">
+                          <span>Physical Capitalization: 34%</span>
+                          <span className="text-white font-bold">Sanctioned Target Baseline: 78%</span>
                         </div>
-                        <p className="text-[11px] sm:text-xs text-white/70">{d.text}</p>
+                        <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
+                          <div className="h-full bg-white rounded-full" style={{ width: '34%' }} />
+                        </div>
                       </div>
-                    ))}
+                    </div>
+
+                    <div className="oled-solid-card p-5 sm:p-6 space-y-3">
+                      <h4 className="text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider text-white/80 mb-2">
+                        Top Additive Shapley Attribution Vectors (SHAP)
+                      </h4>
+                      {shapDrivers.map(d => (
+                        <div key={d.name} className="p-3 rounded-xl bg-white/5 border border-white/15 space-y-1">
+                          <div className="flex items-center justify-between text-xs sm:text-sm">
+                            <span className="font-semibold text-white">{d.name}</span>
+                            <span className="font-mono-code font-bold text-white">
+                              {d.impact}
+                            </span>
+                          </div>
+                          <p className="text-[11px] sm:text-xs text-white/70">{d.text}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="oled-solid-card p-8 text-center space-y-4">
+                    <div className="text-base font-bold text-white">No Infrastructure Corridors Ingested Yet</div>
+                    <p className="text-xs sm:text-sm text-white/75 max-w-xl mx-auto leading-relaxed">
+                      Your account currently has 0 capital assets configured in the database. Ingest your first project corridor using the standard 8 Flash Report columns to view its empirical risk decomposition, LightGBM projections, and SHAP covariate attributions.
+                    </p>
+                    <button
+                      onClick={() => setShowAddModal(true)}
+                      className="px-5 py-2.5 rounded-xl bg-white text-black text-xs font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-lg inline-flex items-center gap-2"
+                    >
+                      <span>+ Ingest Capital Asset</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </section>
@@ -577,7 +595,7 @@ export default function App() {
 
                   <div className="flex items-center gap-3 shrink-0">
                     <button
-                      onClick={() => setShowCeoModal(true)}
+                      onClick={() => setShowAddModal(true)}
                       style={!isDark ? { color: '#000000' } : undefined}
                       className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-mono-code cursor-pointer transition-all duration-200 flex items-center gap-2 ${
                         isDark
@@ -652,8 +670,9 @@ export default function App() {
         <div className="relative z-10 w-full h-full overflow-y-auto">
           {currentTab === 'intelligence' && (
             <ProjectIntelligence
-              projectId={selectedPin.id}
+              projectId={selectedPin?.id}
               onNavigateToInvestigation={() => setCurrentTab('investigation')}
+              onOpenAddProject={() => setShowAddModal(true)}
               onSelectProject={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
@@ -662,20 +681,27 @@ export default function App() {
           )}
 
           {currentTab === 'investigation' && (
-            <Investigation projectId={selectedPin.id} />
+            <Investigation
+              projectId={selectedPin?.id}
+              onOpenAddProject={() => setShowAddModal(true)}
+            />
           )}
 
           {currentTab === 'analytics' && (
-            <Analytics onNavigateToProject={(id) => {
-              const found = pins.find(p => p.id === id);
-              if (found) setSelectedPin(found);
-              setCurrentTab('intelligence');
-            }} />
+            <Analytics
+              pinsCount={pins.length}
+              onOpenAddProject={() => setShowAddModal(true)}
+              onNavigateToProject={(id) => {
+                const found = pins.find(p => p.id === id);
+                if (found) setSelectedPin(found);
+                setCurrentTab('intelligence');
+              }}
+            />
           )}
 
           {currentTab === 'assistant' && (
             <Assistant
-              selectedProjectId={selectedPin.id}
+              selectedProjectId={selectedPin?.id || ''}
               currentUser={currentUser}
               onNavigateToProject={(id) => {
                 const found = pins.find(p => p.id === id);
@@ -688,6 +714,8 @@ export default function App() {
           {currentTab === 'alerts' && (
             <Alerts
               currentUser={currentUser}
+              pinsCount={pins.length}
+              onOpenAddProject={() => setShowAddModal(true)}
               onNavigateToInvestigation={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
@@ -702,7 +730,7 @@ export default function App() {
       {currentTab === 'motion' && (
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
           <button
-            onClick={() => setShowCeoModal(true)}
+            onClick={() => setShowAddModal(true)}
             style={!isDark ? { color: '#000000' } : undefined}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono-code font-bold transition-all duration-200 cursor-pointer ${
               isDark
@@ -715,6 +743,14 @@ export default function App() {
           </button>
         </div>
       )}
+
+      {/* GEMINI 57-FEATURE & LIGHTGBM ML ASSET INGESTION MODAL */}
+      <AddProjectModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        currentUser={currentUser}
+        onProjectAdded={handleProjectAdded}
+      />
 
       {/* CEO PIN MANAGER MODAL */}
       {showCeoModal && (

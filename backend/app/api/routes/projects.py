@@ -174,8 +174,10 @@ async def get_my_projects(
     if not user:
         return []
 
-    assigned_ids = user.get("assigned_projects", [])
-    if assigned_ids:
+    if "assigned_projects" in user:
+        assigned_ids = user.get("assigned_projects") or []
+        if not assigned_ids:
+            return []
         cursor = db.projects.find(
             {"project_id": {"$in": assigned_ids}},
             {"_id": 0}
@@ -201,7 +203,107 @@ async def get_my_projects(
 
     return []
 
+from pydantic import BaseModel
+from app.services.gemini_feature_service import process_project_ingestion
 
+class NormalAssetIngestRequest(BaseModel):
+    project_id: str
+    project_name: str
+    original_cost_crores: float
+    revised_cost_crores: float
+    expenditure_crores: float
+    physical_progress_percent: float
+    s_no: Optional[int] = 1
+    page: Optional[int] = 1
+    ministry: Optional[str] = None
+    sector: Optional[str] = None
+    state: Optional[str] = None
+    username: Optional[str] = None
+
+@router.post("/ingest-normal-asset", response_model=dict, status_code=status.HTTP_201_CREATED)
+async def ingest_normal_asset(payload: NormalAssetIngestRequest):
+    """
+    Ingests an infrastructure asset using ONLY the 8 standard Flash Report columns:
+    page, s_no, project_id, project_name, original_cost_crores, revised_cost_crores,
+    expenditure_crores, physical_progress_percent.
+    
+    1. Invokes Gemini Flash to generate the full 57-feature engineered dataset.
+    2. Feeds the 57 features into the LightGBM models + Platt calibrators.
+    3. Computes DPHIS score, risk tier, and driver decomposition.
+    4. Persists project, features, and snapshot into MongoDB.
+    5. Links project to user.assigned_projects.
+    """
+    db = get_database()
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not available")
+
+    # Run Gemini Flash 2.5 Feature Engineering + ML Inference Pipeline
+    try:
+        pipeline_res = await process_project_ingestion(
+            normal_inputs=payload.model_dump(),
+            ministry=payload.ministry,
+            state=payload.state,
+            sector=payload.sector,
+            username=payload.username
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Feature engineering or ML inference failed: {str(e)}")
+
+    project_doc = pipeline_res["project"]
+    features_57 = pipeline_res["features_57"]
+    project_id = project_doc["project_id"]
+
+    # Upsert into projects collection
+    await db.projects.update_one(
+        {"project_id": project_id},
+        {"$set": project_doc},
+        upsert=True
+    )
+
+    # Store 57-feature engineered dataset in project_features collection
+    feature_record = {
+        "project_id": project_id,
+        "features": features_57,
+        "dphis": project_doc["dphis"],
+        "risk_tier": project_doc["risk_tier"],
+        "created_at": datetime.utcnow()
+    }
+    await db.project_features.update_one(
+        {"project_id": project_id},
+        {"$set": feature_record},
+        upsert=True
+    )
+
+    # Create baseline snapshot
+    baseline_snap = {
+        "project_id": project_id,
+        "snapshot_date": datetime.utcnow().strftime("%Y-%m-%d"),
+        "physical_progress": payload.physical_progress_percent,
+        "financial_progress": round((payload.expenditure_crores / max(1.0, payload.revised_cost_crores)) * 100.0, 2),
+        "cumulative_expenditure": payload.expenditure_crores,
+        "milestones": {"completed": int(payload.physical_progress_percent / 10), "delayed": 1 if project_doc["dphis"] > 65 else 0, "pending": 10 - int(payload.physical_progress_percent / 10), "total": 10},
+        "created_at": datetime.utcnow()
+    }
+    await db.project_snapshots.update_one(
+        {"project_id": project_id, "snapshot_date": baseline_snap["snapshot_date"]},
+        {"$set": baseline_snap},
+        upsert=True
+    )
+
+    # Link to user's assigned projects in db.users
+    if payload.username and payload.username.strip():
+        uname = payload.username.strip()
+        await db.users.update_one(
+            {"username": uname},
+            {"$addToSet": {"assigned_projects": project_id}}
+        )
+        await db.projects.update_one(
+            {"project_id": project_id},
+            {"$addToSet": {"assigned_users": uname}}
+        )
+
+    project_doc.pop("_id", None)
+    return project_doc
 
 @router.post("", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def create_project(payload: ProjectCreate):

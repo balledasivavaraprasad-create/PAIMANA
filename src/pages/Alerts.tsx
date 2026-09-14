@@ -6,9 +6,11 @@ import { fetchAlerts, acknowledgeAlert, triggerN8nRiskEvent, AlertItem, UserProf
 interface Props {
   onNavigateToInvestigation?: (projectId: string) => void;
   currentUser?: UserProfile | null;
+  pinsCount?: number;
+  onOpenAddProject?: () => void;
 }
 
-export default function Alerts({ onNavigateToInvestigation, currentUser }: Props) {
+export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCount, onOpenAddProject }: Props) {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,6 +40,39 @@ export default function Alerts({ onNavigateToInvestigation, currentUser }: Props
   useEffect(() => {
     loadAlerts();
   }, []);
+
+  if (pinsCount === 0) {
+    return (
+      <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
+        <GlassCard variant="hero" padding={32} className="space-y-6 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-white/10">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                <span>Zero Monitored Assets</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-white">
+                Early-Warning Surveillance Awaiting Projects
+              </h2>
+              <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
+                Automated threshold breach detection, multi-factor risk escalation alerts, and automated n8n webhook notifications monitor active infrastructure corridors. Ingest an asset to initialize active monitoring.
+              </p>
+            </div>
+
+            {onOpenAddProject && (
+              <button
+                onClick={onOpenAddProject}
+                className="px-6 py-3.5 rounded-xl bg-white text-black text-sm font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-[0_0_24px_rgba(255,255,255,0.3)] flex items-center gap-2 shrink-0"
+              >
+                <span className="text-base">+</span>
+                <span>Add Project</span>
+              </button>
+            )}
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   const handleAcknowledge = async (alertId: string) => {
     const ok = await acknowledgeAlert(alertId);

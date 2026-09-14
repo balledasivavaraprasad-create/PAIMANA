@@ -102,18 +102,7 @@ async def register(req: UserRegisterRequest, request: Request):
     hashed = get_password_hash(req.password)
     resolved_ministry = ministry_name or "Road Transport & Highways"
 
-    # Automatically associate 8 relevant projects from the selected ministry
-    assigned_ids = []
-    if db is not None:
-        try:
-            import re
-            min_tokens = [re.escape(t) for t in resolved_ministry.replace("&", " ").split() if t.lower() not in ("of", "and", "the", "ministry", "department")]
-            pat = re.compile(".*".join(min_tokens), re.IGNORECASE) if min_tokens else re.compile(re.escape(resolved_ministry), re.IGNORECASE)
-            assigned_cursor = db.projects.find({"ministry": pat}, {"project_id": 1}).sort("dphis", -1).limit(8)
-            assigned_ids = [p["project_id"] for p in await assigned_cursor.to_list(length=8)]
-        except Exception as e:
-            logger.warning(f"Failed to auto-assign projects on registration: {e}")
-
+    # New users start with 0 projects until they ingest their first capital asset
     user_doc = {
         "username": username,
         "email": email_clean,
@@ -131,17 +120,12 @@ async def register(req: UserRegisterRequest, request: Request):
         "notify_via_email": True,
         "terms_accepted": True,
         "ai_ack_accepted": True,
-        "assigned_projects": assigned_ids,
+        "assigned_projects": [],
         "created_at": datetime.now(timezone.utc)
     }
 
     if db is not None:
         await db.users.insert_one(user_doc)
-        if assigned_ids:
-            await db.projects.update_many(
-                {"project_id": {"$in": assigned_ids}},
-                {"$addToSet": {"assigned_users": username}}
-            )
 
         # Issue single-use 6-digit OTP
         code = generate_otp()

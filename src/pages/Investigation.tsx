@@ -3,22 +3,29 @@ import GlassCard from '../components/GlassCard';
 import { triggerInvestigation, fetchProject, InvestigationReport, ProjectData } from '../lib/api';
 
 interface Props {
-  projectId: string;
+  projectId?: string;
+  onOpenAddProject?: () => void;
 }
 
-export default function Investigation({ projectId }: Props) {
+export default function Investigation({ projectId, onOpenAddProject }: Props) {
   const [report, setReport] = useState<InvestigationReport | null>(null);
   const [project, setProject] = useState<ProjectData | null>(null);
   const [loading, setLoading] = useState(false);
   const [acknowledged, setAcknowledged] = useState(false);
 
   useEffect(() => {
+    if (!projectId) {
+      setProject(null);
+      setReport(null);
+      return;
+    }
     fetchProject(projectId).then(p => {
       if (p) setProject(p);
     });
   }, [projectId]);
 
   const handleRunInvestigation = async () => {
+    if (!projectId) return;
     setLoading(true);
     const res = await triggerInvestigation(projectId);
     if (res) {
@@ -26,6 +33,39 @@ export default function Investigation({ projectId }: Props) {
     }
     setLoading(false);
   };
+
+  if (!projectId) {
+    return (
+      <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
+        <GlassCard variant="hero" padding={32} className="space-y-6 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-white/10">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                <span>No Project Selected</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-white">
+                Multi-Agent Causal Diagnosis Requires a Capital Asset
+              </h2>
+              <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
+                Autonomous causal diagnosis synthesizes forensic evidence across 57 feature covariates, contractor historical execution velocity, and milestone buffers. Ingest a project to run causal investigations.
+              </p>
+            </div>
+
+            {onOpenAddProject && (
+              <button
+                onClick={onOpenAddProject}
+                className="px-6 py-3.5 rounded-xl bg-white text-black text-sm font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-[0_0_24px_rgba(255,255,255,0.3)] flex items-center gap-2 shrink-0"
+              >
+                <span className="text-base">+</span>
+                <span>Add Project</span>
+              </button>
+            )}
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   const pName = project?.project_name || "NH-48 Varanasi-Ranchi Expressway";
 

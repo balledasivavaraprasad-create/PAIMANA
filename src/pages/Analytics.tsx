@@ -5,9 +5,11 @@ import { fetchAnalyticsOverview, fetchRiskTrend, AnalyticsOverview } from '../li
 
 interface Props {
   onNavigateToProject?: (projectId: string) => void;
+  pinsCount?: number;
+  onOpenAddProject?: () => void;
 }
 
-export default function Analytics({ onNavigateToProject }: Props) {
+export default function Analytics({ onNavigateToProject, pinsCount, onOpenAddProject }: Props) {
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
   const [riskTrend, setRiskTrend] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +24,39 @@ export default function Analytics({ onNavigateToProject }: Props) {
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
+
+  if (pinsCount === 0) {
+    return (
+      <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
+        <GlassCard variant="hero" padding={32} className="space-y-6 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-white/10">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                <span>Zero Active Projects in Portfolio</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-white">
+                Portfolio Telemetry Awaiting Asset Ingestion
+              </h2>
+              <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
+                Macroeconomic risk analytics, capital velocity distributions, and cross-sector stress indices require at least one active infrastructure corridor. Ingest your first asset using the 8 standard Flash Report columns to generate portfolio telemetry.
+              </p>
+            </div>
+
+            {onOpenAddProject && (
+              <button
+                onClick={onOpenAddProject}
+                className="px-6 py-3.5 rounded-xl bg-white text-black text-sm font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-[0_0_24px_rgba(255,255,255,0.3)] flex items-center gap-2 shrink-0"
+              >
+                <span className="text-base">+</span>
+                <span>Add Project</span>
+              </button>
+            )}
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   const totalProjects = overview?.total_projects || 1500;
   const criticalCount = overview?.critical || 60;

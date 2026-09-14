@@ -213,6 +213,34 @@ export async function fetchMyProjects(username?: string, limit = 50): Promise<Pr
   }
 }
 
+export interface NormalAssetIngestRequest {
+  page?: number;
+  s_no?: number;
+  project_id: string;
+  project_name: string;
+  original_cost_crores: number;
+  revised_cost_crores: number;
+  expenditure_crores: number;
+  physical_progress_percent: number;
+  ministry?: string;
+  sector?: string;
+  state?: string;
+  username?: string;
+}
+
+export async function ingestNormalAsset(payload: NormalAssetIngestRequest): Promise<ProjectData> {
+  const res = await fetch(`${API_BASE}/projects/ingest-normal-asset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || data.error || 'Failed to ingest project via Gemini pipeline');
+  }
+  return data;
+}
+
 export async function fetchProjects(risk?: string, limit = 50, ministry?: string, search?: string, username?: string): Promise<ProjectData[]> {
   try {
     const url = new URL(`${API_BASE}/projects`);

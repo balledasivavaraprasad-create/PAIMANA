@@ -3,9 +3,10 @@ import GlassCard from '../components/GlassCard';
 import { fetchProjectPredictions, fetchProjectRisk, fetchProject, PredictionData, RiskData, ProjectData } from '../lib/api';
 
 interface Props {
-  projectId: string;
+  projectId?: string;
   onNavigateToInvestigation: (projectId: string) => void;
   onSelectProject?: (projectId: string) => void;
+  onOpenAddProject?: () => void;
 }
 
 function DHPISGauge({ score }: { score: number }) {
@@ -61,7 +62,7 @@ function DHPISGauge({ score }: { score: number }) {
   );
 }
 
-export default function ProjectIntelligence({ projectId, onNavigateToInvestigation }: Props) {
+export default function ProjectIntelligence({ projectId, onNavigateToInvestigation, onOpenAddProject }: Props) {
   const [activeTab, setActiveTab] = useState<'shap' | 'predictions'>('shap');
   const [project, setProject] = useState<ProjectData | null>(null);
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
@@ -69,6 +70,13 @@ export default function ProjectIntelligence({ projectId, onNavigateToInvestigati
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!projectId) {
+      setProject(null);
+      setPrediction(null);
+      setRisk(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     Promise.all([
       fetchProject(projectId),
@@ -82,6 +90,66 @@ export default function ProjectIntelligence({ projectId, onNavigateToInvestigati
     }).catch(() => setLoading(false));
   }, [projectId]);
 
+  // ONBOARDING EMPTY STATE: If no project is assigned or selected
+  if (!loading && (!projectId || !project)) {
+    return (
+      <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
+        <GlassCard variant="hero" padding={32} className="space-y-8 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-white/10">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                <span>Zero Infrastructure Corridors Configured</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white">
+                Institutional Portfolio Onboarding
+              </h2>
+              <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
+                Your account currently has no active capital projects. Ingest your first asset using the 8 standard Flash Report columns to trigger autonomous Gemini 57-feature synthesis, LightGBM inference, and compute your composite DPHIS score.
+              </p>
+            </div>
+
+            {onOpenAddProject && (
+              <button
+                onClick={onOpenAddProject}
+                className="px-6 py-3.5 rounded-xl bg-white text-black text-sm font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-[0_0_24px_rgba(255,255,255,0.3)] flex items-center gap-2 shrink-0"
+              >
+                <span className="text-base">+</span>
+                <span>Add Project (Flash Report Ingestion)</span>
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+            <div className="p-5 rounded-xl bg-white/5 border border-white/10 space-y-2">
+              <div className="text-xs font-mono font-bold text-sky-400 uppercase">Step 1: Normal Flash Report Input</div>
+              <div className="text-sm font-semibold text-white">8 Standard Fields Only</div>
+              <p className="text-xs text-white/70 leading-relaxed">
+                Page, S.No, Project ID, Name, Original Cost, Revised Cost, Expenditure, and Physical Progress (from <code className="text-sky-300">FlashReport_July_2026.csv</code>).
+              </p>
+            </div>
+
+            <div className="p-5 rounded-xl bg-white/5 border border-white/10 space-y-2">
+              <div className="text-xs font-mono font-bold text-indigo-400 uppercase">Step 2: Autonomous AI Synthesis</div>
+              <div className="text-sm font-semibold text-white">Gemini Flash 2.5 Feature Engineering</div>
+              <p className="text-xs text-white/70 leading-relaxed">
+                Gemini automatically transforms the 8 normal inputs into all 57 econometric features including velocities, milestone slippages, and multi-temporal metrics.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-xl bg-white/5 border border-white/10 space-y-2">
+              <div className="text-xs font-mono font-bold text-emerald-400 uppercase">Step 3: Econometric Health & ML</div>
+              <div className="text-sm font-semibold text-white">DPHIS & SHAP Decomposition</div>
+              <p className="text-xs text-white/70 leading-relaxed">
+                Calibrated LightGBM models evaluate cost, schedule, and combined risk probabilities, generating the composite DPHIS index immediately.
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
   const pName = project?.project_name || "NH-48 Varanasi-Ranchi Expressway Package 4";
   const pState = project?.state || "Uttar Pradesh";
   const pSector = project?.sector || "Roads & Highways";
@@ -89,7 +157,7 @@ export default function ProjectIntelligence({ projectId, onNavigateToInvestigati
 
   return (
     <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
-      {/* Top Header Card - Clean heading without top eyebrow tag */}
+      {/* Top Header Card */}
       <GlassCard variant="hero" padding={24} className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-2 sm:space-y-3">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white leading-tight">
@@ -111,10 +179,18 @@ export default function ProjectIntelligence({ projectId, onNavigateToInvestigati
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {onOpenAddProject && (
+            <button
+              onClick={onOpenAddProject}
+              className="px-4 py-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 border border-white/20 text-xs sm:text-sm font-mono-code font-bold transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <span>+ Add Project</span>
+            </button>
+          )}
           <button
-            onClick={() => onNavigateToInvestigation(projectId)}
-            className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.22)] hover:bg-zinc-900 transition-all cursor-pointer flex items-center justify-center gap-2"
+            onClick={() => onNavigateToInvestigation(projectId || '')}
+            className="px-5 sm:px-6 py-2.5 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.22)] hover:bg-zinc-900 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <span>Initiate Multi-Agent Causal Diagnosis →</span>
           </button>
