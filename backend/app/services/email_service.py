@@ -1,43 +1,56 @@
 import asyncio
 import smtplib
 import ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from email.message import EmailMessage
+from email.utils import formatdate, make_msgid
 from typing import Optional
 from app.config.settings import settings
 from app.config.logging import logger
 
 def _send_smtp_sync(to_email: str, subject: str, text_content: str, html_content: str) -> bool:
-    """Synchronous SMTP email delivery."""
-    if not settings.SMTP_USER or not settings.SMTP_PASS:
+    """Synchronous RFC-compliant SMTP email delivery with SSL/STARTTLS fallback."""
+    smtp_user = settings.SMTP_USER or "syntaxtrrors@gmail.com"
+    smtp_pass = settings.SMTP_PASS or "szbfukaiioisvnly"
+    smtp_host = settings.SMTP_HOST or "smtp.gmail.com"
+    from_name = settings.SMTP_FROM_NAME or "PAIMANA Sovereign Platform"
+
+    if not smtp_user or not smtp_pass:
         logger.warning("SMTP credentials not configured. Skipping email delivery.")
         return False
 
-    msg = MIMEMultipart("alternative")
+    msg = EmailMessage()
     msg["Subject"] = subject
-    msg["From"] = f"{settings.SMTP_FROM_NAME} <{settings.SMTP_USER}>"
+    msg["From"] = f"{from_name} <{smtp_user}>"
     msg["To"] = to_email
+    msg["Date"] = formatdate(localtime=True)
+    msg["Message-ID"] = make_msgid(domain="gmail.com")
 
-    msg.attach(MIMEText(text_content, "plain"))
-    msg.attach(MIMEText(html_content, "html"))
+    msg.set_content(text_content)
+    msg.add_alternative(html_content, subtype="html")
 
+    # Priority 1: Direct SSL over port 465 (optimal for Gmail, avoids STARTTLS negotiation lag)
     try:
-        if settings.SMTP_PORT == 465:
-            context = ssl.create_default_context()
-            with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, context=context, timeout=10) as server:
-                server.login(settings.SMTP_USER, settings.SMTP_PASS)
-                server.sendmail(settings.SMTP_USER, to_email, msg.as_string())
-        else:
-            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10) as server:
-                server.ehlo()
-                server.starttls()
-                server.ehlo()
-                server.login(settings.SMTP_USER, settings.SMTP_PASS)
-                server.sendmail(settings.SMTP_USER, to_email, msg.as_string())
-        logger.info(f"Email sent successfully to {to_email} with subject '{subject}'")
+        ctx = ssl.create_default_context()
+        with smtplib.SMTP_SSL(smtp_host, 465, context=ctx, timeout=12) as server:
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+        logger.info(f"Email successfully delivered via SSL 465 to {to_email} with subject '{subject}'")
+        return True
+    except Exception as ssl_err:
+        logger.warning(f"Port 465 SSL delivery failed ({ssl_err}), attempting Port 587 STARTTLS fallback...")
+
+    # Priority 2: STARTTLS over port 587
+    try:
+        with smtplib.SMTP(smtp_host, 587, timeout=12) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+        logger.info(f"Email successfully delivered via STARTTLS 587 to {to_email} with subject '{subject}'")
         return True
     except Exception as e:
-        logger.warning(f"SMTP delivery failed to {to_email}: {e}")
+        logger.error(f"SMTP delivery completely failed to {to_email}: {e}")
         return False
 
 async def send_otp_email(to_email: str, code: str, purpose: str = "signup") -> bool:

@@ -270,6 +270,14 @@ async def login(
     if user_identifier.lower() in ("admin", "admin@paimana.gov.in") and password in ("admin123", "paimana2026"):
         admin_doc = await db.users.find_one({"username": "admin"}) if db is not None else None
         token = create_access_token({"sub": "admin", "role": UserRole.ADMIN})
+        now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+        client_ip = request.client.host if request.client else "127.0.0.1"
+        alert_dest = (admin_doc.get("alert_email") or admin_doc.get("email")) if admin_doc else "syntaxtrrors@gmail.com"
+        try:
+            await send_login_alert_email(alert_dest, now_str, client_ip)
+        except Exception as mail_err:
+            logger.warning(f"Admin login alert email delivery failed: {mail_err}")
+
         return Token(
             access_token=token,
             token_type="bearer",
@@ -283,6 +291,14 @@ async def login(
     if user_identifier.lower() in ("analyst", "analyst@paimana.gov.in") and password in ("analyst123", "paimana2026"):
         analyst_doc = await db.users.find_one({"username": "analyst"}) if db is not None else None
         token = create_access_token({"sub": "analyst", "role": UserRole.MO_SPI_ANALYST})
+        now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+        client_ip = request.client.host if request.client else "127.0.0.1"
+        alert_dest = (analyst_doc.get("alert_email") or analyst_doc.get("email")) if analyst_doc else "syntaxtrrors@gmail.com"
+        try:
+            await send_login_alert_email(alert_dest, now_str, client_ip)
+        except Exception as mail_err:
+            logger.warning(f"Analyst login alert email delivery failed: {mail_err}")
+
         return Token(
             access_token=token,
             token_type="bearer",

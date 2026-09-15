@@ -25,10 +25,10 @@ class Settings(BaseSettings):
 
     # SMTP Authentication & Email Service
     SMTP_HOST: str = "smtp.gmail.com"
-    SMTP_PORT: int = 587
+    SMTP_PORT: int = 465
     SMTP_USER: Optional[str] = "syntaxtrrors@gmail.com"
     SMTP_PASS: Optional[str] = "szbfukaiioisvnly"
-    SMTP_FROM_NAME: str = "PAIMANA Identity & Access"
+    SMTP_FROM_NAME: str = "PAIMANA Sovereign Platform"
     OTP_EXPIRE_MINUTES: int = 5
 
     # LLM Settings
