@@ -100,6 +100,24 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     return () => clearInterval(interval);
   }, [signupStep, resendTimer]);
 
+  // Clean and sanitize any network/protocol errors to prevent raw browser errors like 'Load failed'
+  const sanitizeErrorMessage = (err: any, fallback: string): string => {
+    if (!err) return fallback;
+    const raw = typeof err === 'string' ? err : (err.message || fallback);
+    const lower = String(raw).toLowerCase();
+    if (
+      lower.includes('load failed') ||
+      lower.includes('failed to fetch') ||
+      lower.includes('networkerror') ||
+      lower.includes('typeerror') ||
+      lower.includes('network request failed') ||
+      lower.includes('cors')
+    ) {
+      return 'Connection to authentication service was interrupted. Please check credentials or retry.';
+    }
+    return raw;
+  };
+
   // Handle Login Submit
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,11 +131,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       const data = await loginUser({ email: loginEmail.trim(), password: loginPassword });
       onLoginSuccess(data);
     } catch (err: any) {
-      let msg = err.message || 'Authentication failed. Please check credentials.';
-      if (msg.toLowerCase().includes('load failed') || msg.toLowerCase().includes('failed to fetch')) {
-        msg = 'Connection to authentication service was interrupted. Please check credentials or retry.';
-      }
-      setLoginError(msg);
+      setLoginError(sanitizeErrorMessage(err, 'Authentication failed. Please check credentials.'));
     } finally {
       setLoginLoading(false);
     }
@@ -177,7 +191,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       setResendTimer(30);
       setCanResend(false);
     } catch (err: any) {
-      setSignupError(err.message || 'Registration failed.');
+      setSignupError(sanitizeErrorMessage(err, 'Registration failed.'));
     } finally {
       setSignupLoading(false);
     }
@@ -214,7 +228,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       await verifyOtp({ email: signupEmail.trim(), otp: fullCode });
       setSignupStep(3);
     } catch (err: any) {
-      setOtpError(err.message || 'Invalid verification code.');
+      setOtpError(sanitizeErrorMessage(err, 'Invalid verification code.'));
     } finally {
       setOtpLoading(false);
     }
@@ -229,7 +243,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       setResendTimer(30);
       setCanResend(false);
     } catch (err: any) {
-      setOtpError(err.message || 'Could not resend code.');
+      setOtpError(sanitizeErrorMessage(err, 'Could not resend code.'));
     }
   };
 
