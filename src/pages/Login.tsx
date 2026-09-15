@@ -113,19 +113,26 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       const data = await loginUser({ email: loginEmail.trim(), password: loginPassword });
       onLoginSuccess(data);
     } catch (err: any) {
-      setLoginError(err.message || 'Authentication failed. Please check credentials.');
+      let msg = err.message || 'Authentication failed. Please check credentials.';
+      if (msg.toLowerCase().includes('load failed') || msg.toLowerCase().includes('failed to fetch')) {
+        msg = 'Connection to authentication service was interrupted. Please check credentials or retry.';
+      }
+      setLoginError(msg);
     } finally {
       setLoginLoading(false);
     }
   };
 
   // Fast 1-click Demo Fill
-  const fillDemoCredentials = (role: 'admin' | 'analyst' | 'morth') => {
+  const fillDemoCredentials = (role: 'admin' | 'analyst' | 'morth' | 'siva') => {
     if (role === 'admin') {
       setLoginEmail('admin');
       setLoginPassword('paimana2026');
     } else if (role === 'analyst') {
       setLoginEmail('analyst');
+      setLoginPassword('paimana2026');
+    } else if (role === 'siva') {
+      setLoginEmail('balledasivavaraprasad@gmail.com');
       setLoginPassword('paimana2026');
     } else {
       setLoginEmail('ramesh.kumar@morth.gov.in');
@@ -563,7 +570,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-2">
                   Demo Evaluation Credentials
                 </span>
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                   <button
                     type="button"
                     onClick={() => fillDemoCredentials('admin')}
@@ -593,6 +600,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                     title="Dr. Ramesh Kumar (Road Transport & Highways)"
                   >
                     🛣️ MoRTH Official
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fillDemoCredentials('siva')}
+                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate ${
+                      isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                    }`}
+                    title="Siva Prasad (balledasivavaraprasad@gmail.com)"
+                  >
+                    🏛️ Siva Prasad
                   </button>
                 </div>
               </div>
