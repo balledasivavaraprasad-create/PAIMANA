@@ -10,6 +10,54 @@ interface MyProjectOverviewProps {
   onViewProject: (projectId: string) => void;
   onNavigateToProjects: () => void;
   onOpenAddProject: () => void;
+  onNavigateToInvestigation?: (projectId: string) => void;
+  onRemoveProject?: (projectId: string) => void;
+}
+
+function CompactDphisGauge({ score }: { score: number }) {
+  const size = 68;
+  const strokeWidth = 6;
+  const center = size / 2;
+  const radius = center - strokeWidth - 2;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.min(100, Math.max(0, score));
+  const strokeDashoffset = circumference - (clamped / 100) * circumference;
+  const cat = getRiskCategory(score);
+
+  return (
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+      <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
+        <circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke="rgba(255, 255, 255, 0.15)"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+        />
+        <circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={cat.level === 'critical' ? '#ef4444' : cat.level === 'high' ? '#f97316' : cat.level === 'moderate' ? '#eab308' : '#10b981'}
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="transition-all duration-700 ease-out"
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+        <span className="font-mono-code font-bold text-base text-white leading-none">
+          {score}
+        </span>
+        <span className="text-[8px] font-mono-code font-bold text-white/60 uppercase mt-0.5">
+          DPHIS
+        </span>
+      </div>
+    </div>
+  );
 }
 
 export default function MyProjectOverview({
@@ -17,7 +65,9 @@ export default function MyProjectOverview({
   pins,
   onViewProject,
   onNavigateToProjects,
-  onOpenAddProject
+  onOpenAddProject,
+  onNavigateToInvestigation,
+  onRemoveProject
 }: MyProjectOverviewProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -43,7 +93,7 @@ export default function MyProjectOverview({
       {/* Welcome Banner */}
       <div className={`p-6 sm:p-8 rounded-2xl border backdrop-blur-xl shadow-xl transition-all ${
         isDark 
-          ? 'bg-[#0B0F17]/90 border-white/15 text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)]' 
+          ? 'bg-[#0B0F17]/80 border-white/15 text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)]' 
           : 'bg-white/95 border-slate-200 text-slate-900 shadow-lg'
       }`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -61,7 +111,7 @@ export default function MyProjectOverview({
               My Project Overview
             </h1>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
-              Real-time project health, automated threshold alerts, and recommended intervention actions for your assigned infrastructure assets.
+              Real-time project health, automated predictive risk scoring, and early intervention actions for your assigned infrastructure assets.
             </p>
           </div>
 
@@ -87,7 +137,7 @@ export default function MyProjectOverview({
         </div>
       </div>
 
-      {/* Top 4 Summary Cards */}
+      {/* Top 4 Frosted Summary Flashcards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* 1. Active Projects */}
         <div className="oled-solid-card p-4 sm:p-5 space-y-2">
@@ -125,7 +175,7 @@ export default function MyProjectOverview({
             {highRiskCount}
           </div>
           <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
-            <span>Threshold crossed or escalating</span>
+            <span>Escalated delay index</span>
           </div>
         </div>
 
@@ -138,7 +188,7 @@ export default function MyProjectOverview({
             {upcomingMilestonesCount}
           </div>
           <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
-            <span>Due in the next 60 days</span>
+            <span>Due in next 60 days</span>
           </div>
         </div>
       </div>
@@ -152,7 +202,7 @@ export default function MyProjectOverview({
               <span>Projects Needing Attention</span>
             </h2>
             <p className="text-xs text-[var(--text-muted)]">
-              Ranked by urgent intervention need, schedule delay, and threshold status
+              Ranked by urgent intervention need, schedule delay, and DPHIS risk score
             </p>
           </div>
           <span className="text-xs font-mono text-[var(--text-muted)]">
@@ -163,20 +213,6 @@ export default function MyProjectOverview({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {displayProjects.map(pin => {
             const cat = getRiskCategory(pin.dphis);
-            const thresh = pin.dphis_threshold || 70;
-            const isCrossed = pin.dphis >= thresh;
-
-            // Generate contextual plain-language reason
-            let reasonText = "Progress is behind plan.";
-            if (cat.level === 'critical') {
-              reasonText = "Progress is severely behind plan and expenditure is diverging from ground completion.";
-            } else if (cat.level === 'high') {
-              reasonText = "Spending is increasing faster than physical progress.";
-            } else if (cat.level === 'moderate') {
-              reasonText = "A key milestone is at risk of slipping past target date.";
-            } else {
-              reasonText = "Execution proceeding on schedule within risk tolerances.";
-            }
 
             return (
               <div
@@ -184,79 +220,128 @@ export default function MyProjectOverview({
                 className="oled-solid-card p-5 sm:p-6 space-y-4 hover:border-white/40 transition-all flex flex-col justify-between"
               >
                 <div className="space-y-3.5">
-                  {/* Top Bar: ID and Status */}
+                  {/* Top Bar: ID & Location */}
                   <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
                     <div className="flex items-center gap-2">
                       <span className="font-mono-code font-bold text-xs text-white px-2.5 py-0.5 rounded bg-white/10">
                         {pin.id}
                       </span>
-                      <span className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold border ${cat.badgeBg}`}>
-                        {cat.label}
+                      <span className="text-xs text-white/70 flex items-center gap-1 font-medium">
+                        <span>📍</span>
+                        <span>{pin.state}</span>
                       </span>
                     </div>
 
-                    {/* Alert Threshold Badge */}
-                    <div className="flex items-center gap-1.5 font-mono text-xs">
-                      <span className="text-[var(--text-muted)] text-[11px]">Threshold:</span>
-                      <strong className="text-amber-300">{thresh}</strong>
-                      <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${
-                        isCrossed ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-400'
-                      }`}>
-                        {isCrossed ? '🔔 Crossed' : '✓ Below'}
-                      </span>
-                    </div>
+                    {onRemoveProject && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemoveProject(pin.id);
+                        }}
+                        title="Remove Project"
+                        className="text-xs text-red-400/80 hover:text-red-300 hover:bg-red-500/15 px-2 py-0.5 rounded-lg border border-red-500/20 transition-all cursor-pointer font-mono"
+                      >
+                        ✕ Remove
+                      </button>
+                    )}
                   </div>
 
-                  {/* Project Name and Location */}
+                  {/* Project Name */}
                   <div>
-                    <h3 className="font-bold text-base sm:text-lg text-[var(--text-primary)] leading-snug">
+                    <h3 className="font-bold text-base sm:text-lg text-[var(--text-primary)] leading-snug line-clamp-2">
                       {pin.name}
                     </h3>
-                    <div className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-2">
-                      <span>📍 {pin.state}</span>
-                      <span>•</span>
-                      <span>Budget: {pin.cost}</span>
-                      <span>•</span>
-                      <span>Expected Delay: {pin.delay}</span>
+                  </div>
+
+                  {/* DPHIS Score with Round Circular Progress Bar & Scrollbar */}
+                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3.5">
+                    <CompactDphisGauge score={pin.dphis} />
+
+                    <div className="flex-1 space-y-1.5 min-w-0">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-mono-code font-bold text-white/80 text-[11px] uppercase tracking-wider">
+                          DPHIS Risk Score:
+                        </span>
+                        <span className="font-mono-code font-bold text-white">
+                          {pin.dphis} <span className="text-white/40 font-normal">/ 100</span>
+                        </span>
+                      </div>
+
+                      {/* Compact DPHIS scrollbar/bar */}
+                      <div className="h-2 w-full rounded-full bg-white/10 p-0.5 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${Math.min(100, Math.max(5, pin.dphis))}%`,
+                            background: pin.dphis >= 80 
+                              ? 'linear-gradient(90deg, #f97316, #ef4444)' 
+                              : pin.dphis >= 65 
+                              ? 'linear-gradient(90deg, #eab308, #f97316)' 
+                              : pin.dphis >= 45 
+                              ? '#eab308' 
+                              : '#10b981'
+                          }}
+                        />
+                      </div>
+
+                      <div className="text-[10px] font-mono text-white/60 flex items-center justify-between">
+                        <span>Low (0)</span>
+                        <span className={cat.level === 'critical' || cat.level === 'high' ? 'text-red-400 font-bold' : 'text-emerald-400 font-medium'}>
+                          {cat.label}
+                        </span>
+                        <span>Critical (100)</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* One-Line Plain Reason */}
+                  {/* High Delay Risk Flashcard / Diagnosis */}
                   <div className={`p-3 rounded-xl border text-xs leading-relaxed ${
-                    cat.level === 'critical' || cat.level === 'high'
-                      ? 'bg-amber-500/10 border-amber-500/25 text-amber-200'
-                      : 'bg-white/5 border-white/10 text-white/80'
+                    cat.level === 'critical'
+                      ? 'bg-red-500/15 border-red-500/30 text-red-200'
+                      : cat.level === 'high'
+                      ? 'bg-amber-500/15 border-amber-500/30 text-amber-200'
+                      : cat.level === 'moderate'
+                      ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-200'
+                      : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
                   }`}>
-                    <span className="font-bold mr-1.5">Diagnosis:</span>
-                    <span>{reasonText}</span>
-                  </div>
-
-                  {/* Metrics Snapshot */}
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="p-2 rounded-lg bg-black/40 border border-white/5">
-                      <div className="text-[10px] font-mono uppercase text-[var(--text-muted)]">Progress</div>
-                      <div className="font-mono font-bold text-[var(--text-primary)] mt-0.5">34%</div>
+                    <div className="flex items-center gap-1.5 font-bold mb-1">
+                      <span>{cat.level === 'critical' || cat.level === 'high' ? '⚠️' : 'ℹ️'}</span>
+                      <span className="uppercase tracking-wider font-mono text-[11px]">
+                        {cat.level === 'critical' ? 'Critical Delay Risk' : cat.level === 'high' ? 'High Delay Risk' : cat.level === 'moderate' ? 'Moderate Attention Needed' : 'On Track'}
+                      </span>
                     </div>
-                    <div className="p-2 rounded-lg bg-black/40 border border-white/5">
-                      <div className="text-[10px] font-mono uppercase text-[var(--text-muted)]">Budget Spent</div>
-                      <div className="font-mono font-bold text-[var(--text-primary)] mt-0.5">62%</div>
-                    </div>
-                    <div className="p-2 rounded-lg bg-black/40 border border-white/5">
-                      <div className="text-[10px] font-mono uppercase text-[var(--text-muted)]">Risk Trend</div>
-                      <div className="font-mono font-bold text-amber-400 mt-0.5">Worsening</div>
-                    </div>
+                    <p className="text-[11px] opacity-90 leading-snug">
+                      {cat.level === 'critical' 
+                        ? 'Physical execution is severely lagging behind the master schedule. Immediate intervention required.'
+                        : cat.level === 'high'
+                        ? 'Construction progress is lagging behind approved timeline. Milestone at risk of slippage.'
+                        : cat.level === 'moderate'
+                        ? 'Spending pace is slightly higher than completed physical work. Review upcoming milestone.'
+                        : 'All physical deliverables and fund disbursements are proceeding as planned.'}
+                    </p>
                   </div>
                 </div>
 
-                {/* View Project Button */}
-                <div className="pt-3 border-t border-white/10">
+                {/* Actions: View Project Insights + Investigate Issue (side-by-side) */}
+                <div className="pt-3 border-t border-white/10 flex items-center gap-2">
                   <button
                     onClick={() => onViewProject(pin.id)}
-                    className="w-full py-2.5 px-4 rounded-xl bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer text-center shadow-md flex items-center justify-center gap-1.5"
+                    className="flex-1 py-2 px-3 rounded-xl bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer text-center shadow-md flex items-center justify-center gap-1 whitespace-nowrap"
                   >
                     <span>View Project Insights</span>
                     <span>→</span>
                   </button>
+
+                  {onNavigateToInvestigation && (
+                    <button
+                      onClick={() => onNavigateToInvestigation(pin.id)}
+                      title="Deep AI Investigation"
+                      className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap"
+                    >
+                      <span>Investigate Issue</span>
+                      <span>⚡</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );

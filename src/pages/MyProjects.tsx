@@ -12,6 +12,53 @@ interface Props {
   onNavigateToInsights?: (projectId: string) => void;
   onNavigateToInvestigation: (projectId: string) => void;
   onOpenAddProject: () => void;
+  onRemoveProject?: (projectId: string) => void;
+}
+
+function CompactDphisGauge({ score }: { score: number }) {
+  const size = 68;
+  const strokeWidth = 6;
+  const center = size / 2;
+  const radius = center - strokeWidth - 2;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.min(100, Math.max(0, score));
+  const strokeDashoffset = circumference - (clamped / 100) * circumference;
+  const cat = getRiskCategory(score);
+
+  return (
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+      <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
+        <circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke="rgba(255, 255, 255, 0.15)"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+        />
+        <circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={cat.level === 'critical' ? '#ef4444' : cat.level === 'high' ? '#f97316' : cat.level === 'moderate' ? '#eab308' : '#10b981'}
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="transition-all duration-700 ease-out"
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+        <span className="font-mono-code font-bold text-base text-white leading-none">
+          {score}
+        </span>
+        <span className="text-[8px] font-mono-code font-bold text-white/60 uppercase mt-0.5">
+          DPHIS
+        </span>
+      </div>
+    </div>
+  );
 }
 
 export default function MyProjects({
@@ -20,7 +67,8 @@ export default function MyProjects({
   onSelectProject,
   onNavigateToInsights,
   onNavigateToInvestigation,
-  onOpenAddProject
+  onOpenAddProject,
+  onRemoveProject
 }: Props) {
   const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'ANALYST';
   const [searchQuery, setSearchQuery] = useState('');
@@ -71,15 +119,18 @@ export default function MyProjects({
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={onOpenAddProject}
-            className="px-5 py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-md flex items-center gap-1.5"
-          >
-            <span>+</span>
-            <span>Add Project</span>
-          </button>
-        </div>
+        {/* Add Project is strictly for non-admin users */}
+        {!isAdmin && (
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={onOpenAddProject}
+              className="px-5 py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-md flex items-center gap-1.5"
+            >
+              <span>+</span>
+              <span>Add Project</span>
+            </button>
+          </div>
+        )}
       </GlassCard>
 
       {/* Filter and Search Bar */}
@@ -152,7 +203,9 @@ export default function MyProjects({
           <p className="text-xs sm:text-sm text-white/70 max-w-md mx-auto">
             {searchQuery || statusFilter !== 'ALL'
               ? 'No projects match your current filter criteria. Try clearing filters or search query.'
-              : "You do not have any projects listed yet. Click 'Add Project' to get started."
+              : !isAdmin 
+                ? "You do not have any projects listed yet. Click 'Add Project' to get started."
+                : "No projects registered in the portfolio database."
             }
           </p>
           {(searchQuery || statusFilter !== 'ALL') && (
@@ -165,73 +218,129 @@ export default function MyProjects({
           )}
         </GlassCard>
       ) : viewMode === 'cards' ? (
-        /* Cards View (Default for Normal Users) */
+        /* Cards View */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredPins.map(pin => {
             const cat = getRiskCategory(pin.dphis);
+
             return (
               <div
                 key={pin.id}
                 className="oled-solid-card p-5 sm:p-6 space-y-4 hover:border-white/40 transition-all flex flex-col justify-between"
               >
-                <div className="space-y-3">
-                  {/* Top Bar: ID and Status */}
+                <div className="space-y-3.5">
+                  {/* Top Bar: ID, Location & Remove Action */}
                   <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
-                    <span className="font-mono-code font-bold text-xs sm:text-sm text-white px-2 py-0.5 rounded bg-white/10">
-                      {pin.id}
-                    </span>
-                    <span className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold border ${cat.badgeBg}`}>
-                      {cat.label}
-                    </span>
-                  </div>
-
-                  {/* Project Name & State */}
-                  <div>
-                    <h3 className="font-bold text-sm sm:text-base text-white leading-snug">
-                      {pin.name}
-                    </h3>
-                    <div className="text-xs text-white/70 mt-1 flex items-center gap-1.5">
-                      <span>📍</span>
-                      <span>{pin.state}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono-code font-bold text-xs sm:text-sm text-white px-2 py-0.5 rounded bg-white/10">
+                        {pin.id}
+                      </span>
+                      <span className="text-xs text-white/70 flex items-center gap-1 font-medium">
+                        <span>📍</span>
+                        <span>{pin.state}</span>
+                      </span>
                     </div>
-                  </div>
 
-                  {/* Plain Language Summary */}
-                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-white/80 leading-relaxed">
-                    {cat.level === 'critical' ? (
-                      <p>⚠️ <strong>Urgent:</strong> Physical work is running significantly behind schedule. Review milestones.</p>
-                    ) : cat.level === 'high' ? (
-                      <p>⚠️ <strong>High Delay Risk:</strong> Construction progress is lagging behind approved timeline.</p>
-                    ) : cat.level === 'moderate' ? (
-                      <p>ℹ️ <strong>Needs Attention:</strong> Spending pace is slightly higher than completed physical work.</p>
-                    ) : (
-                      <p>✅ <strong>On Track:</strong> Milestone achievements and fund disbursements are proceeding as planned.</p>
+                    {/* Remove Project Option */}
+                    {onRemoveProject && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemoveProject(pin.id);
+                        }}
+                        title="Remove Project"
+                        className="text-xs text-red-400/80 hover:text-red-300 hover:bg-red-500/15 px-2 py-1 rounded-lg border border-red-500/20 transition-all cursor-pointer font-mono flex items-center gap-1"
+                      >
+                        <span>✕</span>
+                        <span>Remove</span>
+                      </button>
                     )}
                   </div>
 
-                  {/* Metrics Row */}
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                    <div className="p-2.5 rounded-lg bg-black/40 border border-white/10">
-                      <div className="text-white/60 font-mono text-[10px] uppercase">Approved Outlay</div>
-                      <div className="font-mono font-bold text-white text-sm mt-0.5">{pin.cost}</div>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-black/40 border border-white/10">
-                      <div className="text-white/60 font-mono text-[10px] uppercase">Schedule Status</div>
-                      <div className="font-mono font-bold text-white text-sm mt-0.5">{pin.delay} delay</div>
+                  {/* Project Name */}
+                  <div>
+                    <h3 className="font-bold text-sm sm:text-base text-white leading-snug line-clamp-2">
+                      {pin.name}
+                    </h3>
+                  </div>
+
+                  {/* DPHIS Score with Round Circular Progress Bar & Scrollbar */}
+                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3.5">
+                    <CompactDphisGauge score={pin.dphis} />
+
+                    <div className="flex-1 space-y-1.5 min-w-0">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-mono-code font-bold text-white/80 text-[11px] uppercase tracking-wider">
+                          DPHIS Risk Score:
+                        </span>
+                        <span className="font-mono-code font-bold text-white">
+                          {pin.dphis} <span className="text-white/40 font-normal">/ 100</span>
+                        </span>
+                      </div>
+
+                      {/* Compact DPHIS scrollbar/bar */}
+                      <div className="h-2 w-full rounded-full bg-white/10 p-0.5 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${Math.min(100, Math.max(5, pin.dphis))}%`,
+                            background: pin.dphis >= 80 
+                              ? 'linear-gradient(90deg, #f97316, #ef4444)' 
+                              : pin.dphis >= 65 
+                              ? 'linear-gradient(90deg, #eab308, #f97316)' 
+                              : pin.dphis >= 45 
+                              ? '#eab308' 
+                              : '#10b981'
+                          }}
+                        />
+                      </div>
+
+                      <div className="text-[10px] font-mono text-white/60 flex items-center justify-between">
+                        <span>Low (0)</span>
+                        <span className={cat.level === 'critical' || cat.level === 'high' ? 'text-red-400 font-bold' : 'text-emerald-400 font-medium'}>
+                          {cat.label}
+                        </span>
+                        <span>Critical (100)</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Project-Specific Alert Threshold */}
-                  <div className="flex items-center justify-between text-[11px] font-mono px-3 py-1.5 rounded-lg bg-black/40 border border-white/5">
-                    <span className="text-white/60">Alert Threshold: <strong className="text-amber-300">{pin.dphis_threshold || 70}</strong> / 100</span>
-                    <span className={pin.dphis >= (pin.dphis_threshold || 70) ? 'text-red-400 font-bold' : 'text-emerald-400 font-medium'}>
-                      {pin.dphis >= (pin.dphis_threshold || 70) ? '🔔 Crossed' : '✓ Below'}
-                    </span>
+                  {/* High Delay Risk Flashcard / Diagnosis */}
+                  <div className={`p-3 rounded-xl border text-xs leading-relaxed ${
+                    cat.level === 'critical'
+                      ? 'bg-red-500/15 border-red-500/30 text-red-200'
+                      : cat.level === 'high'
+                      ? 'bg-amber-500/15 border-amber-500/30 text-amber-200'
+                      : cat.level === 'moderate'
+                      ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-200'
+                      : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
+                  }`}>
+                    <div className="flex items-center gap-1.5 font-bold mb-1">
+                      <span>{cat.level === 'critical' || cat.level === 'high' ? '⚠️' : 'ℹ️'}</span>
+                      <span className="uppercase tracking-wider font-mono text-[11px]">
+                        {cat.level === 'critical' 
+                          ? 'Critical Delay Risk' 
+                          : cat.level === 'high' 
+                          ? 'High Delay Risk' 
+                          : cat.level === 'moderate' 
+                          ? 'Moderate Attention Needed' 
+                          : 'On Track'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] opacity-90 leading-snug">
+                      {cat.level === 'critical' 
+                        ? 'Physical execution is severely lagging behind the master schedule. Immediate intervention required.'
+                        : cat.level === 'high'
+                        ? 'Construction progress is lagging behind approved timeline. Milestone at risk of slippage.'
+                        : cat.level === 'moderate'
+                        ? 'Spending pace is slightly higher than completed physical work. Review upcoming milestone.'
+                        : 'All physical deliverables and fund disbursements are proceeding as planned.'}
+                    </p>
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+                {/* Actions: View Project Insights + Investigate Issue (side-by-side) */}
+                <div className="pt-3 border-t border-white/10 flex items-center gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -242,12 +351,14 @@ export default function MyProjects({
                         setInsightsModalProjectId(pin.id);
                       }
                     }}
-                    className="flex-1 py-2 px-3 rounded-lg bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer text-center"
+                    className="flex-1 py-2 px-3 rounded-xl bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer text-center shadow-md flex items-center justify-center gap-1 whitespace-nowrap"
                   >
-                    View Project Insights →
+                    <span>View Project Insights</span>
+                    <span>→</span>
                   </button>
 
-                  {isAdmin && (
+                  {/* Investigate Issue for Normal User (opens InvestigationModal pop-up) */}
+                  {!isAdmin && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -255,9 +366,10 @@ export default function MyProjects({
                         onNavigateToInvestigation(pin.id);
                       }}
                       title="Deep AI Investigation"
-                      className="py-2 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer"
+                      className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap"
                     >
-                      Investigate ⚡
+                      <span>Investigate Issue</span>
+                      <span>⚡</span>
                     </button>
                   )}
                 </div>
@@ -274,18 +386,14 @@ export default function MyProjects({
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Project ID</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Project Name</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Location</th>
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Status</th>
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Alert Threshold</th>
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Approved Outlay</th>
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Delay</th>
+                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">DPHIS Score</th>
+                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Risk Tier</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {filteredPins.map(pin => {
                 const cat = getRiskCategory(pin.dphis);
-                const thresh = pin.dphis_threshold || 70;
-                const isCrossed = pin.dphis >= thresh;
                 return (
                   <tr 
                     key={pin.id} 
@@ -298,39 +406,66 @@ export default function MyProjects({
                     <td className="p-4 font-mono font-bold text-white">{pin.id}</td>
                     <td className="p-4 font-semibold text-white">{pin.name}</td>
                     <td className="p-4 text-white/80">{pin.state}</td>
+                    <td className="p-4 font-mono font-bold text-white">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{pin.dphis}</span>
+                        <div className="w-16 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${pin.dphis}%`,
+                              background: pin.dphis >= 80 ? '#ef4444' : pin.dphis >= 65 ? '#f97316' : '#10b981'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </td>
                     <td className="p-4">
                       <span className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold border ${cat.badgeBg}`}>
                         {cat.label}
                       </span>
                     </td>
-                    <td className="p-4 font-mono text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-amber-300 font-bold">{thresh}</span>
-                        <span className="text-white/40">/ 100</span>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                          isCrossed ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'
-                        }`}>
-                          {isCrossed ? '🔔 Crossed' : '✓ Below'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="p-4 font-mono font-bold text-white">{pin.cost}</td>
-                    <td className="p-4 font-mono text-white/90">{pin.delay}</td>
                     <td className="p-4">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectProject(pin.id);
-                          if (onNavigateToInsights) {
-                            onNavigateToInsights(pin.id);
-                          } else {
-                            setInsightsModalProjectId(pin.id);
-                          }
-                        }}
-                        className="px-3 py-1 rounded bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap"
-                      >
-                        View Project Insights →
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectProject(pin.id);
+                            if (onNavigateToInsights) {
+                              onNavigateToInsights(pin.id);
+                            } else {
+                              setInsightsModalProjectId(pin.id);
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap"
+                        >
+                          View Project Insights →
+                        </button>
+                        {!isAdmin && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectProject(pin.id);
+                              onNavigateToInvestigation(pin.id);
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer whitespace-nowrap"
+                          >
+                            Investigate ⚡
+                          </button>
+                        )}
+                        {onRemoveProject && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRemoveProject(pin.id);
+                            }}
+                            title="Remove project"
+                            className="px-2 py-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 text-xs font-mono transition-all cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

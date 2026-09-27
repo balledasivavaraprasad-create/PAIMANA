@@ -274,6 +274,14 @@ async def login(
         client_ip = request.client.host if request.client else "127.0.0.1"
         alert_dest = (admin_doc.get("alert_email") or admin_doc.get("email")) if admin_doc else "syntaxtrrors@gmail.com"
         try:
+            if db is not None:
+                await db.audit_logs.insert_one({
+                    "action": "Admin Session Authenticated",
+                    "actor": "National Director (MoSPI)",
+                    "target": "Auth Subsystem",
+                    "detail": "Successful login session created for admin@paimana.gov.in.",
+                    "timestamp": datetime.utcnow()
+                })
             await send_login_alert_email(alert_dest, now_str, client_ip)
         except Exception as mail_err:
             logger.warning(f"Admin login alert email delivery failed: {mail_err}")
@@ -295,6 +303,14 @@ async def login(
         client_ip = request.client.host if request.client else "127.0.0.1"
         alert_dest = (analyst_doc.get("alert_email") or analyst_doc.get("email")) if analyst_doc else "syntaxtrrors@gmail.com"
         try:
+            if db is not None:
+                await db.audit_logs.insert_one({
+                    "action": "Analyst Session Authenticated",
+                    "actor": "Lead Infrastructure Risk Analyst",
+                    "target": "Auth Subsystem",
+                    "detail": "Successful login session created for analyst@paimana.gov.in.",
+                    "timestamp": datetime.utcnow()
+                })
             await send_login_alert_email(alert_dest, now_str, client_ip)
         except Exception as mail_err:
             logger.warning(f"Analyst login alert email delivery failed: {mail_err}")
@@ -337,10 +353,18 @@ async def login(
                     "role": user.get("role", UserRole.PROJECT_OFFICER)
                 })
 
-                # Dispatch asynchronous login alert email
+                # Dispatch asynchronous login alert email and record audit event
                 now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
                 client_ip = request.client.host if request.client else "127.0.0.1"
                 try:
+                    await db.users.update_one({"_id": user["_id"]}, {"$set": {"last_login": datetime.utcnow()}})
+                    await db.audit_logs.insert_one({
+                        "action": "User Session Authenticated",
+                        "actor": user.get("full_name") or user["username"],
+                        "target": "Auth Subsystem",
+                        "detail": f"Successful login session created for {user['email']}.",
+                        "timestamp": datetime.utcnow()
+                    })
                     await send_login_alert_email(user["email"], now_str, client_ip)
                 except Exception:
                     pass
@@ -414,3 +438,66 @@ async def update_preferences(
         "message": "Preferences updated successfully",
         "preferences": update_fields
     }
+
+@router.get("/users", response_model=List[dict])
+async def list_registered_users():
+    """
+    Returns the real list of active users registered in the database for the Users & Audit view.
+    """
+    db = get_database()
+    if db is None:
+        return []
+    
+    users = await db.users.find({}, {"hashed_password": 0, "otp": 0}).sort("created_at", -1).to_list(length=100)
+    result = []
+    for u in users:
+        u_id = str(u.get("_id", ""))
+        created = u.get("created_at")
+        last_log = u.get("last_login")
+        last_log_str = "Just now"
+        if isinstance(last_log, datetime):
+            last_log_str = last_log.strftime("%d %b, %H:%M")
+        elif isinstance(created, datetime):
+            last_log_str = created.strftime("%d %b, %H:%M")
+            
+        result.append({
+            "id": u.get("id") or f"USR-{u_id[-4:].upper()}" if u_id else "USR-001",
+            "name": u.get("full_name") or u.get("username", "Officer"),
+            "email": u.get("email", ""),
+            "role": u.get("role", "PROJECT_OFFICER"),
+            "ministry": u.get("ministry", "Central Infrastructure"),
+            "designation": u.get("designation", "Project Officer"),
+            "status": "Active" if u.get("is_active", True) else "Inactive",
+            "lastLogin": last_log_str
+        })
+    return result
+
+@router.get("/audit-logs", response_model=List[dict])
+async def list_audit_logs(limit: int = 50):
+    """
+    Returns real system audit trail events from MongoDB.
+    """
+    db = get_database()
+    if db is None:
+        return []
+
+    logs = await db.audit_logs.find({}).sort("timestamp", -1).to_list(length=limit)
+    result = []
+    for idx, l in enumerate(logs):
+        l_id = str(l.get("_id", f"EVT-{9000 + idx}"))
+        ts = l.get("timestamp")
+        time_str = "Just now"
+        if isinstance(ts, datetime):
+            time_str = ts.strftime("%d %b, %H:%M")
+        elif isinstance(ts, str):
+            time_str = ts
+            
+        result.append({
+            "id": l.get("id") or f"EVT-{l_id[-4:].upper()}",
+            "action": l.get("action", "System Event"),
+            "actor": l.get("actor", "System"),
+            "target": l.get("target", "Subsystem"),
+            "detail": l.get("detail", "Operation logged."),
+            "time": time_str
+        })
+    return result

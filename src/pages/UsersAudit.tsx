@@ -1,84 +1,94 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import GlassCard from '../components/GlassCard';
+import { fetchUsersList, fetchAuditLogs } from '../lib/api';
+
+const DEFAULT_USERS = [
+  {
+    id: 'USR-001',
+    name: 'National Director (MoSPI)',
+    email: 'admin@paimana.gov.in',
+    role: 'ADMIN',
+    ministry: 'Ministry of Statistics & Programme Implementation',
+    designation: 'MoSPI Lead Director',
+    status: 'Active',
+    lastLogin: 'Just now'
+  },
+  {
+    id: 'USR-002',
+    name: 'Lead Infrastructure Risk Analyst',
+    email: 'analyst@paimana.gov.in',
+    role: 'ANALYST',
+    ministry: 'MoSPI Early Warning Unit',
+    designation: 'Principal Risk Analyst',
+    status: 'Active',
+    lastLogin: 'Today, 13:45'
+  },
+  {
+    id: 'USR-003',
+    name: 'Balleda Siva Vara Prasad',
+    email: 'balledasivavaraprasad@gmail.com',
+    role: 'PROJECT_OFFICER',
+    ministry: 'Ministry of Housing & Urban Affairs',
+    designation: 'Project Officer',
+    status: 'Active',
+    lastLogin: 'Just now'
+  }
+];
+
+const DEFAULT_AUDIT_LOGS = [
+  {
+    id: 'EVT-9021',
+    action: 'Risk Alert Evaluated',
+    actor: 'System / n8n Webhook',
+    target: 'Project 617321 (Varanasi Expressway)',
+    detail: 'DPHIS risk scored at 85.0. Automated notification dispatched.',
+    time: '12 mins ago'
+  },
+  {
+    id: 'EVT-9020',
+    action: 'User Session Authenticated',
+    actor: 'Balleda Siva Vara Prasad',
+    target: 'Auth Subsystem',
+    detail: 'Successful login session created for balledasivavaraprasad@gmail.com.',
+    time: '28 mins ago'
+  },
+  {
+    id: 'EVT-9019',
+    action: 'Project Details Updated',
+    actor: 'Project Officer',
+    target: 'Project N28000157',
+    detail: 'Physical progress milestone synchronized with ministry repository.',
+    time: '1 hour ago'
+  }
+];
 
 export default function UsersAudit() {
-  const users = [
-    {
-      id: 'USR-001',
-      name: 'Ramesh Kumar',
-      email: 'admin@paimana.gov.in',
-      role: 'ADMIN',
-      ministry: 'MoSPI Central Coordination',
-      designation: 'MoSPI Lead Director',
-      status: 'Active',
-      lastLogin: 'Today, 14:22'
-    },
-    {
-      id: 'USR-002',
-      name: 'Dr. Priya Sharma',
-      email: 'analyst@paimana.gov.in',
-      role: 'ANALYST',
-      ministry: 'MoSPI Early Warning Unit',
-      designation: 'Principal Risk Analyst',
-      status: 'Active',
-      lastLogin: 'Today, 13:45'
-    },
-    {
-      id: 'USR-003',
-      name: 'Vikram Singh',
-      email: 'morth@paimana.gov.in',
-      role: 'PROJECT_OFFICER',
-      ministry: 'Ministry of Road Transport and Highways',
-      designation: 'Chief Project Engineer',
-      status: 'Active',
-      lastLogin: 'Yesterday, 18:10'
-    },
-    {
-      id: 'USR-004',
-      name: 'Siva Balle',
-      email: 'balledasivavaraprasad@gmail.com',
-      role: 'PROJECT_OFFICER',
-      ministry: 'Ministry of Housing and Urban Affairs',
-      designation: 'Executive Project Director',
-      status: 'Active',
-      lastLogin: 'Just now'
-    }
-  ];
+  const [users, setUsers] = useState<any[]>(DEFAULT_USERS);
+  const [auditEvents, setAuditEvents] = useState<any[]>(DEFAULT_AUDIT_LOGS);
+  const [loading, setLoading] = useState(true);
 
-  const auditEvents = [
-    {
-      id: 'EVT-9021',
-      action: 'Risk Alert Evaluated',
-      actor: 'System / n8n Webhook',
-      target: 'Project 617321 (Varanasi Expressway)',
-      detail: 'DPHIS risk scored at 85.0. Critical alert dispatched to Siva Balle via SMTP.',
-      time: '12 mins ago'
-    },
-    {
-      id: 'EVT-9020',
-      action: 'User Session Authenticated',
-      actor: 'Siva Balle',
-      target: 'Auth Subsystem',
-      detail: 'Successful OTP verification and JWT session created.',
-      time: '28 mins ago'
-    },
-    {
-      id: 'EVT-9019',
-      action: 'Project Details Updated',
-      actor: 'Vikram Singh',
-      target: 'Project N28000157',
-      detail: 'Physical progress milestone updated from 32% to 34%.',
-      time: '2 hours ago'
-    },
-    {
-      id: 'EVT-9018',
-      action: 'Model Manifest Verified',
-      actor: 'Dr. Priya Sharma',
-      target: 'LightGBM v2.1',
-      detail: 'Quantile loss weights and early warning threshold verified against Q2 data.',
-      time: '5 hours ago'
-    }
-  ];
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      fetchUsersList(),
+      fetchAuditLogs(50)
+    ]).then(([uList, logs]) => {
+      if (!isMounted) return;
+      if (uList && uList.length > 0) {
+        setUsers(uList);
+      }
+      if (logs && logs.length > 0) {
+        setAuditEvents(logs);
+      }
+      setLoading(false);
+    }).catch(() => {
+      if (isMounted) setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
@@ -94,22 +104,27 @@ export default function UsersAudit() {
             </span>
           </div>
           <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
-            Monitor registered department officers, assign project jurisdictions, and review system-wide audit actions
+            Live database registry of authorized ministry officers, role privileges, and system audit trail events
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <span className="px-3.5 py-1.5 rounded-xl bg-white/10 text-white font-mono text-xs font-bold border border-white/20">
-            {users.length} Authorized Accounts
+            {users.length} Authorized {users.length === 1 ? 'Account' : 'Accounts'}
           </span>
         </div>
       </GlassCard>
 
       {/* Authorized Officers & Users Table */}
       <div className="space-y-3">
-        <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-white/70">
-          Authorized Ministry Officers &amp; Analysts
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-white/70">
+            Authorized Ministry Officers &amp; Analysts ({users.length})
+          </h3>
+          {loading && (
+            <span className="text-[11px] font-mono text-white/50 animate-pulse">Syncing database...</span>
+          )}
+        </div>
 
         <div className="overflow-x-auto rounded-xl border border-white/15 bg-black/40 backdrop-blur-md">
           <table className="w-full text-left text-xs border-collapse">
@@ -162,7 +177,7 @@ export default function UsersAudit() {
       {/* System Audit Log */}
       <div className="space-y-3">
         <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-white/70">
-          Recent System Audit Actions
+          Recent System Audit Actions ({auditEvents.length})
         </h3>
 
         <div className="space-y-2.5">

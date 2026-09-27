@@ -18,7 +18,7 @@ import { useTheme } from './hooks/useTheme';
 import { getRiskCategory } from './lib/risk';
 import {
   fetchProjects, fetchMyProjects, fetchAlerts, fetchAnalyticsOverview, API_BASE,
-  fetchCurrentUser, clearAuthToken, UserProfile
+  fetchCurrentUser, clearAuthToken, UserProfile, deleteProject
 } from './lib/api';
 
 export type Page = ActiveTab | 'overview' | 'reports';
@@ -191,6 +191,19 @@ export default function App() {
     setPins(prev => [newPin, ...prev.filter(p => p.id !== newPin.id)]);
     setSelectedPin(newPin);
     setInsightsModalProjectId(newPin.id);
+  };
+
+  const handleRemoveProject = async (projectId: string) => {
+    if (!window.confirm(`Are you sure you want to remove project ${projectId} from monitoring?`)) {
+      return;
+    }
+    const success = await deleteProject(projectId);
+    if (success) {
+      setPins(prev => prev.filter(p => p.id !== projectId));
+      if (selectedPin?.id === projectId) {
+        setSelectedPin(pins.find(p => p.id !== projectId) || null);
+      }
+    }
   };
 
   useEffect(() => {
@@ -410,6 +423,12 @@ export default function App() {
               }}
               onNavigateToProjects={() => setCurrentTab('projects')}
               onOpenAddProject={() => setShowAddModal(true)}
+              onNavigateToInvestigation={(projId) => {
+                const found = pins.find(p => p.id === projId);
+                if (found) setSelectedPin(found);
+                setInvestigationModalProjectId(projId);
+              }}
+              onRemoveProject={handleRemoveProject}
             />
           </div>
         ) : (
@@ -840,19 +859,21 @@ export default function App() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <button
-                      onClick={() => setShowAddModal(true)}
-                      style={!isDark ? { color: '#000000' } : undefined}
-                      className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-mono-code cursor-pointer transition-all duration-200 flex items-center gap-2 ${
-                        isDark
-                          ? 'bg-black text-white border border-white/30 shadow-[0_0_14px_rgba(255,255,255,0.22)] hover:bg-zinc-900 hover:border-white/60'
-                          : 'bg-white/75 hover:bg-white/95 text-black border border-white/90 shadow-[0_4px_18px_rgba(0,0,0,0.08),inset_0_1.5px_2px_rgba(255,255,255,0.95)] backdrop-blur-md'
-                      }`}
-                    >
-                      <span style={!isDark ? { color: '#000000' } : undefined}>+ Add Project</span>
-                    </button>
-                  </div>
+                  {!isAdmin && (
+                    <div className="flex items-center gap-3 shrink-0">
+                      <button
+                        onClick={() => setShowAddModal(true)}
+                        style={!isDark ? { color: '#000000' } : undefined}
+                        className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-mono-code cursor-pointer transition-all duration-200 flex items-center gap-2 ${
+                          isDark
+                            ? 'bg-black text-white border border-white/30 shadow-[0_0_14px_rgba(255,255,255,0.22)] hover:bg-zinc-900 hover:border-white/60'
+                            : 'bg-white/75 hover:bg-white/95 text-black border border-white/90 shadow-[0_4px_18px_rgba(0,0,0,0.08),inset_0_1.5px_2px_rgba(255,255,255,0.95)] backdrop-blur-md'
+                        }`}
+                      >
+                        <span style={!isDark ? { color: '#000000' } : undefined}>+ Add Project</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="overflow-x-auto overflow-y-auto rounded-xl border border-white/15 bg-black/40 backdrop-blur-md max-h-[44vh] relative">
@@ -942,6 +963,7 @@ export default function App() {
                 setInvestigationModalProjectId(id);
               }}
               onOpenAddProject={() => setShowAddModal(true)}
+              onRemoveProject={handleRemoveProject}
             />
           )}
 
@@ -949,6 +971,7 @@ export default function App() {
             <ProjectIntelligence
               projectId={selectedPin?.id}
               currentUser={currentUser}
+              allProjects={pins}
               onNavigateToInvestigation={(id) => {
                 if (id) {
                   const found = pins.find(p => p.id === id);
@@ -956,7 +979,7 @@ export default function App() {
                 }
                 setInvestigationModalProjectId(id || selectedPin?.id || pins[0]?.id || null);
               }}
-              onOpenAddProject={() => setShowAddModal(true)}
+              onOpenAddProject={!isAdmin ? () => setShowAddModal(true) : undefined}
               onSelectProject={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
@@ -967,7 +990,7 @@ export default function App() {
           {currentTab === 'analytics' && (
             <Analytics
               pinsCount={pins.length}
-              onOpenAddProject={() => setShowAddModal(true)}
+              onOpenAddProject={!isAdmin ? () => setShowAddModal(true) : undefined}
               onNavigateToProject={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
@@ -992,7 +1015,7 @@ export default function App() {
             <Alerts
               currentUser={currentUser}
               pinsCount={pins.length}
-              onOpenAddProject={() => setShowAddModal(true)}
+              onOpenAddProject={!isAdmin ? () => setShowAddModal(true) : undefined}
               onNavigateToInvestigation={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
@@ -1016,8 +1039,8 @@ export default function App() {
         </div>
       )}
 
-      {/* FLOATING BOTTOM DOCK CONTROLS (Only on Motion tab for Admins) */}
-      {(currentTab === 'motion' || currentTab === 'overview') && isAdmin && (
+      {/* FLOATING BOTTOM DOCK CONTROLS (Only on Motion tab for Non-Admin Users) */}
+      {(currentTab === 'motion' || currentTab === 'overview') && !isAdmin && (
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
           <button
             onClick={() => setShowAddModal(true)}

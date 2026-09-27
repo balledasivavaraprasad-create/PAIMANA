@@ -331,6 +331,17 @@ async def ingest_normal_asset(payload: NormalAssetIngestRequest):
         trigger_source="project_creation"
     )
 
+    try:
+        await db.audit_logs.insert_one({
+            "action": "Project Created",
+            "actor": payload.username or "Project Officer",
+            "target": f"Project {project_id}",
+            "detail": f"Project {payload.project_name} ({project_id}) ingested into monitoring repository.",
+            "timestamp": datetime.utcnow()
+        })
+    except Exception as e:
+        logger.warning(f"Failed to record audit log for project creation: {e}")
+
     project_doc.pop("_id", None)
     return project_doc
 
@@ -396,6 +407,17 @@ async def create_project(payload: ProjectCreate):
         custom_threshold=dphis_threshold,
         trigger_source="project_creation"
     )
+
+    try:
+        await db.audit_logs.insert_one({
+            "action": "Project Created",
+            "actor": "Project Officer",
+            "target": f"Project {payload.project_id}",
+            "detail": f"Project {payload.project_name} ({payload.project_id}) created in monitoring repository.",
+            "timestamp": datetime.utcnow()
+        })
+    except Exception as e:
+        logger.warning(f"Failed to record audit log for project creation: {e}")
 
     doc.pop("_id", None)
     return doc
@@ -589,4 +611,40 @@ async def handle_project_risk_event(payload: ProjectRiskEventRequest):
         trigger_source="api_event"
     )
     return res
+
+@router.delete("/{project_id}", status_code=status.HTTP_200_OK)
+async def delete_project(project_id: str):
+    """
+    Deletes a project from the MongoDB database and records an audit log event.
+    """
+    db = get_database()
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not connected")
+
+    result = await db.projects.delete_one({"project_id": {"$regex": f"^{project_id}$", "$options": "i"}})
+    if result.deleted_count == 0:
+        # Also try matching by _id
+        try:
+            from bson import ObjectId
+            result = await db.projects.delete_one({"_id": ObjectId(project_id)})
+        except Exception:
+            pass
+
+    # Record deletion in audit log collection
+    try:
+        await db.audit_logs.insert_one({
+            "action": "Project Removed",
+            "actor": "Project Officer",
+            "target": f"Project {project_id}",
+            "detail": f"Project {project_id} removed from the national monitoring repository.",
+            "timestamp": datetime.utcnow()
+        })
+    except Exception as e:
+        logger.warning(f"Failed to record audit log for project deletion: {e}")
+
+    return {
+        "status": "success",
+        "message": f"Project {project_id} deleted successfully",
+        "deleted_count": result.deleted_count
+    }
 

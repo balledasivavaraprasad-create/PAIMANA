@@ -371,22 +371,16 @@ export default function AddProjectModal({
                 </label>
                 <input
                   type="text"
-                  list="ministries-datalist"
                   required
                   value={ministry}
                   onChange={e => setMinistry(e.target.value)}
-                  placeholder="Choose or enter new department..."
+                  placeholder="e.g. Ministry of Road Transport & Highways, Railways, or custom department..."
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
                     isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
-                <datalist id="ministries-datalist">
-                  {SUGGESTED_MINISTRIES.map(m => (
-                    <option key={m} value={m} />
-                  ))}
-                </datalist>
                 <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
-                  New departments are automatically recognized and registered.
+                  Enter your department or ministry name directly.
                 </span>
               </div>
 

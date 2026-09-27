@@ -868,22 +868,74 @@ export async function acknowledgeAlert(alertId: string): Promise<boolean> {
   }
 }
 
-export async function sendChatMessage(message: string, projectId?: string): Promise<any> {
+export async function sendChatMessage(
+  message: string,
+  projectId?: string,
+  userRole?: string,
+  username?: string,
+  ministry?: string,
+  conversationHistory?: Array<{ sender: string; text: string }>
+): Promise<any> {
   try {
     const res = await fetch(`${API_BASE}/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, project_id: projectId }),
+      body: JSON.stringify({
+        message,
+        project_id: projectId,
+        user_role: userRole,
+        username,
+        ministry,
+        conversation_history: conversationHistory || []
+      }),
     });
     if (!res.ok) throw new Error('Chat API error');
     return await res.json();
   } catch (err) {
     return {
-      reply: "Backend connection unavailable. Please ensure the PAIMANA FastAPI service is running at http://localhost:8000.",
+      reply: "Backend connection unavailable. Please ensure the PAIMANA FastAPI service is running.",
       intent: "ERROR",
       grounded_evidence: [],
       suggested_actions: ["Check backend status", "Retry query"]
     };
+  }
+}
+
+export async function deleteProject(projectId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/projects/${encodeURIComponent(projectId)}`, {
+      method: 'DELETE'
+    });
+    return res.ok;
+  } catch (err) {
+    console.error('Failed to delete project:', err);
+    return false;
+  }
+}
+
+export async function fetchUsersList(): Promise<any[]> {
+  try {
+    const res = await fetch(`${API_BASE}/users`);
+    if (res.ok) {
+      return await res.json();
+    }
+    return [];
+  } catch (err) {
+    console.error('Failed to fetch users list:', err);
+    return [];
+  }
+}
+
+export async function fetchAuditLogs(limit: number = 50): Promise<any[]> {
+  try {
+    const res = await fetch(`${API_BASE}/audit-logs?limit=${limit}`);
+    if (res.ok) {
+      return await res.json();
+    }
+    return [];
+  } catch (err) {
+    console.error('Failed to fetch audit logs:', err);
+    return [];
   }
 }
 

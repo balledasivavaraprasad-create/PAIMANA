@@ -18,31 +18,43 @@ interface Props {
   onNavigateToProject?: (projectId: string) => void;
 }
 
-export default function Assistant({ selectedProjectId = 'P1024', currentUser }: Props) {
+export default function Assistant({ selectedProjectId, currentUser }: Props) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const officerName = currentUser?.full_name || 'Officer';
-  const ministryName = currentUser?.ministry || 'Infrastructure Administration';
+  const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'ANALYST';
+  const officerName = currentUser?.full_name || (isAdmin ? 'National Director' : 'Project Officer');
+  const ministryName = currentUser?.ministry || (isAdmin ? 'MoSPI Infrastructure Coordination' : 'Ministry of Housing & Urban Affairs');
+
+  const initialGreeting = isAdmin
+    ? `Welcome ${officerName}. I am your InfraBuild AI National Infrastructure Director & Executive Assistant. I have macro-level oversight across the national project portfolio, central ministries, and state corridors. Ask me about critical delay clusters, inter-ministerial comparisons, systemic delay causes, or query any specific project by name or ID.`
+    : `Hello ${officerName}! I am your InfraBuild AI Project Officer Assistant. I have live access to all projects associated with your account under ${ministryName}. Ask me about any of your projects, schedule delay reasons, physical milestone status, or request a complete summary of any project.`;
+
+  const initialSuggested = isAdmin
+    ? [
+        'Which national projects face critical delays?',
+        'Compare delay risks between Road Transport and Railways',
+        'What are the top systemic delay causes across states?',
+        'Give me an overview of the highest risk project'
+      ]
+    : [
+        'Which of my projects need immediate attention?',
+        'List all my assigned projects and their delay status',
+        'Why is there a delay on my expressway project?',
+        'What are the upcoming milestone deadlines?'
+      ];
 
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       sender: 'assistant',
-      text: `Hello ${officerName}! I am your InfraBuild AI project assistant. I am connected to your projects in ${ministryName}. How can I help you check project delays, budget spending, or upcoming deadlines today?`,
+      text: initialGreeting,
       citations: [
-        { feature: 'Department', impact: ministryName, description: 'Focused on your department' },
-        { feature: 'Active Projects', impact: 'Monitored', description: 'Live tracking active' },
-        { feature: 'Risk Engine', impact: 'Ready', description: 'Delay and cost calculations ready' },
+        { feature: 'Role Context', impact: isAdmin ? 'National Oversight' : 'Department Scope', description: ministryName },
+        { feature: 'Telemetry Sync', impact: 'Live Atlas DB', description: 'Connected' },
+        { feature: 'Reasoning Mode', impact: 'Multi-Turn Chat', description: 'Context-Aware' },
       ],
-      suggestedActions: [
-        'Which of my projects need attention?',
-        `Why is this project at risk?`,
-        'What caused the delay?',
-        'What should we do to recover lost time?',
-        'Which milestone is at risk?',
-        'Which projects have increasing risk?'
-      ],
+      suggestedActions: initialSuggested,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -61,16 +73,26 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     if (!textToSend) setInput('');
     setLoading(true);
 
     try {
-      const response = await sendChatMessage(text, selectedProjectId);
+      const history = updatedMessages.slice(-6).map(m => ({ sender: m.sender, text: m.text }));
+      const response = await sendChatMessage(
+        text,
+        selectedProjectId,
+        currentUser?.role || 'PROJECT_OFFICER',
+        currentUser?.username,
+        currentUser?.ministry,
+        history
+      );
+
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'assistant',
-        text: response.reply || 'No response from intelligence engine.',
+        text: response.reply || 'No response received from the intelligence engine.',
         citations: response.grounded_evidence || [],
         suggestedActions: response.suggested_actions || [],
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -82,7 +104,7 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
         {
           id: (Date.now() + 1).toString(),
           sender: 'assistant',
-          text: 'Error contacting backend service. Please check that the server is running.',
+          text: 'Error communicating with intelligence engine. Please ensure the backend is running.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -95,11 +117,25 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
     <div className="pt-16 sm:pt-20 pb-6 px-4 sm:px-8 md:px-12 max-w-5xl mx-auto flex flex-col h-[calc(100vh-65px)] justify-between space-y-3 sm:space-y-4">
       {/* Header */}
       <GlassCard variant="hero" padding={20} className="w-full space-y-1.5">
-        <h2 className="text-xl sm:text-2xl font-bold font-display tracking-tight">
-          InfraBuild AI Assistant
-        </h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold font-display tracking-tight text-white">
+              InfraBuild AI Assistant
+            </h2>
+            <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
+              isAdmin ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+            }`}>
+              {isAdmin ? 'Admin National Mode' : 'Officer Portfolio Mode'}
+            </span>
+          </div>
+          <span className="text-xs font-mono text-white/60">
+            {currentUser?.username || 'officer'}
+          </span>
+        </div>
         <p className={`text-xs sm:text-sm md:text-base leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-700'}`}>
-          Ask any question about your projects, costs, milestone delays, and get clear, instant answers backed by project data.
+          {isAdmin
+            ? 'Interactive national infrastructure assistant. Query systemic delays, inter-ministerial benchmarks, and cross-state risks.'
+            : 'Interactive department assistant. Ask questions about your assigned projects, milestone delays, and ground recovery steps.'}
         </p>
       </GlassCard>
 
@@ -123,7 +159,7 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
               {msg.citations && msg.citations.length > 0 && (
                 <div className="pt-3 border-t border-white/10 space-y-2">
                   <div className={`text-[11px] sm:text-xs font-mono-code uppercase font-bold ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
-                    Evidence &amp; Verified Facts:
+                    Evidence &amp; Verified Telemetry:
                   </div>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {msg.citations.map((c, idx) => (
@@ -169,12 +205,12 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
             <span className={`w-3.5 h-3.5 rounded-full border-2 border-t-transparent animate-spin ${
               isDark ? 'border-white' : 'border-black'
             }`} />
-            <span>Checking project updates and records...</span>
+            <span>Analyzing project portfolio and generating response...</span>
           </div>
         )}
       </div>
 
-      {/* Seamless Prompt Flashcard */}
+      {/* Interactive Prompt Bar */}
       <div className={`p-2.5 sm:p-3 rounded-2xl border backdrop-blur-xl transition-all duration-200 shadow-xl ${
         isDark
           ? 'bg-[#0B0F17]/90 border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] focus-within:border-white/40'
@@ -186,7 +222,7 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSend()}
-            placeholder="Ask anything about your project, budget, or delays..."
+            placeholder={isAdmin ? "Ask about national projects, systemic delays, or compare ministries..." : "Ask about your projects, milestone delays, or request a summary..."}
             className={`flex-1 bg-transparent border-none text-xs sm:text-sm md:text-base outline-none px-3 py-1.5 font-sans ${
               isDark
                 ? 'text-white placeholder:text-white/40'
