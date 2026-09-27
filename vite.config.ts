@@ -376,6 +376,7 @@ function devEmailPlugin(): Plugin {
           req.on('end', async () => {
             try {
               const data = JSON.parse(body || '{}');
+              // @ts-ignore
               const { default: handler } = await import('./api/send-email.js');
               const mockRes: any = {
                 setHeader: (k: string, v: string) => res.setHeader(k, v),

@@ -3,7 +3,6 @@ import HeaderNav, { ActiveTab } from './components/HeaderNav';
 import CeoPinManager, { ProjectPin } from './components/CeoPinManager';
 import AddProjectModal from './components/AddProjectModal';
 import ProjectIntelligence from './pages/ProjectIntelligence';
-import Investigation from './pages/Investigation';
 import Analytics from './pages/Analytics';
 import Assistant from './pages/Assistant';
 import Alerts from './pages/Alerts';
@@ -11,6 +10,8 @@ import MyProjects from './pages/MyProjects';
 import DataModels from './pages/DataModels';
 import UsersAudit from './pages/UsersAudit';
 import ProjectInsightsModal from './components/ProjectInsightsModal';
+import InvestigationModal from './components/InvestigationModal';
+import SettingsModal, { SettingsTab } from './components/SettingsModal';
 import MyProjectOverview from './components/MyProjectOverview';
 import Login from './pages/Login';
 import { useTheme } from './hooks/useTheme';
@@ -20,18 +21,24 @@ import {
   fetchCurrentUser, clearAuthToken, UserProfile
 } from './lib/api';
 
+export type Page = ActiveTab | 'overview' | 'reports';
+
 export default function App() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   const [authChecking, setAuthChecking] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'ANALYST';
+  const userRole = (currentUser?.role || '').toUpperCase();
+  const isAdmin = userRole === 'ADMIN' || userRole === 'ANALYST' || currentUser?.username?.toLowerCase() === 'admin';
   const [currentTab, setCurrentTab] = useState<ActiveTab>('motion');
   const [ministryFilterOnly, setMinistryFilterOnly] = useState<boolean>(false);
   const [pins, setPins] = useState<ProjectPin[]>([]);
   const [selectedPin, setSelectedPin] = useState<ProjectPin | null>(null);
   const [insightsModalProjectId, setInsightsModalProjectId] = useState<string | null>(null);
+  const [investigationModalProjectId, setInvestigationModalProjectId] = useState<string | null>(null);
+  const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false);
+  const [settingsModalTab, setSettingsModalTab] = useState<SettingsTab>('profile');
   const [activeSection, setActiveSection] = useState<'01' | '02' | '03' | '04'>('01');
   const [showCeoModal, setShowCeoModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -298,6 +305,10 @@ export default function App() {
         alertCount={alertCount}
         user={currentUser}
         onSignOut={handleSignOut}
+        onOpenSettings={(tab) => {
+          setSettingsModalTab(tab || 'profile');
+          setSettingsModalOpen(true);
+        }}
       />
 
       {/* BACKGROUND VIDEO & STATIC MAP AT END - VISIBLE ON ALL DASHBOARD PAGES */}
@@ -386,7 +397,7 @@ export default function App() {
       )}
 
       {/* VIEWPORT CONTENT CONTAINER — BUTTERY SMOOTH SCROLL */}
-      {currentTab === 'motion' ? (
+      {(currentTab === 'motion' || currentTab === 'overview') ? (
         !isAdmin ? (
           <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll">
             <MyProjectOverview
@@ -711,105 +722,102 @@ export default function App() {
             </section>
           )}
 
-          {/* SECTION 03 / 04 — WHY PROJECTS ARE AT RISK */}
-          <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
-            <div className="w-full max-w-6xl pointer-events-auto">
-              <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-2 sm:space-y-3">
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
-                      {isAdmin ? 'Why Projects Get Delayed & Key Risk Factors' : 'Why Your Projects Need Attention'}
-                    </h2>
-                    <p className="text-xs sm:text-sm text-white/80">
-                      {selectedPin
-                        ? `Plain-language analysis of delay causes on project ${selectedPin.id} (${selectedPin.name}).`
-                        : 'Tracking key factors causing delivery delays and cost overruns.'}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() => setInsightsModalProjectId(selectedPin?.id || pins[0]?.id || null)}
-                    className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold hover:bg-zinc-200 transition-all cursor-pointer shadow-lg whitespace-nowrap shrink-0"
-                  >
-                    {isAdmin ? 'View Deep Intelligence →' : 'View Project Insights →'}
-                  </button>
-                </div>
-
-                {selectedPin ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pt-2">
-                    <div className="oled-solid-card p-5 sm:p-6 space-y-3 sm:space-y-4">
-                      {(() => {
-                        const cat = getRiskCategory(selectedPin.dphis);
-                        return (
-                          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                            <span className="font-mono-code font-bold text-white">{selectedPin.id}</span>
-                            <span className={`px-2.5 py-1 rounded text-xs font-mono-code font-bold border ${cat.bgClass} ${cat.borderClass} ${cat.colorClass}`}>
-                              {cat.label}
-                            </span>
-                          </div>
-                        );
-                      })()}
-                      <h4 className="text-sm sm:text-base font-bold text-white">{selectedPin.name}</h4>
-                      <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-                        Funds are being spent faster than physical construction is progressing, putting key project milestones at risk.
+          {/* SECTION 03 / 04 — WHY PROJECTS ARE AT RISK (Non-Admin View Only; Removed for Admin as requested) */}
+          {!isAdmin && (
+            <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
+              <div className="w-full max-w-6xl pointer-events-auto">
+                <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-2 sm:space-y-3">
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
+                        Why Your Projects Need Attention
+                      </h2>
+                      <p className="text-xs sm:text-sm text-white/80">
+                        {selectedPin
+                          ? `Plain-language analysis of delay causes on project ${selectedPin.id} (${selectedPin.name}).`
+                          : 'Tracking key factors causing delivery delays and cost overruns.'}
                       </p>
-
-                      <div className="pt-2 space-y-2 text-xs sm:text-sm">
-                        <div className="flex justify-between font-mono-code text-white/80">
-                          <span>Physical Progress: 34%</span>
-                          <span className="text-white font-bold">Planned Target: 78%</span>
-                        </div>
-                        <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
-                          <div className="h-full bg-white rounded-full" style={{ width: '34%' }} />
-                        </div>
-                      </div>
-
-                      <div className="pt-3 border-t border-white/10">
-                        <h5 className="text-xs font-mono font-bold uppercase text-white/70 mb-2">Recommended Next Steps</h5>
-                        <ul className="text-xs text-white/80 space-y-1.5 list-disc list-inside">
-                          <li>Review delayed construction schedule with EPC contractor</li>
-                          <li>Inspect on-site machinery and equipment deployment</li>
-                          <li>Verify actual ground milestones against contractor expenditure claims</li>
-                        </ul>
-                      </div>
                     </div>
 
-                    <div className="oled-solid-card p-5 sm:p-6 space-y-3">
-                      <h4 className="text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider text-white/80 mb-2">
-                        {isAdmin ? 'Top Model Features Driving Delay Risk' : 'Main Reasons for Risk'}
-                      </h4>
-                      {shapDrivers.map(d => (
-                        <div key={d.name} className="p-3 rounded-xl bg-white/5 border border-white/15 space-y-1">
-                          <div className="flex items-center justify-between text-xs sm:text-sm">
-                            <span className="font-semibold text-white">{d.name}</span>
-                            {isAdmin && (
-                              <span className="font-mono-code font-bold text-white">
-                                {d.impact}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[11px] sm:text-xs text-white/70">{d.text}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="oled-solid-card p-8 text-center space-y-4">
-                    <div className="text-base font-bold text-white">No Projects Added Yet</div>
-                    <p className="text-xs sm:text-sm text-white/75 max-w-xl mx-auto leading-relaxed">
-                      You don't have any projects listed in your dashboard yet. Add your first project using the standard report fields to see risk predictions and AI recommendations.
-                    </p>
                     <button
-                      onClick={() => setShowAddModal(true)}
-                      className="px-5 py-2.5 rounded-xl bg-white text-black text-xs font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-lg inline-flex items-center gap-2"
+                      onClick={() => setInsightsModalProjectId(selectedPin?.id || pins[0]?.id || null)}
+                      className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold hover:bg-zinc-200 transition-all cursor-pointer shadow-lg whitespace-nowrap shrink-0"
                     >
-                      <span>+ Add Project</span>
+                      View Project Insights →
                     </button>
                   </div>
-                )}
+
+                  {selectedPin ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pt-2">
+                      <div className="oled-solid-card p-5 sm:p-6 space-y-3 sm:space-y-4">
+                        {(() => {
+                          const cat = getRiskCategory(selectedPin.dphis);
+                          return (
+                            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                              <span className="font-mono-code font-bold text-white">{selectedPin.id}</span>
+                              <span className={`px-2.5 py-1 rounded text-xs font-mono-code font-bold border ${cat.bgClass} ${cat.borderClass} ${cat.colorClass}`}>
+                                {cat.label}
+                              </span>
+                            </div>
+                          );
+                        })()}
+                        <h4 className="text-sm sm:text-base font-bold text-white">{selectedPin.name}</h4>
+                        <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
+                          Funds are being spent faster than physical construction is progressing, putting key project milestones at risk.
+                        </p>
+
+                        <div className="pt-2 space-y-2 text-xs sm:text-sm">
+                          <div className="flex justify-between font-mono-code text-white/80">
+                            <span>Physical Progress: 34%</span>
+                            <span className="text-white font-bold">Planned Target: 78%</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
+                            <div className="h-full bg-white rounded-full" style={{ width: '34%' }} />
+                          </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-white/10">
+                          <h5 className="text-xs font-mono font-bold uppercase text-white/70 mb-2">Recommended Next Steps</h5>
+                          <ul className="text-xs text-white/80 space-y-1.5 list-disc list-inside">
+                            <li>Review delayed construction schedule with EPC contractor</li>
+                            <li>Inspect on-site machinery and equipment deployment</li>
+                            <li>Verify actual ground milestones against contractor expenditure claims</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="oled-solid-card p-5 sm:p-6 space-y-3">
+                        <h4 className="text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider text-white/80 mb-2">
+                          Main Reasons for Risk
+                        </h4>
+                        {shapDrivers.map(d => (
+                          <div key={d.name} className="p-3 rounded-xl bg-white/5 border border-white/15 space-y-1">
+                            <div className="flex items-center justify-between text-xs sm:text-sm">
+                              <span className="font-semibold text-white">{d.name}</span>
+                            </div>
+                            <p className="text-[11px] sm:text-xs text-white/70">{d.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="oled-solid-card p-8 text-center space-y-4">
+                      <div className="text-base font-bold text-white">No Projects Added Yet</div>
+                      <p className="text-xs sm:text-sm text-white/75 max-w-xl mx-auto leading-relaxed">
+                        You don't have any projects listed in your dashboard yet. Add your first project using the standard report fields to see risk predictions and AI recommendations.
+                      </p>
+                      <button
+                        onClick={() => setShowAddModal(true)}
+                        className="px-5 py-2.5 rounded-xl bg-white text-black text-xs font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-lg inline-flex items-center gap-2"
+                      >
+                        <span>+ Add Project</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* SECTION 04 / 04 — LIVE PROJECTS & PORTFOLIO */}
           <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
@@ -931,13 +939,13 @@ export default function App() {
               onNavigateToInvestigation={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
-                setCurrentTab('investigation');
+                setInvestigationModalProjectId(id);
               }}
               onOpenAddProject={() => setShowAddModal(true)}
             />
           )}
 
-          {currentTab === 'intelligence' && isAdmin && (
+          {currentTab === 'intelligence' && (
             <ProjectIntelligence
               projectId={selectedPin?.id}
               currentUser={currentUser}
@@ -946,7 +954,7 @@ export default function App() {
                   const found = pins.find(p => p.id === id);
                   if (found) setSelectedPin(found);
                 }
-                setCurrentTab('investigation');
+                setInvestigationModalProjectId(id || selectedPin?.id || pins[0]?.id || null);
               }}
               onOpenAddProject={() => setShowAddModal(true)}
               onSelectProject={(id) => {
@@ -956,14 +964,7 @@ export default function App() {
             />
           )}
 
-          {currentTab === 'investigation' && isAdmin && (
-            <Investigation
-              projectId={selectedPin?.id}
-              onOpenAddProject={() => setShowAddModal(true)}
-            />
-          )}
-
-          {currentTab === 'analytics' && isAdmin && (
+          {currentTab === 'analytics' && (
             <Analytics
               pinsCount={pins.length}
               onOpenAddProject={() => setShowAddModal(true)}
@@ -995,7 +996,7 @@ export default function App() {
               onNavigateToInvestigation={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
-                setCurrentTab('investigation');
+                setInvestigationModalProjectId(id);
               }}
               onNavigateToProject={(id) => {
                 const found = pins.find(p => p.id === id);
@@ -1005,18 +1006,18 @@ export default function App() {
             />
           )}
 
-          {currentTab === 'data_models' && isAdmin && (
+          {(currentTab === 'data_models' || currentTab === 'reports') && (
             <DataModels />
           )}
 
-          {currentTab === 'users_audit' && isAdmin && (
+          {currentTab === 'users_audit' && (
             <UsersAudit />
           )}
         </div>
       )}
 
       {/* FLOATING BOTTOM DOCK CONTROLS (Only on Motion tab for Admins) */}
-      {currentTab === 'motion' && isAdmin && (
+      {(currentTab === 'motion' || currentTab === 'overview') && isAdmin && (
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
           <button
             onClick={() => setShowAddModal(true)}
@@ -1038,13 +1039,34 @@ export default function App() {
         isOpen={!!insightsModalProjectId}
         projectId={insightsModalProjectId}
         currentUser={currentUser}
+        isAdmin={isAdmin}
         onClose={() => setInsightsModalProjectId(null)}
         onNavigateToInvestigation={(id) => {
           const found = pins.find(p => p.id === id);
           if (found) setSelectedPin(found);
-          setCurrentTab('investigation');
           setInsightsModalProjectId(null);
+          setInvestigationModalProjectId(id);
         }}
+      />
+
+      {/* INVESTIGATION POP-UP MODAL (Replaces separate investigation page) */}
+      <InvestigationModal
+        isOpen={!!investigationModalProjectId}
+        projectId={investigationModalProjectId}
+        onClose={() => setInvestigationModalProjectId(null)}
+        onOpenAddProject={() => {
+          setInvestigationModalProjectId(null);
+          setShowAddModal(true);
+        }}
+      />
+
+      {/* ACCOUNT & PROFILE SETTINGS MODAL */}
+      <SettingsModal
+        isOpen={settingsModalOpen}
+        initialTab={settingsModalTab}
+        currentUser={currentUser}
+        onClose={() => setSettingsModalOpen(false)}
+        onSignOut={handleSignOut}
       />
 
       {/* GEMINI 57-FEATURE & LIGHTGBM ML ASSET INGESTION MODAL */}
@@ -1053,6 +1075,7 @@ export default function App() {
         onClose={() => setShowAddModal(false)}
         currentUser={currentUser}
         onProjectAdded={handleProjectAdded}
+        existingProjectsCount={pins.length}
       />
 
       {/* CEO PIN MANAGER MODAL */}

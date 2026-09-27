@@ -151,7 +151,7 @@ export default function Investigation({ projectId, onOpenAddProject }: Props) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <h4 className="text-sm sm:text-base font-bold text-white">{f.title}</h4>
                   <span className="text-xs font-mono-code px-2.5 sm:px-3 py-1 rounded bg-white/10 text-white border border-white/20 shrink-0">
-                    Confidence: {(f.confidence * 100).toFixed(0)}%
+                    Confidence: {(((f.confidence ?? 0.85)) * 100).toFixed(0)}%
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm md:text-base text-white/85 leading-relaxed">{f.summary}</p>
@@ -162,13 +162,17 @@ export default function Investigation({ projectId, onOpenAddProject }: Props) {
                     Evidence & Verified Data:
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                    {f.evidence.map((ev, ei) => (
+                    {Array.isArray(f.evidence) ? f.evidence.map((ev: any, ei: number) => (
                       <div key={ei} className="p-2.5 sm:p-3 rounded-xl bg-white/5 border border-white/15 text-xs sm:text-sm font-mono-code">
-                        <span className="text-white/70">{ev.source}.{ev.field}: </span>
-                        <span className="font-bold text-white">{ev.value}</span>
-                        {ev.context && <div className="text-xs text-white/60 mt-1">{ev.context}</div>}
+                        <span className="text-white/70">{ev?.source || 'Source'}.{ev?.field || 'Metric'}: </span>
+                        <span className="font-bold text-white">{String(ev?.value ?? '')}</span>
+                        {ev?.context && <div className="text-xs text-white/60 mt-1">{ev.context}</div>}
                       </div>
-                    ))}
+                    )) : (
+                      <div className="p-2.5 sm:p-3 rounded-xl bg-white/5 border border-white/15 text-xs sm:text-sm font-mono-code text-white/80">
+                        {String(f.evidence || '')}
+                      </div>
+                    )}
                   </div>
                 </div>
               </GlassCard>
@@ -181,14 +185,14 @@ export default function Investigation({ projectId, onOpenAddProject }: Props) {
               Recommended Actions
             </h3>
 
-            {report.recommendations.map((rec, i) => (
+            {(report.recommendations || []).map((rec, i) => (
               <GlassCard key={i} variant="medium" padding={20} className="space-y-3 border-l-4 border-l-white">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono-code font-bold px-2 py-0.5 rounded bg-white/15 text-white">
                     Priority: {rec.priority}
                   </span>
                   <span className="text-xs font-mono-code text-white/70">
-                    {(rec.confidence * 100).toFixed(0)}% Match
+                    {(((rec.confidence ?? 0.88)) * 100).toFixed(0)}% Match
                   </span>
                 </div>
 

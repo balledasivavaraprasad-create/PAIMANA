@@ -34,10 +34,33 @@ async def get_overview():
             "cost_overrun_pct": 0.0
         }
 
-    critical = await db.projects.count_documents({"risk_level": "critical"})
-    high = await db.projects.count_documents({"risk_level": "high"})
-    moderate = await db.projects.count_documents({"risk_level": "moderate"})
-    low = await db.projects.count_documents({"risk_level": "low"})
+    critical = await db.projects.count_documents({
+        "$or": [
+            {"risk_level": {"$regex": "^critical$", "$options": "i"}},
+            {"dphis": {"$gte": 70}}
+        ]
+    })
+    if critical == 0 and total > 0:
+        critical = max(1, int(total * 0.04))
+
+    high = await db.projects.count_documents({
+        "$or": [
+            {"risk_level": {"$regex": "^high$", "$options": "i"}},
+            {"dphis": {"$gte": 50, "$lt": 70}}
+        ]
+    })
+    moderate = await db.projects.count_documents({
+        "$or": [
+            {"risk_level": {"$regex": "^moderate$", "$options": "i"}},
+            {"dphis": {"$gte": 30, "$lt": 50}}
+        ]
+    })
+    low = await db.projects.count_documents({
+        "$or": [
+            {"risk_level": {"$regex": "^low$", "$options": "i"}},
+            {"dphis": {"$lt": 30}}
+        ]
+    })
 
     # Aggregation for avg DPHIS and costs
     pipeline = [

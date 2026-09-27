@@ -236,7 +236,11 @@ export default function MyProjects({
                     onClick={(e) => {
                       e.stopPropagation();
                       onSelectProject(pin.id);
-                      setInsightsModalProjectId(pin.id);
+                      if (onNavigateToInsights) {
+                        onNavigateToInsights(pin.id);
+                      } else {
+                        setInsightsModalProjectId(pin.id);
+                      }
                     }}
                     className="flex-1 py-2 px-3 rounded-lg bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer text-center"
                   >
@@ -317,7 +321,11 @@ export default function MyProjects({
                         onClick={(e) => {
                           e.stopPropagation();
                           onSelectProject(pin.id);
-                          setInsightsModalProjectId(pin.id);
+                          if (onNavigateToInsights) {
+                            onNavigateToInsights(pin.id);
+                          } else {
+                            setInsightsModalProjectId(pin.id);
+                          }
                         }}
                         className="px-3 py-1 rounded bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap"
                       >

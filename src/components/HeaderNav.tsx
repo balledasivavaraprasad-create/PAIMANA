@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useTheme } from '../hooks/useTheme';
+import { SettingsTab } from './SettingsModal';
 
 export type ActiveTab = 
   | 'motion' 
@@ -11,15 +12,18 @@ export type ActiveTab =
   | 'alerts' 
   | 'data_models' 
   | 'users_audit' 
-  | 'login';
+  | 'login'
+  | 'overview'
+  | 'reports';
 
 interface HeaderNavProps {
   currentTab: ActiveTab;
   onTabChange: (tab: ActiveTab) => void;
   alertCount?: number;
-  user?: { full_name?: string; ministry?: string; username?: string; role?: string; designation?: string } | null;
+  user?: { full_name?: string; ministry?: string; username?: string; role?: string; designation?: string; email?: string } | null;
   onSignOut?: () => void;
   onSignInClick?: () => void;
+  onOpenSettings?: (tab?: SettingsTab) => void;
 }
 
 export function HeaderNav({
@@ -28,23 +32,26 @@ export function HeaderNav({
   alertCount = 0,
   user = null,
   onSignOut,
-  onSignInClick
+  onSignInClick,
+  onOpenSettings
 }: HeaderNavProps) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'ANALYST';
 
-  const navItems: Array<{ id: ActiveTab; label: string; badge?: number }> = isAdmin
+  // Navigation Items (Investigation removed from standalone navbar tabs — now accessible via dedicated pop-up modal)
+  const navItems: Array<{ id: ActiveTab; label: string; badge?: number; icon?: string }> = isAdmin
     ? [
         { id: 'motion', label: 'Overview' },
         { id: 'projects', label: 'Portfolio' },
         { id: 'intelligence', label: 'Risk Intelligence' },
-        { id: 'investigation', label: 'Investigations' },
         { id: 'analytics', label: 'Analytics' },
         { id: 'alerts', label: 'Alerts & Automation', badge: alertCount },
         { id: 'assistant', label: 'Assistant' },
@@ -77,6 +84,21 @@ export function HeaderNav({
       window.removeEventListener('resize', checkScroll);
     };
   }, [navItems, currentTab]);
+
+  // Click outside to close profile dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    if (profileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [profileDropdownOpen]);
 
   const scrollStride = (direction: 'left' | 'right') => {
     const el = scrollRef.current;
@@ -181,37 +203,133 @@ export function HeaderNav({
         )}
       </div>
 
-      {/* Top Right Controls - User Status & Theme Switcher */}
+      {/* Top Right Controls - Profile Icon Dropdown & Theme Toggle */}
       <div className="pointer-events-auto flex items-center gap-2 shrink-0">
         {user ? (
-          <div className="flex items-center gap-1.5">
-            <div className={`hidden sm:flex flex-col text-right leading-none ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
-              <div className="flex items-center justify-end gap-1.5">
-                <span className="text-[10px] font-bold font-mono-code truncate max-w-[130px]">
-                  {user.full_name || user.username}
-                </span>
-                <span className={`text-[8px] px-1.5 py-0.5 rounded font-bold font-mono-code uppercase ${
-                  isAdmin ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-white/10 text-white/80 border border-white/20'
-                }`}>
-                  {isAdmin ? 'ADMIN' : 'OFFICER'}
-                </span>
-              </div>
-              <span className="text-[8px] font-mono-code opacity-70 truncate max-w-[150px] mt-0.5">
-                {user.ministry || 'Infrastructure Officer'}
-              </span>
-            </div>
-            {onSignOut && (
-              <button
-                onClick={onSignOut}
-                title="Sign Out"
-                className={`px-2 py-1 rounded-md border text-[10px] font-mono-code transition-colors cursor-pointer ${
+          <div ref={dropdownRef} className="relative">
+            {/* Profile Avatar Button */}
+            <button
+              onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+              title="Profile & Settings"
+              className={`w-7 sm:w-8 h-7 sm:h-8 rounded-full border flex items-center justify-center font-mono font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-sm select-none ${
+                isDark
+                  ? 'bg-gradient-to-tr from-sky-600 to-indigo-600 text-white border-white/25 hover:border-white/50'
+                  : 'bg-gradient-to-tr from-slate-900 to-indigo-800 text-white border-black/25 hover:border-black/50'
+              }`}
+            >
+              {user.full_name ? user.full_name.charAt(0).toUpperCase() : user.username ? user.username.charAt(0).toUpperCase() : '👤'}
+            </button>
+
+            {/* Dropdown Menu */}
+            {profileDropdownOpen && (
+              <div 
+                className={`absolute right-0 top-10 sm:top-11 w-64 rounded-xl border shadow-2xl p-1.5 z-50 animate-fade-in ${
                   isDark
-                    ? 'bg-rose-500/15 hover:bg-rose-500/25 border-rose-500/30 text-rose-300'
-                    : 'bg-rose-50 hover:bg-rose-100 border-rose-300 text-rose-700'
+                    ? 'bg-[#0E1422] border-white/20 text-white shadow-black/90'
+                    : 'bg-white border-slate-300 text-slate-900 shadow-xl'
                 }`}
               >
-                Sign Out
-              </button>
+                {/* User Header */}
+                <div className={`px-3 py-2 border-b mb-1 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                  <div className="font-bold text-xs truncate">
+                    {user.full_name || user.username}
+                  </div>
+                  <div className={`text-[10px] font-mono truncate ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+                    {user.ministry || 'Infrastructure Administration'}
+                  </div>
+                  <span className={`inline-block text-[8px] px-1.5 py-0.2 rounded font-mono font-bold uppercase mt-1 ${
+                    isAdmin 
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
+                      : (isDark ? 'bg-white/10 text-white/80' : 'bg-slate-200 text-slate-800')
+                  }`}>
+                    {isAdmin ? 'ADMIN' : 'PROJECT OFFICER'}
+                  </span>
+                </div>
+
+                {/* Condensed Settings Items */}
+                <div className="space-y-0.5 text-xs font-mono">
+                  <button
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      onOpenSettings && onOpenSettings('profile');
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 cursor-pointer transition-colors ${
+                      isDark ? 'hover:bg-white/10 text-white/90' : 'hover:bg-slate-100 text-slate-800'
+                    }`}
+                  >
+                    <span>👤</span>
+                    <span>Profile Details</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      onOpenSettings && onOpenSettings('security');
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 cursor-pointer transition-colors ${
+                      isDark ? 'hover:bg-white/10 text-white/90' : 'hover:bg-slate-100 text-slate-800'
+                    }`}
+                  >
+                    <span>🔒</span>
+                    <span>Login & Security</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      onOpenSettings && onOpenSettings('2fa');
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 cursor-pointer transition-colors ${
+                      isDark ? 'hover:bg-white/10 text-white/90' : 'hover:bg-slate-100 text-slate-800'
+                    }`}
+                  >
+                    <span>🛡️</span>
+                    <span>Two-Factor Auth</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      onOpenSettings && onOpenSettings('sessions');
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 cursor-pointer transition-colors ${
+                      isDark ? 'hover:bg-white/10 text-white/90' : 'hover:bg-slate-100 text-slate-800'
+                    }`}
+                  >
+                    <span>💻</span>
+                    <span>Active Sessions</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      onOpenSettings && onOpenSettings('account');
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 cursor-pointer transition-colors ${
+                      isDark ? 'hover:bg-white/10 text-white/90' : 'hover:bg-slate-100 text-slate-800'
+                    }`}
+                  >
+                    <span>⚙️</span>
+                    <span>Account Settings</span>
+                  </button>
+                </div>
+
+                {/* Sign Out Action */}
+                {onSignOut && (
+                  <div className={`pt-1 mt-1 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                    <button
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        onSignOut();
+                      }}
+                      className="w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 text-xs font-mono text-rose-400 hover:bg-rose-500/15 cursor-pointer transition-colors"
+                    >
+                      <span>🚪</span>
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         ) : (

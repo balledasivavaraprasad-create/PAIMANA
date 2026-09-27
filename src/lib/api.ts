@@ -60,6 +60,7 @@ export interface ProjectData {
 export interface RiskData {
   project_id: string;
   dphis: number;
+  dphis_score?: number;
   level: string;
   components: {
     time: number;
@@ -99,30 +100,40 @@ export interface PredictionData {
 }
 
 export interface InvestigationReport {
-  investigation_id: string;
+  investigation_id?: string;
   project_id: string;
-  trigger_reason: string;
-  executive_summary: string;
+  trigger_reason?: string;
+  executive_summary?: string;
+  generated_at?: string;
   findings: Array<{
     title: string;
-    summary: string;
-    evidence: Array<{
-      source: string;
-      field: string;
-      value: any;
-      context?: string;
-    }>;
-    confidence: number;
+    summary?: string;
+    detail?: string;
+    severity?: string;
+    evidence: any;
+    confidence?: number;
   }>;
-  recommendations: Array<{
+  root_causes?: string[];
+  recommendations?: Array<{
     action: string;
-    reason: string;
-    priority: string;
-    confidence: number;
+    reason?: string;
+    priority?: string | number;
+    impact?: string;
+    owner?: string;
+    confidence?: number;
     target_agency?: string;
   }>;
-  tools_executed: string[];
-  overall_confidence: number;
+  recommended_actions?: Array<{
+    action: string;
+    reason?: string;
+    priority?: string | number;
+    impact?: string;
+    owner?: string;
+    confidence?: number;
+    target_agency?: string;
+  }>;
+  tools_executed?: string[];
+  overall_confidence?: number;
 }
 
 export interface AnalyticsOverview {
@@ -941,6 +952,7 @@ export interface AuthResponse {
   email?: string;
   full_name?: string;
   ministry?: string;
+  designation?: string;
   assigned_projects?: string[];
 }
 

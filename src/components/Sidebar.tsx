@@ -2,7 +2,7 @@ import React from 'react';
 import type { Page } from '../App';
 import ThemeToggle from './ThemeToggle';
 
-const icons = {
+const icons: Record<string, React.ReactNode> = {
   overview: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
@@ -23,9 +23,9 @@ const icons = {
       <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
     </svg>
   ),
-  investigation: (
+  motion: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+      <polygon points="5 3 19 12 5 21 5 3"/>
     </svg>
   ),
   assistant: (
@@ -50,7 +50,6 @@ const navItems: Array<{ id: Page; label: string; badge?: number }> = [
   { id: 'projects', label: 'Projects' },
   { id: 'intelligence', label: 'Risk Intelligence' },
   { id: 'analytics', label: 'Portfolio Analytics' },
-  { id: 'investigation', label: 'AI Investigations' },
   { id: 'assistant', label: 'Intelligence Assistant' },
   { id: 'alerts', label: 'Alerts', badge: 14 },
   { id: 'reports', label: 'Reports' },

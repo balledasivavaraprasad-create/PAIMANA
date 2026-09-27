@@ -2,25 +2,80 @@ import React, { useState } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { ingestNormalAsset, ProjectData, UserProfile } from '../lib/api';
 
+const INDIAN_STATES = [
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+  'Andaman and Nicobar Islands',
+  'Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi (NCT)',
+  'Jammu and Kashmir',
+  'Ladakh',
+  'Lakshadweep',
+  'Puducherry'
+];
+
+const SUGGESTED_MINISTRIES = [
+  'Ministry of Road Transport & Highways',
+  'Ministry of Railways',
+  'Ministry of Housing & Urban Affairs',
+  'Ministry of Ports, Shipping & Waterways',
+  'Ministry of Power',
+  'Ministry of Civil Aviation',
+  'Ministry of Petroleum & Natural Gas',
+  'Ministry of New & Renewable Energy',
+  'Ministry of Water Resources & Jal Shakti',
+  'Department of Telecommunications',
+  'Ministry of Coal & Mines',
+  'National Highways Authority of India (NHAI)',
+  'National High Speed Rail Corporation (NHSRCL)'
+];
+
 interface AddProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser: UserProfile | null;
   onProjectAdded: (newProject: ProjectData) => void;
+  existingProjectsCount?: number;
 }
 
 export default function AddProjectModal({
   isOpen,
   onClose,
   currentUser,
-  onProjectAdded
+  onProjectAdded,
+  existingProjectsCount = 0
 }: AddProjectModalProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  // The 8 Standard Normal File Columns from FlashReport_July_2026.csv
-  const [page, setPage] = useState<number>(1);
-  const [sNo, setSNo] = useState<number>(1);
+  // Core project fields
   const [projectId, setProjectId] = useState<string>('');
   const [projectName, setProjectName] = useState<string>('');
   const [originalCost, setOriginalCost] = useState<string>('');
@@ -39,6 +94,10 @@ export default function AddProjectModal({
   const [error, setError] = useState<string>('');
 
   if (!isOpen) return null;
+
+  // Auto-calculated Serial Number based on count of existing projects in account
+  const autoSNo = (existingProjectsCount || 0) + 1;
+  const autoPage = 1;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,20 +123,20 @@ export default function AddProjectModal({
 
     setLoading(true);
     try {
-      setStatusStep('Invoking Gemini Flash 2.5 AI for 57-Feature Engineering...');
+      setStatusStep('Invoking Gemini Flash AI for 57-Feature Engineering...');
       await new Promise(r => setTimeout(r, 600));
 
       setStatusStep('Synthesizing Risk Dimensions & Progress-Expenditure Velocity...');
       const createdProject = await ingestNormalAsset({
-        page: Number(page) || 1,
-        s_no: Number(sNo) || 1,
+        page: autoPage,
+        s_no: autoSNo,
         project_id: projectId.trim().toUpperCase(),
         project_name: projectName.trim(),
         original_cost_crores: origCostNum,
         revised_cost_crores: revCostNum,
         expenditure_crores: expNum,
         physical_progress_percent: progNum,
-        ministry: ministry.trim(),
+        ministry: ministry.trim(), // Automatically accepts existing or brand new department
         state: state.trim(),
         username: currentUser?.username,
         dphis_threshold: Number(dphisThreshold) || 70
@@ -103,8 +162,6 @@ export default function AddProjectModal({
     setRevisedCost('4890.0');
     setExpenditure('2890.0');
     setPhysicalProgress('62.5');
-    setSNo(1);
-    setPage(1);
     setState('Uttar Pradesh');
     if (currentUser?.ministry) {
       setMinistry(currentUser.ministry);
@@ -126,7 +183,7 @@ export default function AddProjectModal({
               </h2>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Enter the 8 basic project details from the monthly report to compute risk scores and delay forecasts.
+              Enter core project metrics to compute risk scores, SHAP explanations, and delay forecasts.
             </p>
           </div>
           <button
@@ -193,7 +250,7 @@ export default function AddProjectModal({
                 <input
                   type="text"
                   required
-                  placeholder="e.g. NH-48-PKG3 or 060100093"
+                  placeholder="e.g. NH-48-PKG3 or PRJ_1024"
                   value={projectId}
                   onChange={e => setProjectId(e.target.value)}
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
@@ -273,8 +330,8 @@ export default function AddProjectModal({
               </div>
             </div>
 
-            {/* Row 3: Physical Progress and Tokens */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Row 3: Physical Progress & Automatic S.No info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
                   6. Physical Progress (%) *
@@ -294,67 +351,65 @@ export default function AddProjectModal({
                 />
               </div>
 
-              <div>
-                <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
-                  7. Serial No (s_no)
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={sNo}
-                  onChange={e => setSNo(Number(e.target.value))}
-                  className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
-                  }`}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
-                  8. Flash Report Page
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={page}
-                  onChange={e => setPage(Number(e.target.value))}
-                  className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
-                  }`}
-                />
+              <div className="flex flex-col justify-end">
+                <div className={`p-2.5 rounded-lg border text-xs font-mono flex items-center justify-between ${
+                  isDark ? 'bg-white/5 border-white/10 text-white/70' : 'bg-slate-100 border-slate-200 text-slate-700'
+                }`}>
+                  <span>Serial No (Auto-calculated):</span>
+                  <span className="font-bold text-white font-mono bg-white/10 px-2 py-0.5 rounded">
+                    #{autoSNo}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Row 4: Jurisdiction context */}
+            {/* Row 4: Jurisdiction Context with Indian States Dropdown & Department */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <div>
                 <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
-                  Ministry / Department
+                  7. Ministry / Department (Existing or New) *
                 </label>
                 <input
                   type="text"
+                  list="ministries-datalist"
+                  required
                   value={ministry}
                   onChange={e => setMinistry(e.target.value)}
-                  placeholder="e.g. Ministry of Road Transport & Highways"
+                  placeholder="Choose or enter new department..."
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
                     isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
+                <datalist id="ministries-datalist">
+                  {SUGGESTED_MINISTRIES.map(m => (
+                    <option key={m} value={m} />
+                  ))}
+                </datalist>
+                <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
+                  New departments are automatically recognized and registered.
+                </span>
               </div>
 
               <div>
                 <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
-                  State / Location
+                  8. State / Union Territory *
                 </label>
-                <input
-                  type="text"
+                <select
                   value={state}
                   onChange={e => setState(e.target.value)}
-                  placeholder="e.g. Maharashtra, Uttar Pradesh"
-                  className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
+                  className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none cursor-pointer ${
+                    isDark ? 'bg-[#0E1524] border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
-                />
+                >
+                  {INDIAN_STATES.map(st => (
+                    <option key={st} value={st}>
+                      {st}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
+                  Select geographical execution jurisdiction in India.
+                </span>
               </div>
             </div>
 
@@ -374,45 +429,35 @@ export default function AddProjectModal({
                     required
                     value={dphisThreshold}
                     onChange={e => setDphisThreshold(Number(e.target.value))}
-                    className={`w-20 px-3 py-1.5 rounded-lg border text-sm font-mono font-bold text-center outline-none ${
-                      isDark ? 'bg-black/60 border-amber-500/50 text-amber-300 focus:border-amber-400' : 'bg-white border-amber-400 text-amber-900 focus:border-amber-600'
-                    }`}
+                    className="w-16 px-2 py-1 rounded bg-black/60 border border-amber-500/50 text-amber-300 text-xs font-mono font-bold text-center outline-none"
                   />
-                  <span className="text-xs font-mono text-slate-400">/ 100</span>
+                  <span className="text-xs text-amber-400/80 font-mono">/ 100</span>
                 </div>
               </div>
-              <p className="text-[11.5px] text-[var(--text-secondary)] leading-relaxed">
-                Set the DPHIS score at which this project should automatically trigger an alert.
-              </p>
-              <p className="text-[11px] text-amber-600 dark:text-amber-400/90 font-medium mt-1">
-                When this project's DPHIS reaches or crosses this value, an alert will automatically be sent to you and the responsible administrator.
+              <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
+                Set the independent health risk threshold (DPHIS 1–100) for this specific asset. When risk score reaches or exceeds this value, an instant alert will be dispatched to you and logged to the audit history.
               </p>
             </div>
 
             {/* Footer Buttons */}
-            <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
-              <span className="text-[10px] font-mono text-slate-400">
-                ⚡ Automatically calculates delay risk &amp; cost trends
-              </span>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono cursor-pointer transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={`px-5 py-2 rounded-lg font-mono font-bold text-xs shadow-lg cursor-pointer transition-all disabled:opacity-50 ${
-                    isDark ? 'bg-white hover:bg-slate-200 text-black' : 'bg-black hover:bg-zinc-800 text-white'
-                  }`}
-                >
-                  {loading ? 'Saving Project...' : 'Save Project & Calculate Risk →'}
-                </button>
-              </div>
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="px-4 py-2 rounded-lg border border-white/10 text-xs font-mono hover:bg-white/5 cursor-pointer text-slate-400 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`px-6 py-2 rounded-lg font-mono font-bold text-xs cursor-pointer shadow-lg transition-all ${
+                  isDark ? 'bg-white text-black hover:bg-slate-200' : 'bg-black text-white hover:bg-slate-800'
+                }`}
+              >
+                {loading ? 'Analyzing Project...' : 'Add Project →'}
+              </button>
             </div>
           </form>
         )}

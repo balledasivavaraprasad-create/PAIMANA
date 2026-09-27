@@ -143,22 +143,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   };
 
   // Fast 1-click Demo Fill
-  const fillDemoCredentials = async (role: 'admin' | 'analyst' | 'morth' | 'siva', autoSubmit = false) => {
+  const fillDemoCredentials = async (role: 'admin' | 'siva', autoSubmit = false) => {
     setLoginError('');
     let email = '';
     let password = '';
     if (role === 'admin') {
       email = 'admin';
       password = 'paimana2026';
-    } else if (role === 'analyst') {
-      email = 'analyst';
-      password = 'paimana2026';
-    } else if (role === 'siva') {
+    } else {
       email = 'balledasivavaraprasad@gmail.com';
       password = 'paimana2026';
-    } else {
-      email = 'ramesh.kumar@morth.gov.in';
-      password = 'Password1234!';
     }
     setLoginEmail(email);
     setLoginPassword(password);
@@ -606,46 +600,28 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-2">
                   Demo Evaluation Credentials
                 </span>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => fillDemoCredentials('admin', true)}
-                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate cursor-pointer ${
-                      isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                    className={`py-2 px-3 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm ${
+                      isDark ? 'bg-white/10 hover:bg-white hover:text-black border-white/20 text-white' : 'bg-slate-100 hover:bg-black hover:text-white border-slate-300 text-slate-800'
                     }`}
                     title="MoSPI Admin (paimana2026)"
                   >
-                    👑 MoSPI Admin
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillDemoCredentials('analyst', true)}
-                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate cursor-pointer ${
-                      isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
-                    }`}
-                    title="Risk Analyst (paimana2026)"
-                  >
-                    📊 Lead Analyst
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillDemoCredentials('morth', true)}
-                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate cursor-pointer ${
-                      isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
-                    }`}
-                    title="Dr. Ramesh Kumar (Road Transport & Highways)"
-                  >
-                    🛣️ MoRTH Official
+                    <span>👑</span>
+                    <span>Admin</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => fillDemoCredentials('siva', true)}
-                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate cursor-pointer ${
-                      isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                    className={`py-2 px-3 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm ${
+                      isDark ? 'bg-white/10 hover:bg-white hover:text-black border-white/20 text-white' : 'bg-slate-100 hover:bg-black hover:text-white border-slate-300 text-slate-800'
                     }`}
-                    title="Siva Prasad (balledasivavaraprasad@gmail.com)"
+                    title="User: balledasivavaraprasad@gmail.com (paimana2026)"
                   >
-                    🏛️ Siva Prasad
+                    <span>👤</span>
+                    <span className="truncate">balledasivavaraprasad@gmail.com</span>
                   </button>
                 </div>
               </div>
@@ -853,7 +829,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                     {otpDigits.map((digit, idx) => (
                       <input
                         key={idx}
-                        ref={el => (otpInputsRef.current[idx] = el)}
+                        ref={el => { otpInputsRef.current[idx] = el; }}
                         type="text"
                         inputMode="numeric"
                         maxLength={1}

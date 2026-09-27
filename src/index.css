@@ -362,19 +362,18 @@
 }
 
 /* =========================================================================
-   BUTTERY SMOOTH MOTION SCROLL SYSTEM
+   BUTTERY SMOOTH MOTION SCROLL SYSTEM (SILKY SMOOTH DAMPING)
    ========================================================================= */
 .buttery-smooth-scroll {
   scroll-behavior: smooth;
-  scroll-snap-type: y proximity;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   scroll-padding-top: 48px;
 }
 
 .buttery-smooth-section {
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
 
