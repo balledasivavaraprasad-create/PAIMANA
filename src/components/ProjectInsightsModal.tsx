@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { 
-  fetchProject, fetchProjectPredictions, fetchProjectRisk, triggerInvestigation, updateProjectThreshold,
-  ProjectData, PredictionData, RiskData, InvestigationReport, UserProfile 
+  fetchProject, fetchProjectPredictions, fetchProjectRisk, updateProjectThreshold,
+  ProjectData, PredictionData, RiskData, UserProfile 
 } from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
 
@@ -32,12 +32,6 @@ export default function ProjectInsightsModal({
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
   const [risk, setRisk] = useState<RiskData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
-  // Normal user embedded investigation state
-  const [showTechnicalShap, setShowTechnicalShap] = useState(false);
-  const [isInvestigating, setIsInvestigating] = useState(false);
-  const [investigationReport, setInvestigationReport] = useState<InvestigationReport | null>(null);
-  const [investigationStep, setInvestigationStep] = useState<number>(0);
 
   // Admin threshold configuration state
   const [isEditingThreshold, setIsEditingThreshold] = useState(false);
@@ -71,9 +65,6 @@ export default function ProjectInsightsModal({
     }
 
     setLoading(true);
-    setInvestigationReport(null);
-    setInvestigationStep(0);
-    setIsInvestigating(false);
     setIsEditingThreshold(false);
     setThresholdSaveSuccess(null);
 
@@ -135,89 +126,6 @@ export default function ProjectInsightsModal({
   const pState = project?.state || 'Maharashtra';
   const pSector = project?.sector || 'Roads & Highways';
   const pCostCr = project?.cost?.revised || project?.cost?.original || 4218;
-
-  const handleRunInvestigation = async () => {
-    setIsInvestigating(true);
-    setInvestigationStep(1);
-
-    const stepTimer = setInterval(() => {
-      setInvestigationStep(prev => {
-        if (prev >= 5) {
-          clearInterval(stepTimer);
-          return 5;
-        }
-        return prev + 1;
-      });
-    }, 400);
-
-    try {
-      const rep = await triggerInvestigation(projectId);
-      clearInterval(stepTimer);
-      setInvestigationStep(5);
-      setInvestigationReport(rep);
-    } catch {
-      clearInterval(stepTimer);
-      setInvestigationStep(5);
-      setInvestigationReport({
-        project_id: projectId,
-        generated_at: new Date().toISOString(),
-        findings: [
-          {
-            title: 'Construction Progress Deficit',
-            severity: 'critical',
-            detail: 'Actual work completed (34%) is 44 percentage points below planned target (78%).',
-            evidence: 'Flash Report schedule verification · Month 14'
-          },
-          {
-            title: 'Expenditure Velocity Higher Than Milestone Progress',
-            severity: 'high',
-            detail: '62% of allocated funds disbursed, but primary viaduct and earthworks remain pending.',
-            evidence: 'Public Finance Management System expenditure ledger'
-          },
-          {
-            title: 'Contractor Resource Bottleneck',
-            severity: 'medium',
-            detail: 'Equipment deployment on site is 38% below the contractual baseline requirement.',
-            evidence: 'Site engineer monthly equipment muster'
-          }
-        ],
-        root_causes: [
-          'Delayed contractor machinery deployment and shortage of specialized pier shuttering.',
-          'Slow monsoon recovery in sector 3 earthworks requiring revised compaction schedule.'
-        ],
-        recommended_actions: [
-          {
-            priority: 1,
-            action: 'Issue formal notice to EPC contractor regarding delayed bridge superstructure',
-            impact: 'high',
-            owner: 'Project Director / Monitoring Officer'
-          },
-          {
-            priority: 2,
-            action: 'Conduct site joint inspection on equipment deployment before approving next invoice',
-            impact: 'medium',
-            owner: 'Chief Executive Engineer'
-          },
-          {
-            priority: 3,
-            action: 'Re-baseline quarterly milestone targets to ensure target completion by December 2027',
-            impact: 'medium',
-            owner: 'Ministry Infrastructure Review Board'
-          }
-        ]
-      });
-    } finally {
-      setIsInvestigating(false);
-    }
-  };
-
-  const investigationSteps = [
-    'Checking project milestone history...',
-    'Analyzing physical progress against schedule...',
-    'Verifying expenditure vs completed ground work...',
-    'Checking contractor site resource logs...',
-    'Finalizing root causes and recommended actions...'
-  ];
 
   return (
     <div 
@@ -295,24 +203,6 @@ export default function ProjectInsightsModal({
                       </span>
                     </div>
                   </div>
-
-                  <button
-                    onClick={handleRunInvestigation}
-                    disabled={isInvestigating}
-                    className="px-4 py-2.5 rounded-xl bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer shadow-md shrink-0 flex items-center gap-2 self-start sm:self-center"
-                  >
-                    {isInvestigating ? (
-                      <>
-                        <span className="w-3.5 h-3.5 rounded-full border-2 border-black border-t-transparent animate-spin" />
-                        <span>Investigating...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>⚡</span>
-                        <span>Investigate Issues</span>
-                      </>
-                    )}
-                  </button>
                 </div>
               </div>
 
@@ -487,95 +377,10 @@ export default function ProjectInsightsModal({
               </div>
 
               {/* 2. Why is This Project at Risk? */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white/70">
-                    2. Why is this project at risk?
-                  </h3>
-                  <button
-                    onClick={() => setShowTechnicalShap(!showTechnicalShap)}
-                    className="text-[11px] font-mono text-white/70 hover:text-white underline cursor-pointer"
-                  >
-                    {showTechnicalShap ? 'Hide Technical Explanation' : 'View Technical Explanation'}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="oled-solid-card p-4 space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-mono text-xs font-bold text-white">1</span>
-                      <h4 className="font-semibold text-xs text-white">Progress is Behind Schedule</h4>
-                    </div>
-                    <p className="text-xs text-white/75 leading-relaxed">
-                      Actual on-site work is at 34%, whereas planned target by now was 78%. Construction pace requires acceleration.
-                    </p>
-                  </div>
-
-                  <div className="oled-solid-card p-4 space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-mono text-xs font-bold text-white">2</span>
-                      <h4 className="font-semibold text-xs text-white">Spending Outpaces Physical Work</h4>
-                    </div>
-                    <p className="text-xs text-white/75 leading-relaxed">
-                      62% of the project budget has been released, while only 34% of certified structures have been delivered.
-                    </p>
-                  </div>
-
-                  <div className="oled-solid-card p-4 space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-mono text-xs font-bold text-white">3</span>
-                      <h4 className="font-semibold text-xs text-white">Key Milestones are Slipping</h4>
-                    </div>
-                    <p className="text-xs text-white/75 leading-relaxed">
-                      Critical path viaduct construction and utility shifting are delayed by 8–14 months compared with the approved DPR.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Collapsible Technical Explanation */}
-                {showTechnicalShap && (
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/15 space-y-3 animate-fade-in text-xs">
-                    <div className="font-mono font-bold uppercase tracking-wider text-white/70 text-[11px]">
-                      Technical Model Weights & Contributions
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-white/80">
-                      <div className="p-2.5 rounded bg-black/40 border border-white/10">
-                        <div className="flex justify-between font-mono">
-                          <span>Physical Schedule Gap</span>
-                          <span className="font-bold text-white">+43.2 pts</span>
-                        </div>
-                        <p className="text-[10px] text-white/60 mt-1">LightGBM quantile loss gradient</p>
-                      </div>
-                      <div className="p-2.5 rounded bg-black/40 border border-white/10">
-                        <div className="flex justify-between font-mono">
-                          <span>Expenditure vs Progress Velocity</span>
-                          <span className="font-bold text-white">+24.1 pts</span>
-                        </div>
-                        <p className="text-[10px] text-white/60 mt-1">Cost escalation regressor (XGBoost)</p>
-                      </div>
-                      <div className="p-2.5 rounded bg-black/40 border border-white/10">
-                        <div className="flex justify-between font-mono">
-                          <span>Equipment / Resource Shortage</span>
-                          <span className="font-bold text-white">+14.5 pts</span>
-                        </div>
-                        <p className="text-[10px] text-white/60 mt-1">Contractor manpower deficit signal</p>
-                      </div>
-                      <div className="p-2.5 rounded bg-black/40 border border-white/10">
-                        <div className="flex justify-between font-mono">
-                          <span>Clearances & RoW Availability</span>
-                          <span className="font-bold text-white">-8.0 pts</span>
-                        </div>
-                        <p className="text-[10px] text-white/60 mt-1">Land acquisition complete (risk mitigator)</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 3. Recommended Actions */}
+              {/* 2. Recommended Actions */}
               <div className="space-y-3">
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white/70">
-                  3. What should you do now?
+                  2. Recommended Actions
                 </h3>
 
                 <div className="space-y-2.5">
@@ -627,90 +432,6 @@ export default function ProjectInsightsModal({
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* 4. Embedded Investigation Section */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white/70">
-                    4. Project Issue Investigation
-                  </h3>
-                  {investigationReport && (
-                    <span className="text-[11px] font-mono text-white/60">
-                      Completed · {investigationReport.generated_at ? new Date(investigationReport.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  )}
-                </div>
-
-                {isInvestigating ? (
-                  <div className="oled-solid-card p-6 space-y-4 text-center">
-                    <div className="flex justify-center">
-                      <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-                    </div>
-                    <div className="space-y-1 font-mono text-xs">
-                      <p className="font-bold text-white">Running automated investigation...</p>
-                      <p className="text-white/70">{investigationSteps[investigationStep - 1] || 'Scanning records...'}</p>
-                    </div>
-                  </div>
-                ) : investigationReport ? (
-                  <div className="oled-solid-card p-5 space-y-4">
-                    <div>
-                      <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-white/80 mb-2">
-                        Key Investigation Findings
-                      </h4>
-                      <div className="space-y-2">
-                        {(investigationReport.findings || []).map((f, idx) => {
-                          const evidenceText = typeof f.evidence === 'string'
-                            ? f.evidence
-                            : Array.isArray(f.evidence)
-                              ? f.evidence.map((e: any) => typeof e === 'string' ? e : `${e.field || e.source || 'Metric'}: ${e.value}`).join(' · ')
-                              : 'Verified via Flash Report schedule verification';
-                          return (
-                            <div key={idx} className="p-3 rounded-lg bg-white/5 border border-white/10 text-xs space-y-1">
-                              <div className="flex items-center justify-between">
-                                <span className="font-bold text-white">{f.title}</span>
-                                <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-white/10 text-white">
-                                  {f.severity || 'HIGH'}
-                                </span>
-                              </div>
-                              <p className="text-white/80">{f.detail || f.summary}</p>
-                              <p className="text-[10px] font-mono text-white/50">Evidence: {evidenceText}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-white/10">
-                      <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-white/80 mb-2">
-                        Root Causes Identified
-                      </h4>
-                      <ul className="text-xs text-white/80 space-y-1 list-disc list-inside">
-                        {(investigationReport.root_causes && investigationReport.root_causes.length > 0
-                          ? investigationReport.root_causes
-                          : (investigationReport.recommendations?.map(r => r.reason) || [
-                              'Delayed contractor machinery deployment and shortage of specialized pier shuttering.',
-                              'Slow monsoon recovery in sector 3 earthworks requiring revised compaction schedule.'
-                            ])
-                        ).map((rc, idx) => (
-                          <li key={idx}>{rc}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                    <p className="text-white/75">
-                      Need a deeper analysis of contractor delays, material shortages, and site evidence? Trigger an automated issue scan.
-                    </p>
-                    <button
-                      onClick={handleRunInvestigation}
-                      className="px-4 py-2 rounded-lg bg-white text-black hover:bg-slate-200 font-mono font-bold transition-all cursor-pointer whitespace-nowrap self-start sm:self-auto"
-                    >
-                      Start Scan ⚡
-                    </button>
-                  </div>
-                )}
               </div>
             </>
           )}

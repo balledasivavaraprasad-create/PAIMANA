@@ -11,10 +11,25 @@ interface Props {
   pins: ProjectPin[];
   onSelectProject: (projectId: string) => void;
   onNavigateToInsights?: (projectId: string) => void;
-  onNavigateToInvestigation: (projectId: string) => void;
+  onNavigateToRiskIntelligence?: (projectId: string) => void;
+  onNavigateToInvestigation?: (projectId: string) => void;
   onOpenAddProject: () => void;
   onRemoveProject?: (projectId: string) => void;
 }
+
+const getPinSector = (p: ProjectPin): string => {
+  if ((p as any).sector) return (p as any).sector;
+  const n = p.name.toLowerCase();
+  if (n.includes('rail') || n.includes('gauge') || n.includes('metro') || n.includes('station')) return 'Railways';
+  if (n.includes('solar') || n.includes('power') || n.includes('energy') || n.includes('transmission')) return 'Power & Energy';
+  if (n.includes('port') || n.includes('shipping') || n.includes('dock') || n.includes('terminal')) return 'Ports & Shipping';
+  if (n.includes('gas') || n.includes('petroleum') || n.includes('pipeline')) return 'Petroleum & Natural Gas';
+  if (n.includes('water') || n.includes('irrigation') || n.includes('river')) return 'Water Resources';
+  return 'Roads & Highways';
+};
+
+const parseCost = (costStr: string): number => parseInt(costStr.replace(/[^\d]/g, '') || '0', 10);
+const parseDelay = (delayStr: string): number => parseInt(delayStr.replace(/[^\d]/g, '') || '0', 10);
 
 function CompactDphisGauge({ score, isDark = true }: { score: number; isDark?: boolean }) {
   const size = 68;
@@ -67,6 +82,7 @@ export default function MyProjects({
   pins,
   onSelectProject,
   onNavigateToInsights,
+  onNavigateToRiskIntelligence,
   onNavigateToInvestigation,
   onOpenAddProject,
   onRemoveProject
@@ -74,14 +90,34 @@ export default function MyProjects({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'ANALYST';
+  
+  // Filters State
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW'>('ALL');
+  const [sectorFilter, setSectorFilter] = useState<string>('ALL');
+  const [stateFilter, setStateFilter] = useState<string>('ALL');
+  const [sortBy, setSortBy] = useState<'dphis_desc' | 'dphis_asc' | 'cost_desc' | 'delay_desc' | 'name_asc'>('dphis_desc');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [insightsModalProjectId, setInsightsModalProjectId] = useState<string | null>(null);
 
-  // Filter projects by search and status
+  // Inferred options for dropdowns
+  const inferredSectors = useMemo(() => {
+    const set = new Set<string>();
+    pins.forEach(p => set.add(getPinSector(p)));
+    return Array.from(set).sort();
+  }, [pins]);
+
+  const inferredStates = useMemo(() => {
+    const set = new Set<string>();
+    pins.forEach(p => {
+      if (p.state) set.add(p.state);
+    });
+    return Array.from(set).sort();
+  }, [pins]);
+
+  // Filter & sort projects
   const filteredPins = useMemo(() => {
-    return pins.filter(p => {
+    let list = pins.filter(p => {
       const cat = getRiskCategory(p.dphis);
       const matchesStatus = 
         statusFilter === 'ALL' ||
@@ -90,16 +126,36 @@ export default function MyProjects({
         (statusFilter === 'MODERATE' && cat.level === 'moderate') ||
         (statusFilter === 'LOW' && cat.level === 'low');
 
+      const matchesSector = 
+        sectorFilter === 'ALL' ||
+        getPinSector(p).toLowerCase() === sectorFilter.toLowerCase();
+
+      const matchesState = 
+        stateFilter === 'ALL' ||
+        p.state.toLowerCase() === stateFilter.toLowerCase();
+
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch = 
         !q ||
         p.id.toLowerCase().includes(q) ||
         p.name.toLowerCase().includes(q) ||
-        p.state.toLowerCase().includes(q);
+        p.state.toLowerCase().includes(q) ||
+        getPinSector(p).toLowerCase().includes(q);
 
-      return matchesStatus && matchesSearch;
+      return matchesStatus && matchesSector && matchesState && matchesSearch;
     });
-  }, [pins, searchQuery, statusFilter]);
+
+    list = [...list].sort((a, b) => {
+      if (sortBy === 'dphis_desc') return b.dphis - a.dphis;
+      if (sortBy === 'dphis_asc') return a.dphis - b.dphis;
+      if (sortBy === 'cost_desc') return parseCost(b.cost) - parseCost(a.cost);
+      if (sortBy === 'delay_desc') return parseDelay(b.delay) - parseDelay(a.delay);
+      if (sortBy === 'name_asc') return a.name.localeCompare(b.name);
+      return 0;
+    });
+
+    return list;
+  }, [pins, searchQuery, statusFilter, sectorFilter, stateFilter, sortBy]);
 
   return (
     <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
@@ -136,65 +192,116 @@ export default function MyProjects({
         )}
       </GlassCard>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search by project name, ID, or state..."
-            className="w-full bg-[#0B0F17]/80 border border-white/20 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/50"
-          />
-        </div>
+      {/* Filter and Search Bar with Risk Intelligence Controls */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search by project name, ID, or state..."
+              className="w-full bg-[#0B0F17]/80 border border-white/20 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/50"
+            />
+          </div>
 
-        {/* Status Filter Buttons */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-          {(['ALL', 'CRITICAL', 'HIGH', 'MODERATE', 'LOW'] as const).map(st => {
-            const labelMap = {
-              ALL: 'All Status',
-              CRITICAL: 'Critical',
-              HIGH: 'High Risk',
-              MODERATE: 'Needs Attention',
-              LOW: 'On Track'
-            };
-            const active = statusFilter === st;
-            return (
+          {/* Status Filter Buttons */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+            {(['ALL', 'CRITICAL', 'HIGH', 'MODERATE', 'LOW'] as const).map(st => {
+              const labelMap = {
+                ALL: 'All Status',
+                CRITICAL: 'Critical',
+                HIGH: 'High Risk',
+                MODERATE: 'Needs Attention',
+                LOW: 'On Track'
+              };
+              const active = statusFilter === st;
+              return (
+                <button
+                  key={st}
+                  onClick={() => setStatusFilter(st)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer whitespace-nowrap border ${
+                    active
+                      ? 'bg-white text-black font-bold border-white shadow-sm'
+                      : 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15'
+                  }`}
+                >
+                  {labelMap[st]}
+                </button>
+              );
+            })}
+
+            {/* View Mode Toggle */}
+            <div className="ml-2 hidden sm:flex items-center bg-white/5 border border-white/15 rounded-lg p-0.5">
               <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer whitespace-nowrap border ${
-                  active
-                    ? 'bg-white text-black font-bold border-white shadow-sm'
-                    : 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15'
+                onClick={() => setViewMode('cards')}
+                title="Card view"
+                className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
+                  viewMode === 'cards' ? 'bg-white text-black font-bold' : 'text-white/70 hover:text-white'
                 }`}
               >
-                {labelMap[st]}
+                Cards
               </button>
-            );
-          })}
+              <button
+                onClick={() => setViewMode('table')}
+                title="Table view"
+                className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
+                  viewMode === 'table' ? 'bg-white text-black font-bold' : 'text-white/70 hover:text-white'
+                }`}
+              >
+                Table
+              </button>
+            </div>
+          </div>
+        </div>
 
-          {/* View Mode Toggle */}
-          <div className="ml-2 hidden sm:flex items-center bg-white/5 border border-white/15 rounded-lg p-0.5">
-            <button
-              onClick={() => setViewMode('cards')}
-              title="Card view"
-              className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
-                viewMode === 'cards' ? 'bg-white text-black font-bold' : 'text-white/70 hover:text-white'
-              }`}
+        {/* Secondary Filter Toolbar: Sector, State, Sort By */}
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          {/* Sector Filter */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-mono text-white/60">Sector:</span>
+            <select
+              value={sectorFilter}
+              onChange={e => setSectorFilter(e.target.value)}
+              className="bg-[#0B0F17] border border-white/20 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white/50 cursor-pointer"
             >
-              Cards
-            </button>
-            <button
-              onClick={() => setViewMode('table')}
-              title="Table view"
-              className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
-                viewMode === 'table' ? 'bg-white text-black font-bold' : 'text-white/70 hover:text-white'
-              }`}
+              <option value="ALL">All Sectors ({inferredSectors.length})</option>
+              {inferredSectors.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* State Filter */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-mono text-white/60">State:</span>
+            <select
+              value={stateFilter}
+              onChange={e => setStateFilter(e.target.value)}
+              className="bg-[#0B0F17] border border-white/20 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white/50 cursor-pointer"
             >
-              Table
-            </button>
+              <option value="ALL">All States ({inferredStates.length})</option>
+              {inferredStates.map(st => (
+                <option key={st} value={st}>{st}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sort By */}
+          <div className="flex items-center gap-1.5 sm:ml-auto">
+            <span className="text-[11px] font-mono text-white/60">Sort:</span>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as any)}
+              className="bg-[#0B0F17] border border-white/20 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white/50 cursor-pointer"
+            >
+              <option value="dphis_desc">Highest Risk (DPHIS)</option>
+              <option value="dphis_asc">Lowest Risk (DPHIS)</option>
+              <option value="cost_desc">Highest Sanctioned Budget</option>
+              <option value="delay_desc">Highest Schedule Delay</option>
+              <option value="name_asc">Project Name (A–Z)</option>
+            </select>
           </div>
         </div>
       </div>
@@ -204,16 +311,21 @@ export default function MyProjects({
         <GlassCard variant="medium" padding={32} className="text-center space-y-4">
           <div className="text-base font-bold text-white">No Matching Projects Found</div>
           <p className="text-xs sm:text-sm text-white/70 max-w-md mx-auto">
-            {searchQuery || statusFilter !== 'ALL'
+            {searchQuery || statusFilter !== 'ALL' || sectorFilter !== 'ALL' || stateFilter !== 'ALL'
               ? 'No projects match your current filter criteria. Try clearing filters or search query.'
               : !isAdmin 
                 ? "You do not have any projects listed yet. Click 'Add Project' to get started."
                 : "No projects registered in the portfolio database."
             }
           </p>
-          {(searchQuery || statusFilter !== 'ALL') && (
+          {(searchQuery || statusFilter !== 'ALL' || sectorFilter !== 'ALL' || stateFilter !== 'ALL') && (
             <button
-              onClick={() => { setSearchQuery(''); setStatusFilter('ALL'); }}
+              onClick={() => { 
+                setSearchQuery(''); 
+                setStatusFilter('ALL'); 
+                setSectorFilter('ALL'); 
+                setStateFilter('ALL'); 
+              }}
               className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer"
             >
               Clear Filters
@@ -225,11 +337,12 @@ export default function MyProjects({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredPins.map(pin => {
             const cat = getRiskCategory(pin.dphis);
+            const pinSector = getPinSector(pin);
 
             return (
               <div
                 key={pin.id}
-                className="oled-solid-card p-5 sm:p-6 space-y-4 hover:border-white/40 transition-all flex flex-col justify-between"
+                className="oled-solid-card frosted-glass-card p-5 sm:p-6 space-y-4 hover:border-white/40 transition-all flex flex-col justify-between"
               >
                 <div className="space-y-3.5">
                   {/* Top Bar: ID, Location & Remove Action */}
@@ -260,9 +373,12 @@ export default function MyProjects({
                     )}
                   </div>
 
-                  {/* Project Name */}
+                  {/* Project Name and Sector */}
                   <div>
-                    <h3 className="font-bold text-sm sm:text-base text-white leading-snug line-clamp-2">
+                    <span className="text-[10px] font-mono uppercase text-white/60 tracking-wider">
+                      {pinSector}
+                    </span>
+                    <h3 className="font-bold text-base sm:text-lg text-[var(--text-primary)] leading-snug line-clamp-2 mt-0.5">
                       {pin.name}
                     </h3>
                   </div>
@@ -323,13 +439,7 @@ export default function MyProjects({
                     <div className="flex items-center gap-1.5 font-bold mb-1">
                       <span>{cat.level === 'critical' || cat.level === 'high' ? '⚠️' : 'ℹ️'}</span>
                       <span className={`uppercase tracking-wider font-mono text-[11px] ${isDark ? '' : 'text-black font-bold'}`}>
-                        {cat.level === 'critical' 
-                          ? 'Critical Delay Risk' 
-                          : cat.level === 'high' 
-                          ? 'High Delay Risk' 
-                          : cat.level === 'moderate' 
-                          ? 'Moderate Attention Needed' 
-                          : 'On Track'}
+                        {cat.level === 'critical' ? 'Critical Delay Risk' : cat.level === 'high' ? 'High Delay Risk' : cat.level === 'moderate' ? 'Moderate Attention Needed' : 'On Track'}
                       </span>
                     </div>
                     <p className={`text-[11px] leading-snug ${isDark ? 'opacity-90' : 'text-black font-medium'}`}>
@@ -344,7 +454,7 @@ export default function MyProjects({
                   </div>
                 </div>
 
-                {/* Actions: View Project Insights + Investigate Issue (side-by-side) */}
+                {/* Actions: View Project Insights + Risk Intelligence (side-by-side) */}
                 <div className="pt-3 border-t border-white/10 flex items-center gap-2">
                   <button
                     onClick={(e) => {
@@ -362,21 +472,20 @@ export default function MyProjects({
                     <span>→</span>
                   </button>
 
-                  {/* Investigate Issue for Normal User (opens InvestigationModal pop-up) */}
-                  {!isAdmin && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectProject(pin.id);
-                        onNavigateToInvestigation(pin.id);
-                      }}
-                      title="Deep AI Investigation"
-                      className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap"
-                    >
-                      <span>Investigate Issue</span>
-                      <span>⚡</span>
-                    </button>
-                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectProject(pin.id);
+                      if (onNavigateToRiskIntelligence) {
+                        onNavigateToRiskIntelligence(pin.id);
+                      }
+                    }}
+                    title="Deep Risk Intelligence & Model Forecasts"
+                    className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap shadow-sm"
+                  >
+                    <span>Risk Intelligence</span>
+                    <span>⚡</span>
+                  </button>
                 </div>
               </div>
             );
@@ -390,6 +499,7 @@ export default function MyProjects({
               <tr className="border-b border-white/15 bg-[#0B0F17]">
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Project ID</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Project Name</th>
+                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Sector</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Location</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">DPHIS Score</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Risk Tier</th>
@@ -399,6 +509,7 @@ export default function MyProjects({
             <tbody className="divide-y divide-white/5">
               {filteredPins.map(pin => {
                 const cat = getRiskCategory(pin.dphis);
+                const pinSector = getPinSector(pin);
                 return (
                   <tr 
                     key={pin.id} 
@@ -410,6 +521,7 @@ export default function MyProjects({
                   >
                     <td className="p-4 font-mono font-bold text-white">{pin.id}</td>
                     <td className="p-4 font-semibold text-white">{pin.name}</td>
+                    <td className="p-4 text-white/70 font-mono text-xs">{pinSector}</td>
                     <td className="p-4 text-white/80">{pin.state}</td>
                     <td className="p-4 font-mono font-bold text-white">
                       <div className="flex items-center gap-2">
@@ -446,16 +558,29 @@ export default function MyProjects({
                         >
                           View Project Insights →
                         </button>
-                        {!isAdmin && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectProject(pin.id);
+                            if (onNavigateToRiskIntelligence) {
+                              onNavigateToRiskIntelligence(pin.id);
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer whitespace-nowrap"
+                        >
+                          Risk Intelligence ⚡
+                        </button>
+                        {onNavigateToInvestigation && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onSelectProject(pin.id);
                               onNavigateToInvestigation(pin.id);
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer whitespace-nowrap"
+                            title="Launch AI Root Cause Investigation Console"
+                            className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-mono font-bold border border-amber-500/40 transition-all cursor-pointer whitespace-nowrap"
                           >
-                            Investigate ⚡
+                            Investigate 🔍
                           </button>
                         )}
                         {onRemoveProject && (
@@ -480,13 +605,13 @@ export default function MyProjects({
         </div>
       )}
 
-      {/* Floating Project Insights Pop-Up Modal */}
+      {/* Embedded Project Insights Modal */}
       <ProjectInsightsModal
-        isOpen={!!insightsModalProjectId}
+        isOpen={Boolean(insightsModalProjectId)}
         projectId={insightsModalProjectId}
         currentUser={currentUser}
+        isAdmin={isAdmin}
         onClose={() => setInsightsModalProjectId(null)}
-        onNavigateToInvestigation={onNavigateToInvestigation}
       />
     </div>
   );

@@ -10,6 +10,7 @@ interface MyProjectOverviewProps {
   onViewProject: (projectId: string) => void;
   onNavigateToProjects: () => void;
   onOpenAddProject: () => void;
+  onNavigateToRiskIntelligence?: (projectId: string) => void;
   onNavigateToInvestigation?: (projectId: string) => void;
   onRemoveProject?: (projectId: string) => void;
 }
@@ -66,6 +67,7 @@ export default function MyProjectOverview({
   onViewProject,
   onNavigateToProjects,
   onOpenAddProject,
+  onNavigateToRiskIntelligence,
   onNavigateToInvestigation,
   onRemoveProject
 }: MyProjectOverviewProps) {
@@ -140,7 +142,7 @@ export default function MyProjectOverview({
       {/* Top 4 Frosted Summary Flashcards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* 1. Active Projects */}
-        <div className="oled-solid-card p-4 sm:p-5 space-y-2">
+        <div className="oled-solid-card frosted-glass-card p-4 sm:p-5 space-y-2">
           <div className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
             Active Projects
           </div>
@@ -154,7 +156,7 @@ export default function MyProjectOverview({
         </div>
 
         {/* 2. Projects Needing Attention */}
-        <div className="oled-solid-card p-4 sm:p-5 space-y-2 border-amber-500/30">
+        <div className="oled-solid-card frosted-glass-card p-4 sm:p-5 space-y-2 border-amber-500/30">
           <div className="text-[11px] font-mono text-amber-400 uppercase tracking-wider font-semibold">
             Projects Needing Attention
           </div>
@@ -167,7 +169,7 @@ export default function MyProjectOverview({
         </div>
 
         {/* 3. High-Risk Projects */}
-        <div className="oled-solid-card p-4 sm:p-5 space-y-2 border-red-500/30">
+        <div className="oled-solid-card frosted-glass-card p-4 sm:p-5 space-y-2 border-red-500/30">
           <div className="text-[11px] font-mono text-red-400 uppercase tracking-wider font-semibold">
             High-Risk Projects
           </div>
@@ -180,7 +182,7 @@ export default function MyProjectOverview({
         </div>
 
         {/* 4. Upcoming Milestones */}
-        <div className="oled-solid-card p-4 sm:p-5 space-y-2">
+        <div className="oled-solid-card frosted-glass-card p-4 sm:p-5 space-y-2">
           <div className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
             Upcoming Milestones
           </div>
@@ -217,7 +219,7 @@ export default function MyProjectOverview({
             return (
               <div
                 key={pin.id}
-                className="oled-solid-card p-5 sm:p-6 space-y-4 hover:border-white/40 transition-all flex flex-col justify-between"
+                className="oled-solid-card frosted-glass-card p-5 sm:p-6 space-y-4 hover:border-white/40 transition-all flex flex-col justify-between"
               >
                 <div className="space-y-3.5">
                   {/* Top Bar: ID & Location */}
@@ -324,7 +326,7 @@ export default function MyProjectOverview({
                   </div>
                 </div>
 
-                {/* Actions: View Project Insights + Investigate Issue (side-by-side) */}
+                {/* Actions: View Project Insights + Risk Intelligence (side-by-side) */}
                 <div className="pt-3 border-t border-white/10 flex items-center gap-2">
                   <button
                     onClick={() => onViewProject(pin.id)}
@@ -334,16 +336,18 @@ export default function MyProjectOverview({
                     <span>→</span>
                   </button>
 
-                  {onNavigateToInvestigation && (
-                    <button
-                      onClick={() => onNavigateToInvestigation(pin.id)}
-                      title="Deep AI Investigation"
-                      className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap"
-                    >
-                      <span>Investigate Issue</span>
-                      <span>⚡</span>
-                    </button>
-                  )}
+                  <button
+                    onClick={() => {
+                      if (onNavigateToRiskIntelligence) {
+                        onNavigateToRiskIntelligence(pin.id);
+                      }
+                    }}
+                    title="Deep Risk Intelligence & Model Forecasts"
+                    className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap shadow-sm"
+                  >
+                    <span>Risk Intelligence</span>
+                    <span>⚡</span>
+                  </button>
                 </div>
               </div>
             );

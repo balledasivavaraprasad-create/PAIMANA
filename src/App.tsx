@@ -422,6 +422,11 @@ export default function App() {
                 setInsightsModalProjectId(projId);
               }}
               onNavigateToProjects={() => setCurrentTab('projects')}
+              onNavigateToRiskIntelligence={(projId) => {
+                const found = pins.find(p => p.id === projId);
+                if (found) setSelectedPin(found);
+                setCurrentTab('intelligence');
+              }}
               onOpenAddProject={() => setShowAddModal(true)}
               onNavigateToInvestigation={(projId) => {
                 const found = pins.find(p => p.id === projId);
@@ -957,6 +962,11 @@ export default function App() {
                 if (found) setSelectedPin(found);
                 setInsightsModalProjectId(id);
               }}
+              onNavigateToRiskIntelligence={(id) => {
+                const found = pins.find(p => p.id === id);
+                if (found) setSelectedPin(found);
+                setCurrentTab('intelligence');
+              }}
               onNavigateToInvestigation={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
@@ -979,6 +989,7 @@ export default function App() {
                 }
                 setInvestigationModalProjectId(id || selectedPin?.id || pins[0]?.id || null);
               }}
+              onNavigateBack={() => setCurrentTab('projects')}
               onOpenAddProject={!isAdmin ? () => setShowAddModal(true) : undefined}
               onSelectProject={(id) => {
                 const found = pins.find(p => p.id === id);

@@ -2,3 +2,8 @@ backend/
 n8n/
 .venv/
 scratch/
+Models/
+Models.zip
+Notebooks/
+Notebooks.zip
+*.zip

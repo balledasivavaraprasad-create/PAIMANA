@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import GlassCard from '../components/GlassCard';
 import { 
-  fetchProjectPredictions, fetchProjectRisk, fetchProject, fetchProjects, triggerInvestigation,
-  PredictionData, RiskData, ProjectData, InvestigationReport, UserProfile 
+  fetchProjectPredictions, fetchProjectRisk, fetchProject, fetchProjects,
+  PredictionData, RiskData, ProjectData, UserProfile 
 } from '../lib/api';
 import { ProjectPin } from '../components/CeoPinManager';
 import { getRiskCategory } from '../lib/risk';
@@ -15,6 +15,7 @@ interface Props {
   onNavigateToInvestigation: (projectId: string) => void;
   onSelectProject?: (projectId: string) => void;
   onOpenAddProject?: () => void;
+  onNavigateBack?: () => void;
 }
 
 function DHPISGauge({ score }: { score: number }) {
@@ -122,14 +123,25 @@ export default function ProjectIntelligence({
   currentUser,
   allProjects,
   onNavigateToInvestigation, 
-  onSelectProject
+  onSelectProject,
+  onOpenAddProject,
+  onNavigateBack
 }: Props) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'ANALYST';
   
-  // Navigation state: null = project list view, string = deep intelligence view
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  // Navigation state: null = project list view (admin only), string = deep intelligence view
+  const defaultProjectId = projectId || (!isAdmin && allProjects && allProjects.length > 0 ? allProjects[0].id : null);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(defaultProjectId);
+
+  useEffect(() => {
+    if (projectId) {
+      setActiveProjectId(projectId);
+    } else if (!isAdmin && allProjects && allProjects.length > 0) {
+      setActiveProjectId(allProjects[0].id);
+    }
+  }, [projectId, isAdmin, allProjects]);
 
   // Directory Projects State
   const [projectList, setProjectList] = useState<any[]>([]);
@@ -148,12 +160,6 @@ export default function ProjectIntelligence({
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
   const [risk, setRisk] = useState<RiskData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-
-  // Normal user embedded investigation state
-  const [showTechnicalShap, setShowTechnicalShap] = useState(false);
-  const [isInvestigating, setIsInvestigating] = useState(false);
-  const [investigationReport, setInvestigationReport] = useState<InvestigationReport | null>(null);
-  const [investigationStep, setInvestigationStep] = useState<number>(0);
 
   // Load project list on mount
   useEffect(() => {
@@ -280,32 +286,11 @@ export default function ProjectIntelligence({
     });
   }, [projectList, riskFilter, sectorFilter, stateFilter, searchQuery, sortBy]);
 
-  const handleRunNormalInvestigation = async () => {
-    if (!activeProjectId || isInvestigating) return;
-    setIsInvestigating(true);
-    setInvestigationStep(1);
-
-    const stepTimer = setInterval(() => {
-      setInvestigationStep(prev => (prev < 4 ? prev + 1 : prev));
-    }, 450);
-
-    try {
-      const res = await triggerInvestigation(activeProjectId);
-      clearInterval(stepTimer);
-      setInvestigationReport(res);
-    } catch (err) {
-      clearInterval(stepTimer);
-      console.warn('Investigation trigger error:', err);
-    } finally {
-      setIsInvestigating(false);
-      setInvestigationStep(5);
-    }
-  };
-
   /* =========================================================================
      VIEW 1: REDESIGNED RISK INTELLIGENCE DIRECTORY (SEARCH + INFERRED FILTERS)
+     Admin-only directory list; regular users are routed directly to project view
      ========================================================================= */
-  if (!activeProjectId) {
+  if (isAdmin && !activeProjectId) {
     return (
       <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
         {/* Header Hero */}
@@ -594,6 +579,7 @@ export default function ProjectIntelligence({
   /* =========================================================================
      VIEW 2: DEEP RISK INTELLIGENCE DETAIL PAGE (WITH BACK BUTTON)
      ========================================================================= */
+  const resolvedProjectId = activeProjectId || (allProjects && allProjects.length > 0 ? allProjects[0].id : 'P1024');
   const pName = project?.project_name || "NH-48 Varanasi-Ranchi Expressway Package 4";
   const pState = project?.state || "Uttar Pradesh";
   const pSector = project?.sector || "Roads & Highways";
@@ -602,17 +588,23 @@ export default function ProjectIntelligence({
 
   return (
     <div className="space-y-6 sm:space-y-8 pt-16 sm:pt-20 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto">
-      {/* Return to Redefined Risk Intelligence Directory Bar */}
+      {/* Return to Directory / Back to My Projects */}
       <div className="flex items-center justify-between pb-2">
         <button
-          onClick={() => setActiveProjectId(null)}
+          onClick={() => {
+            if (onNavigateBack) {
+              onNavigateBack();
+            } else if (isAdmin) {
+              setActiveProjectId(null);
+            }
+          }}
           className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white hover:text-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/20 transition-all cursor-pointer flex items-center gap-2 shadow-md"
         >
-          <span>← Back to Risk Intelligence List</span>
+          <span>← {isAdmin ? 'Back to Risk Intelligence List' : 'Back to My Projects'}</span>
         </button>
 
         <div className="text-xs font-mono text-white/60">
-          Inspecting Asset: <strong className="text-white">{activeProjectId}</strong>
+          Inspecting Asset: <strong className="text-white">{resolvedProjectId}</strong>
         </div>
       </div>
 
@@ -621,7 +613,7 @@ export default function ProjectIntelligence({
         <div className="space-y-2 sm:space-y-3">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="font-mono-code font-bold text-xs sm:text-sm text-white px-2.5 py-0.5 rounded bg-white/10">
-              {activeProjectId}
+              {resolvedProjectId}
             </span>
             <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${riskCat.badgeBg}`}>
               {riskCat.label}
@@ -647,32 +639,12 @@ export default function ProjectIntelligence({
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          {!isAdmin ? (
-            <button
-              onClick={handleRunNormalInvestigation}
-              disabled={isInvestigating}
-              className="px-5 py-2.5 rounded-xl bg-white text-black hover:bg-slate-200 text-xs sm:text-sm font-mono-code font-bold transition-all cursor-pointer shadow-lg flex items-center gap-2"
-            >
-              {isInvestigating ? (
-                <>
-                  <span className="w-3.5 h-3.5 rounded-full border-2 border-black border-t-transparent animate-spin" />
-                  <span>Investigating Issues...</span>
-                </>
-              ) : (
-                <>
-                  <span>⚡</span>
-                  <span>Investigate Issues</span>
-                </>
-              )}
-            </button>
-          ) : (
-            <button
-              onClick={() => onNavigateToInvestigation(activeProjectId || '')}
-              className="px-5 sm:px-6 py-2.5 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.22)] hover:bg-zinc-900 transition-all cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>Launch Deep AI Investigation Console →</span>
-            </button>
-          )}
+          <button
+            onClick={() => onNavigateToInvestigation(resolvedProjectId)}
+            className="px-5 sm:px-6 py-2.5 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.22)] hover:bg-zinc-900 transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span>Launch Deep AI Investigation Console →</span>
+          </button>
         </div>
       </GlassCard>
 
