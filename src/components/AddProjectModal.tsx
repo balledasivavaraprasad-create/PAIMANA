@@ -118,13 +118,13 @@ export default function AddProjectModal({
         <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-5">
           <div>
             <div className="flex items-center gap-2">
-              <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${isDark ? 'bg-white' : 'bg-black'}`} />
+              <span className={`w-2.5 h-2.5 rounded-full ${isDark ? 'bg-white' : 'bg-black'}`} />
               <h2 className="text-xl font-serif font-bold tracking-wide">
-                Ingest Infrastructure Asset
+                Add New Project
               </h2>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Standard Flash Report Baseline (8 Columns) → Automated Gemini Flash 2.5 (57 Features) → LightGBM DPHIS Scoring
+              Enter the 8 basic project details from the monthly report to compute risk scores and delay forecasts.
             </p>
           </div>
           <button
@@ -156,11 +156,11 @@ export default function AddProjectModal({
               </div>
             </div>
             <div className="space-y-1">
-              <h4 className={`font-mono font-bold text-sm animate-pulse ${isDark ? 'text-white' : 'text-black'}`}>
-                {statusStep || 'Processing Ingestion Pipeline...'}
+              <h4 className={`font-mono font-bold text-sm ${isDark ? 'text-white' : 'text-black'}`}>
+                {statusStep || 'Saving project & analyzing...'}
               </h4>
               <p className="text-[11px] text-slate-400 font-mono">
-                Gemini Flash 2.5 is synthesizing 57 domain features for LightGBM inference
+                Calculating cost trends, delay projections, and risk scores.
               </p>
             </div>
           </div>
@@ -327,7 +327,7 @@ export default function AddProjectModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <div>
                 <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
-                  Jurisdiction Ministry
+                  Ministry / Department
                 </label>
                 <input
                   type="text"
@@ -342,7 +342,7 @@ export default function AddProjectModal({
 
               <div>
                 <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
-                  Jurisdiction State / Territory
+                  State / Location
                 </label>
                 <input
                   type="text"
@@ -359,7 +359,7 @@ export default function AddProjectModal({
             {/* Footer Buttons */}
             <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
               <span className="text-[10px] font-mono text-slate-400">
-                ⚡ Automatically engineers 57 columns via Gemini Flash 2.5
+                ⚡ Automatically calculates delay risk &amp; cost trends
               </span>
 
               <div className="flex items-center gap-2">
@@ -377,7 +377,7 @@ export default function AddProjectModal({
                     isDark ? 'bg-white hover:bg-slate-200 text-black' : 'bg-black hover:bg-zinc-800 text-white'
                   }`}
                 >
-                  {loading ? 'Ingesting Asset...' : 'Ingest & Compute DPHIS →'}
+                  {loading ? 'Saving Project...' : 'Save Project & Calculate Risk →'}
                 </button>
               </div>
             </div>

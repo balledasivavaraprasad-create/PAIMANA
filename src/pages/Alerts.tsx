@@ -48,14 +48,14 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-white/10">
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                <span>Zero Monitored Assets</span>
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span>No Alerts Yet</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold font-display text-white">
-                Early-Warning Surveillance Awaiting Projects
+                All Clear · No Projects Flagged
               </h2>
               <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
-                Automated threshold breach detection, multi-factor risk escalation alerts, and automated n8n webhook notifications monitor active infrastructure corridors. Ingest an asset to initialize active monitoring.
+                When you add projects, any critical cost increases or milestone delays will automatically appear here as alerts.
               </p>
             </div>
 
@@ -114,10 +114,10 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
       <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1.5">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white">
-            Algorithmic Early Warning Telemetry & Risk Surveillance
+            Project Alerts &amp; Early Warnings
           </h2>
           <p className="text-xs sm:text-base text-white/70">
-            {alerts.filter(a => a.status === 'PENDING').length} Unacknowledged Critical Anomalies · State-Transition Deduplication Protocol & Event-Driven Outbound Webhook Architecture
+            {alerts.filter(a => a.status === 'PENDING').length} Pending Alerts · Automatic warnings sent when risk scores increase
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
             onClick={loadAlerts}
             className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold hover:bg-zinc-200 cursor-pointer transition-all shadow-md"
           >
-            ↻ Re-Synchronize Incident Stream
+            ↻ Refresh Alerts
           </button>
         </div>
       </GlassCard>
@@ -136,22 +136,22 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/10 pb-3">
           <div>
             <h3 className="text-base sm:text-lg font-bold font-display text-white flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              Automated Institutional Alert & n8n Cloud Workflow Protocol
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+              Automatic Email Warnings &amp; Alert Settings
             </h3>
             <p className="text-xs sm:text-sm text-white/70">
-              Surveillance engine continuously evaluates asset DPHIS against user-configured threshold (default: &gt; 75.0). Exceeding this boundary triggers automated email dispatch to user credentials via n8n Cloud.
+              The system monitors your projects continuously. If any project's risk score exceeds your chosen threshold (default: &gt; 75), an automated email warning is instantly sent to your email.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 font-mono-code text-xs text-white/80 shrink-0">
-            <span className="px-2.5 py-1 bg-white/10 rounded-lg border border-white/20">Webhook: Live</span>
+            <span className="px-2.5 py-1 bg-white/10 rounded-lg border border-white/20">Webhook: Connected</span>
             <span className="px-2.5 py-1 bg-white/10 rounded-lg border border-white/20">Recipient: balledasivavaraprasad@gmail.com</span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-mono-code text-white/80 uppercase">DPHIS Alert Threshold</label>
+            <label className="text-xs font-mono-code text-white/80 uppercase">Risk Alert Threshold</label>
             <div className="flex items-center gap-2">
               <input
                 type="number"
@@ -164,11 +164,11 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
               />
               <span className="text-xs font-mono-code text-white/60 shrink-0">/ 100</span>
             </div>
-            <p className="text-[11px] text-white/50">Default: 75.0 (Critical Tier)</p>
+            <p className="text-[11px] text-white/50">Default: 75.0 (High Risk)</p>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-mono-code text-white/80 uppercase">Target Recipient Email</label>
+            <label className="text-xs font-mono-code text-white/80 uppercase">Recipient Email</label>
             <input
               type="email"
               value={recipientEmail}
@@ -176,11 +176,11 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
               className="w-full bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-mono-code text-white focus:outline-none focus:border-white"
               placeholder="user@paimana.gov.in"
             />
-            <p className="text-[11px] text-white/50">User credential destination</p>
+            <p className="text-[11px] text-white/50">Where alert emails are sent</p>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-mono-code text-white/80 uppercase">Simulated Asset DPHIS</label>
+            <label className="text-xs font-mono-code text-white/80 uppercase">Test Risk Score</label>
             <div className="flex items-center gap-2">
               <input
                 type="number"
@@ -193,7 +193,7 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
               />
               <span className="text-xs font-mono-code text-white/60 shrink-0">/ 100</span>
             </div>
-            <p className="text-[11px] text-white/50">Test value to evaluate rule</p>
+            <p className="text-[11px] text-white/50">Enter a test score to try email sending</p>
           </div>
 
           <div className="flex flex-col justify-end space-y-1.5">
@@ -202,9 +202,9 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
               disabled={isTriggering}
               className="w-full px-4 py-2.5 rounded-lg bg-white text-black font-mono-code font-bold text-xs sm:text-sm hover:bg-zinc-200 transition-all cursor-pointer disabled:opacity-50 shadow-md"
             >
-              {isTriggering ? "Evaluating..." : "⚡ Execute Risk Evaluation"}
+              {isTriggering ? "Testing..." : "⚡ Test Alert Email"}
             </button>
-            <p className="text-[11px] text-white/50 text-center">FastAPI → n8n Cloud Webhook</p>
+            <p className="text-[11px] text-white/50 text-center">Sends test notification via email</p>
           </div>
         </div>
 
@@ -216,9 +216,9 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
           }`}>
             <div>
               <span className="font-bold">
-                {simulationResult.threshold_exceeded ? "✓ ESCALATION TRIGGERED:" : "ℹ ALERT SUPPRESSED:"}
+                {simulationResult.threshold_exceeded ? "✓ ALERT SENT:" : "ℹ NO ALERT TRIGGERED:"}
               </span>{" "}
-              {simulationResult.message || (simulationResult.threshold_exceeded ? `DPHIS score ${simulatedDphis} exceeds threshold ${userThreshold}. Dispatched to n8n Cloud; notification email queued for ${simulationResult.recipient_email}.` : `DPHIS score ${simulatedDphis} is below threshold ${userThreshold}. Standard surveillance maintained.`)}
+              {simulationResult.message || (simulationResult.threshold_exceeded ? `Risk score ${simulatedDphis} is higher than threshold ${userThreshold}. Email warning sent to ${simulationResult.recipient_email}.` : `Risk score ${simulatedDphis} is below threshold ${userThreshold}. No alert email needed.`)}
             </div>
             {simulationResult.status_code && (
               <span className="px-2.5 py-1 rounded bg-black/40 border border-white/20 text-xs shrink-0">
@@ -242,7 +242,7 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
                 </div>
 
                 <div className="flex items-center gap-3 text-xs sm:text-sm font-mono-code text-white/80 shrink-0">
-                  <span className="text-white font-bold">Composite DPHIS: {a.dphis}</span>
+                  <span className="text-white font-bold">Risk Score: {a.dphis}</span>
                   <span>•</span>
                   <span>{new Date(a.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
@@ -253,10 +253,10 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
               <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <span className="text-xs sm:text-sm font-mono-code uppercase px-2.5 py-1 rounded bg-white/10 border border-white/20 text-white">
-                    Diagnostic Criterion: {a.trigger}
+                    Reason: {a.trigger}
                   </span>
                   <span className="text-xs sm:text-sm font-mono-code font-bold text-white">
-                    Protocol Lifecycle: {a.status}
+                    Status: {a.status}
                   </span>
                 </div>
 
@@ -266,7 +266,7 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
                       onClick={() => onNavigateToInvestigation(a.project_id)}
                       className="text-xs sm:text-sm font-mono-code text-white underline hover:text-white/80 cursor-pointer font-semibold"
                     >
-                      Initiate Forensic Causal Audit →
+                      Investigate Project →
                     </button>
                   )}
                   {a.status !== 'ACKNOWLEDGED' && (
@@ -274,7 +274,7 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
                       onClick={() => handleAcknowledge(a.alert_id)}
                       className="px-3 sm:px-4 py-1.5 rounded-lg bg-white text-black hover:bg-zinc-200 border border-white text-xs sm:text-sm font-mono-code font-bold cursor-pointer transition-all"
                     >
-                      Ratify & Confirm Receipt
+                      Mark as Reviewed
                     </button>
                   )}
                 </div>
@@ -284,9 +284,9 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
         ) : (
           <GlassCard variant="medium" padding={32} className="text-center space-y-3">
             <div className="text-3xl text-white">✓</div>
-            <div className="text-base sm:text-lg font-bold text-white">No Active Anomalous Incident Triggers</div>
+            <div className="text-base sm:text-lg font-bold text-white">No Active Alerts</div>
             <p className="text-xs sm:text-base text-white/70">
-              Sovereign asset cohort operating within calibrated confidence bands. Real-time telemetry evaluates multi-temporal divergence continuously.
+              All monitored projects are currently running within safe limits.
             </p>
           </GlassCard>
         )}

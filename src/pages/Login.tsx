@@ -337,15 +337,15 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <span className={`text-xs px-3 py-1 rounded-full border flex items-center gap-1.5 ${
               isDark ? 'bg-white/5 border-white/15 text-slate-300' : 'bg-slate-100 border-black/10 text-slate-700'
             }`}>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Surveillance: <strong className={isDark ? 'text-white' : 'text-black'}>
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              Monitored: <strong className={isDark ? 'text-white' : 'text-black'}>
                 {publicOverview ? `${publicOverview.total_projects.toLocaleString()} Projects` : '3,394 Projects'}
               </strong>
             </span>
             <span className={`text-xs px-3 py-1 rounded-full border ${
               isDark ? 'bg-white/5 border-white/15 text-slate-300' : 'bg-slate-100 border-black/10 text-slate-700'
             }`}>
-              Model Engine: <strong className={isDark ? 'text-white' : 'text-black'}>LightGBM + DPHIS v2</strong>
+              Engine: <strong className={isDark ? 'text-white' : 'text-black'}>Early Warning Active</strong>
             </span>
             <button
               type="button"
@@ -368,7 +368,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             isDark ? 'bg-[#0E192E]/70 border-white/10' : 'bg-white/80 border-slate-200'
           }`}>
             <span className="text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
-              Active Corridors
+              Active Projects
             </span>
             <div className={`text-xl sm:text-2xl font-bold font-mono my-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {publicOverview ? publicOverview.total_projects.toLocaleString() : '3,394'}
@@ -382,51 +382,51 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             isDark ? 'bg-[#0E192E]/70 border-white/10' : 'bg-white/80 border-slate-200'
           }`}>
             <span className="text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
-              Total Capex Monitored
+              Total Budget Monitored
             </span>
             <div className="text-xl sm:text-2xl font-bold font-mono my-1 text-sky-400">
               ₹{publicOverview ? publicOverview.total_capex_lakh_cr : '74.5'}L Cr
             </div>
-            <span className="text-[10px] text-slate-400">Verified Sovereign Outlay</span>
+            <span className="text-[10px] text-slate-400">Approved Outlay</span>
           </div>
 
           <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${
             isDark ? 'bg-[#0E192E]/70 border-white/10' : 'bg-white/80 border-slate-200'
           }`}>
             <span className="text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
-              Corridors At Risk
+              Projects At Risk
             </span>
             <div className="text-xl sm:text-2xl font-bold font-mono my-1 text-amber-400">
               {publicOverview ? publicOverview.at_risk_count.toLocaleString() : '223'}
             </div>
-            <span className="text-[10px] text-amber-400">Moderate / High Escalation</span>
+            <span className="text-[10px] text-amber-400">Moderate / High Risk</span>
           </div>
 
           <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${
             isDark ? 'bg-[#0E192E]/70 border-white/10' : 'bg-white/80 border-slate-200'
           }`}>
             <span className="text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
-              Critical Slippage
+              Critical Delays
             </span>
             <div className="text-xl sm:text-2xl font-bold font-mono my-1 text-rose-500">
               {publicOverview ? publicOverview.critical_count.toLocaleString() : '18'}
             </div>
-            <span className="text-[10px] text-rose-400 font-medium">Intervention Mandate Triggered</span>
+            <span className="text-[10px] text-rose-400 font-medium">Need Immediate Action</span>
           </div>
         </div>
 
-        {/* Live Sovereign Risk Intelligence Watchlist (Restricted Sanitized Columns Only) */}
+        {/* Live Risk Intelligence Watchlist (Restricted Sanitized Columns Only) */}
         {showRiskWatch && publicOverview && publicOverview.risk_watchlist.length > 0 && (
           <div className="mb-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 backdrop-blur-md transition-all animate-fadeIn">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 mb-3 border-b border-amber-500/20">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-300">
-                  Live Sovereign Risk Watchlist · Existing Flagged Corridors
+                  Projects at Risk · Current Watchlist
                 </h3>
               </div>
               <span className="text-[10px] font-mono text-slate-400 bg-black/40 px-2.5 py-0.5 rounded-full border border-white/10">
-                🔒 Public Restrictive View · Direct DB Access Prohibited
+                🔒 Public Summary View
               </span>
             </div>
 
@@ -434,13 +434,13 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-white/10 text-[10px] font-mono uppercase tracking-wider text-slate-400">
-                    <th className="py-2 px-3">Infrastructure Nomenclature</th>
+                    <th className="py-2 px-3">Project Name</th>
                     <th className="py-2 px-3">Sector</th>
-                    <th className="py-2 px-3">Jurisdiction State</th>
-                    <th className="py-2 px-3">DPHIS Index</th>
-                    <th className="py-2 px-3">Sanctioned Outlay</th>
-                    <th className="py-2 px-3">Critical Delay</th>
-                    <th className="py-2 px-3">Risk Tier</th>
+                    <th className="py-2 px-3">State</th>
+                    <th className="py-2 px-3">Risk Score</th>
+                    <th className="py-2 px-3">Approved Cost</th>
+                    <th className="py-2 px-3">Delay</th>
+                    <th className="py-2 px-3">Risk Level</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 font-mono text-[11px]">
@@ -533,7 +533,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   Sign in
                 </h1>
                 <p className="text-xs text-slate-400">
-                  Enter your official credentials to access the PAIMANA predictive intelligence console.
+                  Sign in to check your projects, costs, and delay risks.
                 </p>
               </div>
 
@@ -597,7 +597,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   disabled={loginLoading}
                   className="w-full py-2.5 px-4 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-mono font-bold text-sm shadow-lg shadow-sky-500/20 transition-all cursor-pointer disabled:opacity-50"
                 >
-                  {loginLoading ? 'Authenticating...' : 'Sign in to Console →'}
+                  {loginLoading ? 'Signing in...' : 'Sign in →'}
                 </button>
               </form>
 
@@ -906,7 +906,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                     Account Verified
                   </h2>
                   <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                    Your official identity has been authenticated and provisioned. You may now sign in using your credentials.
+                    Your account has been created and verified. You can now sign in.
                   </p>
                   <button
                     type="button"
@@ -928,7 +928,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border backdrop-blur-md shadow-lg ${
           isDark ? 'bg-[#0E192E]/70 border-white/15 text-slate-200' : 'bg-white/80 border-slate-300 text-slate-800'
         }`}>
-          <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shadow-[0_0_8px_#38bdf8]" />
+          <span className="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_8px_#38bdf8]" />
           <span className="text-[11px] font-mono">
             {SLIDES[currentSlide]?.label}
           </span>

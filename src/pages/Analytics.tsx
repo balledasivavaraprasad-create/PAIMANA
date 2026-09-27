@@ -32,14 +32,14 @@ export default function Analytics({ onNavigateToProject, pinsCount, onOpenAddPro
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-white/10">
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                <span>Zero Active Projects in Portfolio</span>
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span>No Projects in Your Dashboard Yet</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold font-display text-white">
-                Portfolio Telemetry Awaiting Asset Ingestion
+                Add a Project to See Analytics
               </h2>
               <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
-                Macroeconomic risk analytics, capital velocity distributions, and cross-sector stress indices require at least one active infrastructure corridor. Ingest your first asset using the 8 standard Flash Report columns to generate portfolio telemetry.
+                To view national risk trends, budget spending, and sector breakdowns, please add at least one project using the Add Project button.
               </p>
             </div>
 
@@ -70,16 +70,16 @@ export default function Analytics({ onNavigateToProject, pinsCount, onOpenAddPro
       <GlassCard variant="hero" padding={24} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-1.5 sm:space-y-2">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white">
-            Macroeconomic Capital Expenditure & Portfolio Risk Analytics
+            National Infrastructure Spending & Risk Trends
           </h2>
           <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
-            Empirical longitudinal aggregation across {totalProjects.toLocaleString()} sovereign infrastructure capital assets and 18,000 multi-temporal telemetry snapshots
+            Overview of {totalProjects.toLocaleString()} monitored government projects and their progress trends
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <span className="text-xs sm:text-sm font-mono-code px-3.5 py-1.5 rounded-xl bg-white/10 text-white font-semibold border border-white/20">
-            Monitored Cohort: 1,500 Assets
+            Monitored: 1,500 Projects
           </span>
         </div>
       </GlassCard>
@@ -87,24 +87,24 @@ export default function Analytics({ onNavigateToProject, pinsCount, onOpenAddPro
       {/* Top 4 Macro Metrics - Fully responsive grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <MetricCard
-          label="Total Capitalized Assets"
+          label="Total Projects"
           value={totalProjects.toLocaleString()}
-          sub="Central Sector Portfolio Corpus"
+          sub="Monitored across India"
         />
         <MetricCard
-          label="Critical Intervention Thresholds"
+          label="Projects with Major Delays"
           value={criticalCount.toString()}
-          sub={`+${highCount} in High Vulnerability Cohort`}
+          sub={`+${highCount} high risk projects`}
         />
         <MetricCard
-          label="National Health Index (DPHIS Mean)"
+          label="Average Risk Score"
           value={avgDphis.toString()}
-          sub="Econometric Baseline Benchmark"
+          sub="Target baseline: Under 30"
         />
         <MetricCard
-          label="Projected Capital Escalation Exposure"
+          label="Estimated Cost Increase"
           value={`${costOverrun}%`}
-          sub="Net Contingency Outlay Variance"
+          sub="Average budget overrun"
         />
       </div>
 
@@ -114,9 +114,9 @@ export default function Analytics({ onNavigateToProject, pinsCount, onOpenAddPro
         <GlassCard variant="medium" padding={24} className="space-y-4 sm:space-y-5">
           <div className="flex items-center justify-between">
             <h3 className="text-base sm:text-lg font-bold font-display text-white">
-              Longitudinal Portfolio Health & Risk Drift Trajectory
+              Monthly Risk Trends
             </h3>
-            <span className="text-xs font-mono-code text-white/70">6-Month Temporal Sequence</span>
+            <span className="text-xs font-mono-code text-white/70">Past 6 Months</span>
           </div>
 
           <div className="space-y-3 pt-1">
@@ -131,11 +131,11 @@ export default function Analytics({ onNavigateToProject, pinsCount, onOpenAddPro
               <div key={t.month} className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/15 flex items-center justify-between gap-2">
                 <div className="space-y-0.5">
                   <div className="text-xs sm:text-sm font-bold font-mono-code text-white">{t.month}</div>
-                  <div className="text-[11px] sm:text-xs text-white/70">{t.critical_count} critical corridor interventions</div>
+                  <div className="text-[11px] sm:text-xs text-white/70">{t.critical_count} projects facing major delays</div>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-sm sm:text-base font-bold font-mono-code text-white">Index: {t.average_dphis}</div>
-                  <div className="text-[10px] sm:text-xs text-white/80 font-mono-code font-semibold">+{(t.average_dphis - 38.0).toFixed(1)} pts stochastic drift</div>
+                  <div className="text-[10px] sm:text-xs text-white/80 font-mono-code font-semibold">+{(t.average_dphis - 38.0).toFixed(1)} pts higher than average</div>
                 </div>
               </div>
             ))}
@@ -145,7 +145,7 @@ export default function Analytics({ onNavigateToProject, pinsCount, onOpenAddPro
         {/* Sector Exposure Breakdown */}
         <GlassCard variant="medium" padding={24} className="space-y-4 sm:space-y-5">
           <h3 className="text-base sm:text-lg font-bold font-display text-white">
-            Sectoral Capital Allocation & Vulnerability Exposure
+            Projects &amp; Budgets by Sector
           </h3>
 
           <div className="space-y-3 pt-1">
@@ -162,8 +162,8 @@ export default function Analytics({ onNavigateToProject, pinsCount, onOpenAddPro
                   <span className="font-mono-code font-bold text-white shrink-0">{sec.outlay}</span>
                 </div>
                 <div className="flex items-center justify-between text-[11px] sm:text-xs md:text-sm font-mono-code text-white/70">
-                  <span>{sec.count} Capital Assets</span>
-                  <span className="text-white font-bold">{sec.critical} Critical Vulnerability Assets</span>
+                  <span>{sec.count} Projects</span>
+                  <span className="text-white font-bold">{sec.critical} Facing Delays</span>
                 </div>
               </div>
             ))}

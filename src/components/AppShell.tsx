@@ -26,14 +26,14 @@ export function AppShell({ currentPage, onNavigate, children }: AppShellProps) {
               PAIMANA AI Infrastructure Intelligence
             </h1>
             <span className="text-[10px] uppercase font-mono-data tracking-wider px-2 py-0.5 rounded bg-[var(--accent-soft)] text-[var(--accent)] font-semibold border border-[var(--accent-soft)]">
-              Central Sector Monitor
+              Project Monitoring
             </span>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-2 text-xs text-[var(--text-muted)]">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Live Engine Sync · FY26</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>System Connected · FY26</span>
             </div>
 
             <ThemeToggle />

@@ -233,10 +233,10 @@ export default function App() {
   };
 
   const shapDrivers = [
-    { name: 'Critical Path Schedule Deviation', impact: '+43.2 pts', text: 'Superstructure Phase 1 milestone buffer exhausted; critical path slip: Δt = +28 mos', severity: 'critical' },
-    { name: 'CapEx Disbursement–Execution Disparity', impact: '+24.1 pts', text: 'Disbursement velocity (62%) diverges from certified physical completion (34%) by 28 pts', severity: 'critical' },
-    { name: 'Contractual Mechanization Deficit', impact: '+14.5 pts', text: 'On-site machinery mobilization 38% below Detailed Project Report (DPR) baseline', severity: 'high' },
-    { name: 'Right-of-Way (RoW) Liquidation Efficacy', impact: '-8.0 pts', text: 'Cadastral land acquisition 98.4% finalized with statutory encumbrance clearance', severity: 'low' },
+    { name: 'Schedule Delays', impact: '+43.2 pts', text: 'Main construction work is running 28 months behind the planned schedule.', severity: 'critical' },
+    { name: 'Spending Ahead of Progress', impact: '+24.1 pts', text: '62% of funds have been spent, but only 34% of actual construction is completed.', severity: 'critical' },
+    { name: 'Machinery & Equipment Shortage', impact: '+14.5 pts', text: 'Heavy equipment on site is 38% below the target needed to finish on time.', severity: 'high' },
+    { name: 'Land Acquisition & Clearances', impact: '-8.0 pts', text: '98.4% of land has been acquired and cleared, which prevents work stoppages.', severity: 'low' },
   ];
 
   // 1. Splash preflight screen while verifying active database session
@@ -245,7 +245,7 @@ export default function App() {
       <div className={`w-screen h-screen flex flex-col items-center justify-center transition-colors ${
         isDark ? 'bg-black text-white' : 'bg-white text-black'
       }`}>
-        <div className="flex flex-col items-center gap-4 animate-pulse">
+        <div className="flex flex-col items-center gap-4">
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-mono font-bold text-2xl border ${
             isDark ? 'bg-black text-white border-white/30 shadow-[0_0_24px_rgba(255,255,255,0.2)]' : 'bg-white text-black border-black/20 shadow-md'
           }`}>
@@ -253,10 +253,10 @@ export default function App() {
           </div>
           <div className="text-center">
             <div className={`text-xs font-mono font-bold tracking-widest uppercase ${isDark ? 'text-white' : 'text-black'}`}>
-              PAIMANA INSTITUTIONAL PLATFORM
+              PAIMANA PROJECT PLATFORM
             </div>
             <div className={`text-[11px] font-mono mt-1 ${isDark ? 'text-white/70' : 'text-black/70'}`}>
-              Verifying official credentials against sovereign database...
+              Loading your projects and account...
             </div>
           </div>
         </div>
@@ -391,21 +391,20 @@ export default function App() {
               <p className={`text-xs sm:text-sm md:text-base font-semibold leading-relaxed max-w-md pt-2 ${
                 isDark ? 'text-white/90 drop-shadow-md' : 'text-black'
               }`}>
-                Continuous econometric surveillance and stochastic risk decomposition across 28 sub-national infrastructure corridors.
+                Live project tracking, budget monitoring, and delay risk predictions across infrastructure projects in India.
               </p>
 
-              {/* User Ministerial Clearance Badge */}
+              {/* User Department Badge */}
               <div className="pt-2 flex flex-wrap items-center gap-2.5">
                 <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 text-xs font-mono shadow-sm ${
                   isDark ? 'bg-black/70 border-white/20 text-white' : 'bg-white/95 border-slate-300 text-slate-900 shadow-sm'
                 }`}>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span>
                     Officer: <strong className={isDark ? 'text-white' : 'text-black'}>{currentUser.full_name}</strong>
                   </span>
                   <span className="opacity-40">|</span>
                   <span>
-                    Jurisdiction: <strong className={isDark ? 'text-white' : 'text-black'}>{currentUser.ministry}</strong>
+                    Department: <strong className={isDark ? 'text-white' : 'text-black'}>{currentUser.ministry}</strong>
                   </span>
                 </div>
 
@@ -418,7 +417,7 @@ export default function App() {
                         : (isDark ? 'bg-black/70 text-white hover:bg-black/90 border-white/20' : 'bg-white/95 text-black hover:bg-white border-slate-300 shadow-sm')
                     }`}
                   >
-                    {ministryFilterOnly ? `Showing: ${currentUser.ministry} Corridors ✓` : `Focus: ${currentUser.ministry}`}
+                    {ministryFilterOnly ? `Showing: ${currentUser.ministry} Projects ✓` : `Filter: ${currentUser.ministry}`}
                   </button>
                 )}
               </div>
@@ -432,7 +431,7 @@ export default function App() {
                       : 'bg-black text-white hover:bg-zinc-800 shadow-md'
                   }`}
                 >
-                  Inspect Portfolio Risk Matrix →
+                  View Project Details & Risks →
                 </button>
                 <button
                   onClick={() => setCurrentTab('assistant')}
@@ -442,7 +441,7 @@ export default function App() {
                       : 'bg-white/80 text-black border border-black/20 hover:bg-white shadow-sm'
                   }`}
                 >
-                  Consult Analytical Copilot 💬
+                  Ask AI Assistant 💬
                 </button>
               </div>
             </div>
@@ -454,11 +453,11 @@ export default function App() {
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-10 shadow-2xl">
                 <div className="space-y-3 sm:space-y-4 max-w-3xl">
                   <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold font-display text-white tracking-tight leading-tight">
-                    Macroeconomic Capital Velocity & Inter-Corridor Stress Surveillance
+                    National Project Overview & Budget Health
                   </h2>
 
                   <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-normal">
-                    Longitudinal portfolio health synthesized dynamically across {portfolioStats.totalProjects.toLocaleString()} sovereign infrastructure assets spanning 18,000 empirical snapshot vectors.
+                    Live progress and risk tracking across {portfolioStats.totalProjects.toLocaleString()} government infrastructure projects.
                   </p>
                 </div>
 
@@ -468,24 +467,24 @@ export default function App() {
                     <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
                       {portfolioStats.avgDphis}
                     </div>
-                    <div className="text-xs text-white/80 font-medium">Portfolio Mean Health Index (DPHIS)</div>
-                    <div className="text-xs font-mono-code text-white font-semibold">+4.1 pts longitudinal risk acceleration</div>
+                    <div className="text-xs text-white/80 font-medium">Average Risk Score (0–100)</div>
+                    <div className="text-xs font-mono-code text-white font-semibold">+4.1 pts higher risk than last month</div>
                   </div>
 
                   <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
                     <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
                       {portfolioStats.totalProjects.toLocaleString()}
                     </div>
-                    <div className="text-xs text-white/80 font-medium">Active Strategic Capital Assets</div>
-                    <div className="text-xs font-mono-code text-white font-semibold">18,000 multi-temporal telemetry audits</div>
+                    <div className="text-xs text-white/80 font-medium">Total Active Projects</div>
+                    <div className="text-xs font-mono-code text-white font-semibold">18,000 monthly progress checks</div>
                   </div>
 
                   <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
                     <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
                       {portfolioStats.criticalCount}
                     </div>
-                    <div className="text-xs text-white/80 font-medium">High-Vulnerability Intervention Thresholds</div>
-                    <div className="text-xs font-mono-code text-white font-semibold">Algorithmic anomaly detection active</div>
+                    <div className="text-xs text-white/80 font-medium">Projects Facing Critical Delays</div>
+                    <div className="text-xs font-mono-code text-white font-semibold">Need immediate attention & review</div>
                   </div>
                 </div>
               </div>
@@ -499,12 +498,12 @@ export default function App() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-2 sm:space-y-3">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
-                      Empirical Risk Decomposition & Additive Shapley Attribution
+                      Why Projects Get Delayed & Key Risk Factors
                     </h2>
                     <p className="text-xs sm:text-sm text-white/80">
                       {selectedPin
-                        ? `Isolating marginal covariate contributions driving probabilistic failure escalation on corridor ${selectedPin.id}.`
-                        : 'Continuous econometric surveillance and feature attribution across active portfolio assets.'}
+                        ? `Looking at the main reasons causing delay risks on project ${selectedPin.id}.`
+                        : 'Tracking key reasons for delays and cost overruns across all active projects.'}
                     </p>
                   </div>
 
@@ -512,7 +511,7 @@ export default function App() {
                     onClick={() => setCurrentTab('intelligence')}
                     className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold hover:bg-zinc-200 transition-all cursor-pointer shadow-lg whitespace-nowrap shrink-0"
                   >
-                    Forensic Audit Dossier →
+                    View Full Project Report →
                   </button>
                 </div>
 
@@ -522,18 +521,18 @@ export default function App() {
                       <div className="flex items-center justify-between border-b border-white/10 pb-3">
                         <span className="font-mono-code font-bold text-white">{selectedPin.id}</span>
                         <span className="px-2.5 py-1 rounded bg-white/10 text-white text-xs font-mono-code font-bold border border-white/20">
-                          DPHIS: {selectedPin.dphis} · Critical Risk Cohort
+                          Risk Score: {selectedPin.dphis} · Critical Risk
                         </span>
                       </div>
                       <h4 className="text-sm sm:text-base font-bold text-white">{selectedPin.name}</h4>
                       <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-                        Certified physical completion exhibits severe hysteresis relative to cumulative financial disbursement, inducing acute milestone recovery friction.
+                        Money is being spent much faster than actual physical construction is progressing, putting key project deadlines at high risk.
                       </p>
 
                       <div className="pt-2 space-y-2 text-xs sm:text-sm">
                         <div className="flex justify-between font-mono-code text-white/80">
-                          <span>Physical Capitalization: 34%</span>
-                          <span className="text-white font-bold">Sanctioned Target Baseline: 78%</span>
+                          <span>Actual Work Done: 34%</span>
+                          <span className="text-white font-bold">Planned Target by Now: 78%</span>
                         </div>
                         <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
                           <div className="h-full bg-white rounded-full" style={{ width: '34%' }} />
@@ -543,7 +542,7 @@ export default function App() {
 
                     <div className="oled-solid-card p-5 sm:p-6 space-y-3">
                       <h4 className="text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider text-white/80 mb-2">
-                        Top Additive Shapley Attribution Vectors (SHAP)
+                        Top Factors Driving Delay Risk
                       </h4>
                       {shapDrivers.map(d => (
                         <div key={d.name} className="p-3 rounded-xl bg-white/5 border border-white/15 space-y-1">
@@ -560,15 +559,15 @@ export default function App() {
                   </div>
                 ) : (
                   <div className="oled-solid-card p-8 text-center space-y-4">
-                    <div className="text-base font-bold text-white">No Infrastructure Corridors Ingested Yet</div>
+                    <div className="text-base font-bold text-white">No Projects Added Yet</div>
                     <p className="text-xs sm:text-sm text-white/75 max-w-xl mx-auto leading-relaxed">
-                      Your account currently has 0 capital assets configured in the database. Ingest your first project corridor using the standard 8 Flash Report columns to view its empirical risk decomposition, LightGBM projections, and SHAP covariate attributions.
+                      You don't have any projects listed in your dashboard yet. Add your first project using the 8 standard report fields to see risk predictions and AI explanations.
                     </p>
                     <button
                       onClick={() => setShowAddModal(true)}
                       className="px-5 py-2.5 rounded-xl bg-white text-black text-xs font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-lg inline-flex items-center gap-2"
                     >
-                      <span>+ Ingest Capital Asset</span>
+                      <span>+ Add Project</span>
                     </button>
                   </div>
                 )}
@@ -584,16 +583,16 @@ export default function App() {
                   <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex flex-wrap items-center gap-3">
                       <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
-                        Infrastructure Portfolio Ledger
+                        My Assigned Projects
                       </h2>
                       <span className={`px-3 py-1 rounded-lg text-xs font-mono font-bold border ${
                         isDark ? 'bg-black/70 text-white border-white/20' : 'bg-white/95 text-black border-slate-300 shadow-sm'
                       }`}>
-                        Official Jurisdiction: {currentUser.ministry || 'Assigned Sovereign Portfolios'}
+                        Department: {currentUser.ministry || 'Assigned Projects'}
                       </span>
                     </div>
                     <p className="text-xs sm:text-sm text-white/70">
-                      Displaying {displayedPins.length} active corridors associated with your official account ({currentUser.full_name} · {currentUser.designation || 'Project Officer'}).
+                      Showing {displayedPins.length} projects assigned to your account ({currentUser.full_name} · {currentUser.designation || 'Project Officer'}).
                     </p>
                   </div>
 
@@ -607,7 +606,7 @@ export default function App() {
                           : 'bg-white/75 hover:bg-white/95 text-black border border-white/90 shadow-[0_4px_18px_rgba(0,0,0,0.08),inset_0_1.5px_2px_rgba(255,255,255,0.95)] backdrop-blur-md'
                       }`}
                     >
-                      <span style={!isDark ? { color: '#000000' } : undefined}>+ Ingest Capital Asset</span>
+                      <span style={!isDark ? { color: '#000000' } : undefined}>+ Add Project</span>
                     </button>
                   </div>
                 </div>
@@ -616,20 +615,20 @@ export default function App() {
                   <table className="w-full text-left text-xs border-collapse">
                     <thead className="sticky top-0 z-20">
                       <tr className="border-b border-white/15">
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Asset Token</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Infrastructure Nomenclature</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Jurisdictional State</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">DPHIS Index</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Sanctioned Outlay</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Critical Delay</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Analytical Protocol</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Project ID</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Project Name</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">State / Location</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Risk Score</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Approved Cost</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Delay</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {displayedPins.length === 0 ? (
                         <tr>
                           <td colSpan={7} className="p-8 text-center font-mono text-xs text-slate-400">
-                            No infrastructure corridors currently assigned to this user profile in the database.
+                            No projects currently assigned to this user profile in the database.
                           </td>
                         </tr>
                       ) : (
@@ -656,7 +655,7 @@ export default function App() {
                               }}
                               className="px-2.5 py-1 rounded bg-[var(--surface-sunken)] hover:bg-white hover:text-black text-[10px] font-mono-code text-white border border-white/20 transition-all cursor-pointer"
                             >
-                              Inspect →
+                              View Details →
                             </button>
                           </td>
                         </tr>
@@ -743,7 +742,7 @@ export default function App() {
             }`}
           >
             <span style={!isDark ? { color: '#000000' } : undefined} className={`text-sm leading-none font-bold ${isDark ? 'text-white/80' : 'text-black'}`}>+</span>
-            <span style={!isDark ? { color: '#000000' } : undefined} className={`font-bold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>Ingest Capital Asset</span>
+            <span style={!isDark ? { color: '#000000' } : undefined} className={`font-bold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>Add Project</span>
           </button>
         </div>
       )}

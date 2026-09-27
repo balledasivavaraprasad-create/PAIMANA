@@ -25,17 +25,17 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
     {
       id: '1',
       sender: 'assistant',
-      text: `Greetings ${officerName} (${ministryName}). PAIMANA Institutional Decision-Support Copilot is synchronized with your ministerial jurisdiction. Active connection verified with FastAPI econometric reasoning and sovereign telemetry cluster. How may I assist your corridor risk surveillance today?`,
+      text: `Hello ${officerName}! I am your PAIMANA project assistant. I am connected to your projects in ${ministryName}. How can I help you check project delays, budget spending, or upcoming deadlines today?`,
       citations: [
-        { feature: 'Jurisdiction Filter', impact: ministryName, description: 'Corridor surveillance scoped to your ministerial portfolio' },
-        { feature: 'Sovereign Asset Corpus', impact: '1,500 Monitored Assets', description: 'MongoDB longitudinal telemetry cluster active' },
-        { feature: 'Additive Shapley Engine', impact: 'Deterministic', description: 'Empirical XGBoost factor decomposition available' },
+        { feature: 'Department', impact: ministryName, description: 'Focused on your department' },
+        { feature: 'Active Projects', impact: 'Monitored', description: 'Live tracking active' },
+        { feature: 'Risk Engine', impact: 'Ready', description: 'Delay and cost calculations ready' },
       ],
       suggestedActions: [
-        `Deconstruct primary SHAP escalation drivers for Asset ${selectedProjectId}`,
-        'Identify corridors exhibiting acute progress-disbursement divergence',
-        `Synthesize statutory remediation directives for Asset ${selectedProjectId}`,
-        `Evaluate longitudinal risk drift acceleration for Asset ${selectedProjectId}`
+        `What are the main delay reasons for project ${selectedProjectId}?`,
+        'Which projects have spent money without finishing physical work?',
+        `What actions should we take to speed up project ${selectedProjectId}?`,
+        `Is project ${selectedProjectId} likely to miss its target deadline?`
       ],
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
@@ -76,7 +76,7 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
         {
           id: (Date.now() + 1).toString(),
           sender: 'assistant',
-          text: 'Error contacting backend service. Please check that FastAPI is running on port 8000.',
+          text: 'Error contacting backend service. Please check that the server is running.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -90,10 +90,10 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
       {/* Header */}
       <GlassCard variant="hero" padding={20} className="w-full space-y-1.5">
         <h2 className="text-xl sm:text-2xl font-bold font-display text-white tracking-tight">
-          Institutional Decision-Support Copilot
+          PAIMANA Project Assistant
         </h2>
         <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
-          Executive macroeconomic reasoning engine grounded in deterministic FastAPI services, longitudinal MongoDB time-series telemetry, and additive Shapley attribution.
+          Ask any question about your projects, costs, milestone delays, and get clear, instant answers backed by project data.
         </p>
       </GlassCard>
 
@@ -117,7 +117,7 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
               {msg.citations && msg.citations.length > 0 && (
                 <div className="pt-3 border-t border-white/10 space-y-2">
                   <div className="text-[11px] sm:text-xs font-mono-code uppercase font-bold text-white/60">
-                    Empirical Footprint Audit Traces:
+                    Evidence &amp; Verified Facts:
                   </div>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {msg.citations.map((c, idx) => (
@@ -125,7 +125,7 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
                         key={idx}
                         className="px-2.5 py-1 rounded bg-white/10 border border-white/20 text-[11px] sm:text-xs font-mono-code text-white"
                       >
-                        {c.feature}: {c.impact} pts
+                        {c.feature}: {c.impact}
                       </span>
                     ))}
                   </div>
