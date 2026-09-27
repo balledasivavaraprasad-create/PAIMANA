@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import GlassCard from '../components/GlassCard';
+import ProjectInsightsModal from '../components/ProjectInsightsModal';
 import { ProjectPin } from '../components/CeoPinManager';
 import { UserProfile } from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
@@ -8,7 +9,7 @@ interface Props {
   currentUser?: UserProfile | null;
   pins: ProjectPin[];
   onSelectProject: (projectId: string) => void;
-  onNavigateToInsights: (projectId: string) => void;
+  onNavigateToInsights?: (projectId: string) => void;
   onNavigateToInvestigation: (projectId: string) => void;
   onOpenAddProject: () => void;
 }
@@ -25,6 +26,7 @@ export default function MyProjects({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW'>('ALL');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [insightsModalProjectId, setInsightsModalProjectId] = useState<string | null>(null);
 
   // Filter projects by search and status
   const filteredPins = useMemo(() => {
@@ -223,9 +225,10 @@ export default function MyProjects({
                 {/* Actions */}
                 <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       onSelectProject(pin.id);
-                      onNavigateToInsights(pin.id);
+                      setInsightsModalProjectId(pin.id);
                     }}
                     className="flex-1 py-2 px-3 rounded-lg bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer text-center"
                   >
@@ -234,7 +237,8 @@ export default function MyProjects({
 
                   {isAdmin && (
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         onSelectProject(pin.id);
                         onNavigateToInvestigation(pin.id);
                       }}
@@ -268,7 +272,14 @@ export default function MyProjects({
               {filteredPins.map(pin => {
                 const cat = getRiskCategory(pin.dphis);
                 return (
-                  <tr key={pin.id} className="hover:bg-white/5 transition-colors">
+                  <tr 
+                    key={pin.id} 
+                    onClick={() => {
+                      onSelectProject(pin.id);
+                      setInsightsModalProjectId(pin.id);
+                    }}
+                    className="hover:bg-white/5 transition-colors cursor-pointer"
+                  >
                     <td className="p-4 font-mono font-bold text-white">{pin.id}</td>
                     <td className="p-4 font-semibold text-white">{pin.name}</td>
                     <td className="p-4 text-white/80">{pin.state}</td>
@@ -281,13 +292,14 @@ export default function MyProjects({
                     <td className="p-4 font-mono text-white/90">{pin.delay}</td>
                     <td className="p-4">
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           onSelectProject(pin.id);
-                          onNavigateToInsights(pin.id);
+                          setInsightsModalProjectId(pin.id);
                         }}
                         className="px-3 py-1 rounded bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap"
                       >
-                        View Insights →
+                        View Project Insights →
                       </button>
                     </td>
                   </tr>
@@ -297,6 +309,15 @@ export default function MyProjects({
           </table>
         </div>
       )}
+
+      {/* Floating Project Insights Pop-Up Modal */}
+      <ProjectInsightsModal
+        isOpen={!!insightsModalProjectId}
+        projectId={insightsModalProjectId}
+        currentUser={currentUser}
+        onClose={() => setInsightsModalProjectId(null)}
+        onNavigateToInvestigation={onNavigateToInvestigation}
+      />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import Alerts from './pages/Alerts';
 import MyProjects from './pages/MyProjects';
 import DataModels from './pages/DataModels';
 import UsersAudit from './pages/UsersAudit';
+import ProjectInsightsModal from './components/ProjectInsightsModal';
 import Login from './pages/Login';
 import { useTheme } from './hooks/useTheme';
 import { getRiskCategory } from './lib/risk';
@@ -29,6 +30,7 @@ export default function App() {
   const [ministryFilterOnly, setMinistryFilterOnly] = useState<boolean>(false);
   const [pins, setPins] = useState<ProjectPin[]>([]);
   const [selectedPin, setSelectedPin] = useState<ProjectPin | null>(null);
+  const [insightsModalProjectId, setInsightsModalProjectId] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'01' | '02' | '03' | '04'>('01');
   const [showCeoModal, setShowCeoModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -180,7 +182,7 @@ export default function App() {
 
     setPins(prev => [newPin, ...prev.filter(p => p.id !== newPin.id)]);
     setSelectedPin(newPin);
-    setCurrentTab('intelligence');
+    setInsightsModalProjectId(newPin.id);
   };
 
   useEffect(() => {
@@ -451,7 +453,7 @@ export default function App() {
 
               <div className="pt-3 sm:pt-4 flex flex-wrap items-center gap-3">
                 <button
-                  onClick={() => setCurrentTab('intelligence')}
+                  onClick={() => setInsightsModalProjectId(selectedPin?.id || pins[0]?.id || null)}
                   className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-mono-code font-bold shadow-2xl transition-all cursor-pointer ${
                     isDark
                       ? 'bg-white text-black hover:bg-slate-200'
@@ -675,7 +677,7 @@ export default function App() {
                                   <button
                                     onClick={() => {
                                       setSelectedPin(p);
-                                      setCurrentTab('intelligence');
+                                      setInsightsModalProjectId(p.id);
                                     }}
                                     className="w-full py-2 rounded-lg bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono-code font-bold border border-white/20 transition-all cursor-pointer text-center"
                                   >
@@ -710,7 +712,7 @@ export default function App() {
                   </div>
 
                   <button
-                    onClick={() => setCurrentTab('intelligence')}
+                    onClick={() => setInsightsModalProjectId(selectedPin?.id || pins[0]?.id || null)}
                     className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold hover:bg-zinc-200 transition-all cursor-pointer shadow-lg whitespace-nowrap shrink-0"
                   >
                     {isAdmin ? 'View Deep Intelligence →' : 'View Project Insights →'}
@@ -875,7 +877,7 @@ export default function App() {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedPin(p);
-                                    setCurrentTab('intelligence');
+                                    setInsightsModalProjectId(p.id);
                                   }}
                                   className="px-2.5 py-1 rounded bg-[var(--surface-sunken)] hover:bg-white hover:text-black text-[10px] font-mono-code text-white border border-white/20 transition-all cursor-pointer"
                                 >
@@ -907,7 +909,7 @@ export default function App() {
               onNavigateToInsights={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
-                setCurrentTab('intelligence');
+                setInsightsModalProjectId(id);
               }}
               onNavigateToInvestigation={(id) => {
                 const found = pins.find(p => p.id === id);
@@ -963,7 +965,7 @@ export default function App() {
               onNavigateToProject={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
-                setCurrentTab('intelligence');
+                setInsightsModalProjectId(id);
               }}
             />
           )}
@@ -981,7 +983,7 @@ export default function App() {
               onNavigateToProject={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
-                setCurrentTab('intelligence');
+                setInsightsModalProjectId(id);
               }}
             />
           )}
@@ -1013,6 +1015,20 @@ export default function App() {
           </button>
         </div>
       )}
+
+      {/* PROJECT INSIGHTS POP-UP MODAL */}
+      <ProjectInsightsModal
+        isOpen={!!insightsModalProjectId}
+        projectId={insightsModalProjectId}
+        currentUser={currentUser}
+        onClose={() => setInsightsModalProjectId(null)}
+        onNavigateToInvestigation={(id) => {
+          const found = pins.find(p => p.id === id);
+          if (found) setSelectedPin(found);
+          setCurrentTab('investigation');
+          setInsightsModalProjectId(null);
+        }}
+      />
 
       {/* GEMINI 57-FEATURE & LIGHTGBM ML ASSET INGESTION MODAL */}
       <AddProjectModal

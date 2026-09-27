@@ -54,7 +54,6 @@ export function HeaderNav({
     : [
         { id: 'motion', label: 'Dashboard' },
         { id: 'projects', label: 'My Projects' },
-        { id: 'intelligence', label: 'Project Insights' },
         { id: 'alerts', label: 'Alerts', badge: alertCount },
         { id: 'assistant', label: 'Assistant' },
       ];
