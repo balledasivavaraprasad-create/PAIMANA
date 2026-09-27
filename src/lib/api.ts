@@ -38,6 +38,23 @@ export interface ProjectData {
   dphis: number;
   risk_level: 'critical' | 'high' | 'moderate' | 'low';
   data_quality_score?: number;
+  dphis_threshold?: number;
+  threshold_enabled?: boolean;
+  threshold_source?: 'project_creator' | 'admin';
+  threshold_configured_by?: string;
+  threshold_configured_at?: string;
+  threshold_updated_at?: string;
+  threshold_status?: 'below' | 'triggered';
+  previous_dphis?: number;
+  current_dphis?: number;
+  threshold_last_crossed_at?: string;
+  last_threshold_alert_id?: string;
+  threshold_history?: Array<{
+    old_value: number | null;
+    new_value: number;
+    changed_by: string;
+    timestamp: string;
+  }>;
 }
 
 export interface RiskData {
@@ -122,14 +139,24 @@ export interface AnalyticsOverview {
 
 export interface AlertItem {
   alert_id: string;
+  event_id?: string;
   project_id: string;
   project_name: string;
   severity: string;
   previous_severity?: string;
   trigger: string;
+  trigger_type?: string;
+  threshold?: number;
+  previous_dphis?: number;
+  current_dphis?: number;
+  top_risk_reasons?: string[];
   dphis: number;
   message: string;
   status: string;
+  notification_status?: 'pending' | 'sent' | 'failed';
+  user_notified?: boolean;
+  admin_notified?: boolean;
+  n8n_execution_reference?: string;
   created_at: string;
 }
 
@@ -326,6 +353,7 @@ export interface NormalAssetIngestRequest {
   sector?: string;
   state?: string;
   username?: string;
+  dphis_threshold?: number;
 }
 
 export async function ingestNormalAsset(payload: NormalAssetIngestRequest): Promise<ProjectData> {
@@ -388,6 +416,43 @@ export async function ingestNormalAsset(payload: NormalAssetIngestRequest): Prom
     }
     throw err;
   }
+}
+
+export async function updateProjectThreshold(
+  projectId: string,
+  dphisThreshold: number,
+  changedBy: string = 'admin'
+): Promise<any> {
+  const res = await fetch(`${API_BASE}/projects/${projectId}/threshold`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      dphis_threshold: dphisThreshold,
+      changed_by: changedBy,
+      threshold_enabled: true
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || data.error || 'Failed to update project threshold');
+  }
+  return data;
+}
+
+export async function updateAlertNotificationStatus(
+  alertId: string,
+  status: 'sent' | 'failed' | 'pending',
+  executionReference?: string
+): Promise<any> {
+  const res = await fetch(`${API_BASE}/alerts/${alertId}/notification-status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      notification_status: status,
+      n8n_execution_reference: executionReference
+    })
+  });
+  return res.json();
 }
 
 export async function fetchProjects(risk?: string, limit = 50, ministry?: string, search?: string, username?: string): Promise<ProjectData[]> {
@@ -770,9 +835,12 @@ export async function fetchRiskTrend(): Promise<any[]> {
   }
 }
 
-export async function fetchAlerts(): Promise<AlertItem[]> {
+export async function fetchAlerts(username?: string, projectId?: string): Promise<AlertItem[]> {
   try {
-    const res = await fetch(`${API_BASE}/alerts`);
+    const url = new URL(`${API_BASE}/alerts`);
+    if (username && username.trim()) url.searchParams.set('username', username.trim());
+    if (projectId && projectId.trim()) url.searchParams.set('project_id', projectId.trim());
+    const res = await fetch(url.toString());
     if (!res.ok) throw new Error('Alerts error');
     return await res.json();
   } catch (err) {

@@ -220,6 +220,14 @@ export default function MyProjects({
                       <div className="font-mono font-bold text-white text-sm mt-0.5">{pin.delay} delay</div>
                     </div>
                   </div>
+
+                  {/* Project-Specific Alert Threshold */}
+                  <div className="flex items-center justify-between text-[11px] font-mono px-3 py-1.5 rounded-lg bg-black/40 border border-white/5">
+                    <span className="text-white/60">Alert Threshold: <strong className="text-amber-300">{pin.dphis_threshold || 70}</strong> / 100</span>
+                    <span className={pin.dphis >= (pin.dphis_threshold || 70) ? 'text-red-400 font-bold' : 'text-emerald-400 font-medium'}>
+                      {pin.dphis >= (pin.dphis_threshold || 70) ? '🔔 Crossed' : '✓ Below'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Actions */}
@@ -263,6 +271,7 @@ export default function MyProjects({
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Project Name</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Location</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Status</th>
+                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Alert Threshold</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Approved Outlay</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Delay</th>
                 <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Action</th>
@@ -271,6 +280,8 @@ export default function MyProjects({
             <tbody className="divide-y divide-white/5">
               {filteredPins.map(pin => {
                 const cat = getRiskCategory(pin.dphis);
+                const thresh = pin.dphis_threshold || 70;
+                const isCrossed = pin.dphis >= thresh;
                 return (
                   <tr 
                     key={pin.id} 
@@ -287,6 +298,17 @@ export default function MyProjects({
                       <span className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold border ${cat.badgeBg}`}>
                         {cat.label}
                       </span>
+                    </td>
+                    <td className="p-4 font-mono text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-amber-300 font-bold">{thresh}</span>
+                        <span className="text-white/40">/ 100</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
+                          isCrossed ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'
+                        }`}>
+                          {isCrossed ? '🔔 Crossed' : '✓ Below'}
+                        </span>
+                      </div>
                     </td>
                     <td className="p-4 font-mono font-bold text-white">{pin.cost}</td>
                     <td className="p-4 font-mono text-white/90">{pin.delay}</td>

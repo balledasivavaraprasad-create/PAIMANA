@@ -9,6 +9,8 @@ router = APIRouter(prefix="/alerts", tags=["Alerts & Notifications"])
 async def list_alerts(
     severity: Optional[str] = None,
     status: Optional[str] = None,
+    project_id: Optional[str] = None,
+    username: Optional[str] = None,
     limit: int = Query(default=50, le=200)
 ):
     db = get_database()
@@ -20,6 +22,13 @@ async def list_alerts(
         filter_q["severity"] = severity.lower()
     if status:
         filter_q["status"] = status.upper()
+    if project_id:
+        filter_q["project_id"] = project_id
+
+    if username and username.strip():
+        u = await db.users.find_one({"username": username.strip()})
+        if u and u.get("assigned_projects"):
+            filter_q["project_id"] = {"$in": u["assigned_projects"]}
 
     cursor = db.alerts.find(filter_q, {"_id": 0}).sort("created_at", -1).limit(limit)
     return await cursor.to_list(length=limit)
@@ -157,3 +166,26 @@ async def resolve_alert(alert_id: str):
     if res.matched_count == 0:
         raise HTTPException(status_code=404, detail="Alert not found")
     return {"message": "Alert resolved successfully", "alert_id": alert_id}
+
+from pydantic import BaseModel
+
+class NotificationStatusUpdate(BaseModel):
+    notification_status: str  # sent, failed, pending
+    n8n_execution_reference: Optional[str] = None
+    user_notified: Optional[bool] = None
+    admin_notified: Optional[bool] = None
+
+@router.patch("/{alert_id}/notification-status", response_model=dict)
+async def update_alert_notification_status(alert_id: str, payload: NotificationStatusUpdate):
+    db = get_database()
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not available")
+
+    update_data = {k: v for k, v in payload.model_dump(exclude_unset=True).items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc)
+
+    res = await db.alerts.update_one({"alert_id": alert_id}, {"$set": update_data})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    return {"message": "Notification status updated", "alert_id": alert_id, "updated": update_data}
+

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { 
-  fetchProject, fetchProjectPredictions, fetchProjectRisk, triggerInvestigation,
+  fetchProject, fetchProjectPredictions, fetchProjectRisk, triggerInvestigation, updateProjectThreshold,
   ProjectData, PredictionData, RiskData, InvestigationReport, UserProfile 
 } from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
@@ -36,6 +36,12 @@ export default function ProjectInsightsModal({
   const [investigationReport, setInvestigationReport] = useState<InvestigationReport | null>(null);
   const [investigationStep, setInvestigationStep] = useState<number>(0);
 
+  // Admin threshold configuration state
+  const [isEditingThreshold, setIsEditingThreshold] = useState(false);
+  const [editThresholdValue, setEditThresholdValue] = useState<number>(70);
+  const [isSavingThreshold, setIsSavingThreshold] = useState(false);
+  const [thresholdSaveSuccess, setThresholdSaveSuccess] = useState<string | null>(null);
+
   // Close on Escape key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -65,6 +71,8 @@ export default function ProjectInsightsModal({
     setInvestigationReport(null);
     setInvestigationStep(0);
     setIsInvestigating(false);
+    setIsEditingThreshold(false);
+    setThresholdSaveSuccess(null);
 
     Promise.all([
       fetchProject(projectId),
@@ -74,12 +82,43 @@ export default function ProjectInsightsModal({
       setProject(p);
       setPrediction(pred);
       setRisk(r);
+      if (p?.dphis_threshold !== undefined) {
+        setEditThresholdValue(p.dphis_threshold);
+      }
       setLoading(false);
     }).catch(err => {
       console.warn('Failed to load project insights:', err);
       setLoading(false);
     });
   }, [isOpen, projectId]);
+
+  const handleSaveThreshold = async () => {
+    if (!projectId) return;
+    setIsSavingThreshold(true);
+    setThresholdSaveSuccess(null);
+    try {
+      const res = await updateProjectThreshold(
+        projectId,
+        editThresholdValue,
+        currentUser?.username || 'admin'
+      );
+      setProject(prev => prev ? {
+        ...prev,
+        dphis_threshold: editThresholdValue,
+        threshold_status: res.threshold_status || (score < editThresholdValue ? 'below' : 'triggered'),
+        threshold_history: res.threshold_history || prev.threshold_history
+      } : null);
+      setThresholdSaveSuccess('Threshold updated and logged to history!');
+      setTimeout(() => {
+        setIsEditingThreshold(false);
+        setThresholdSaveSuccess(null);
+      }, 1800);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update threshold');
+    } finally {
+      setIsSavingThreshold(false);
+    }
+  };
 
   if (!isOpen || !projectId) return null;
 
@@ -269,6 +308,117 @@ export default function ProjectInsightsModal({
                     )}
                   </button>
                 </div>
+              </div>
+
+              {/* Project Health & DPHIS Alert Threshold Banner */}
+              <div className={`p-4 sm:p-5 rounded-2xl border transition-all ${
+                isThresholdCrossed 
+                  ? 'bg-amber-500/10 border-amber-500/30' 
+                  : (isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200')
+              }`}>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="text-[11px] font-mono uppercase tracking-wider text-white/60 flex items-center gap-2">
+                      <span>PROJECT HEALTH</span>
+                      <span>•</span>
+                      <span className="font-bold text-white">DPHIS {score} / 100</span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
+                      <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${riskCat.badgeBg}`}>
+                        {riskCat.label}
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-white">
+                        Alert Threshold: <strong className="font-mono text-amber-400">{threshold}</strong> / 100
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
+                        isThresholdCrossed 
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse' 
+                          : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                      }`}>
+                        {isThresholdCrossed ? '🔔 THRESHOLD CROSSED' : '✓ BELOW THRESHOLD'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/70 pt-1">
+                      {isThresholdCrossed 
+                        ? 'Project risk score has reached or crossed its configured threshold. An alert event was automatically dispatched to you and the administrator.' 
+                        : 'Current DPHIS score is within acceptable risk boundaries for this project. Automated monitoring continues.'}
+                    </p>
+                  </div>
+
+                  {isAdmin && (
+                    <div className="shrink-0 flex items-center gap-2">
+                      <button
+                        onClick={() => setIsEditingThreshold(!isEditingThreshold)}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer border ${
+                          isEditingThreshold 
+                            ? 'bg-amber-400 text-black border-amber-300' 
+                            : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                        }`}
+                      >
+                        ⚙️ {isEditingThreshold ? 'Close Edit' : 'Edit Threshold'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Admin Threshold Editor Drawer */}
+                {isAdmin && isEditingThreshold && (
+                  <div className="mt-4 pt-4 border-t border-white/10 space-y-4 animate-fade-in">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <h4 className="text-xs font-mono font-bold text-white uppercase">
+                          Configure Project Alert Threshold
+                        </h4>
+                        <p className="text-[11px] text-white/60">
+                          Set the independent risk threshold for {projectId}. Every project has its own threshold.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={editThresholdValue}
+                          onChange={e => setEditThresholdValue(Number(e.target.value))}
+                          className="w-20 px-3 py-1.5 rounded-lg bg-black/60 border border-amber-500/50 text-amber-300 text-sm font-mono font-bold text-center outline-none"
+                        />
+                        <button
+                          onClick={handleSaveThreshold}
+                          disabled={isSavingThreshold}
+                          className="px-4 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-mono font-bold transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingThreshold ? 'Saving...' : 'Save Threshold'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {thresholdSaveSuccess && (
+                      <div className="text-xs text-emerald-400 font-mono font-medium">
+                        ✓ {thresholdSaveSuccess}
+                      </div>
+                    )}
+
+                    {/* Threshold History Table */}
+                    {project?.threshold_history && project.threshold_history.length > 0 && (
+                      <div className="space-y-1.5">
+                        <div className="text-[10px] font-mono uppercase text-white/50">Threshold Change History</div>
+                        <div className="max-h-28 overflow-y-auto space-y-1 font-mono text-[11px] text-white/70">
+                          {project.threshold_history.slice().reverse().map((h, i) => (
+                            <div key={i} className="flex items-center justify-between p-1.5 rounded bg-black/30 border border-white/5">
+                              <span>
+                                {h.old_value !== null ? `${h.old_value} → ` : 'Initial: '}
+                                <strong className="text-amber-300">{h.new_value}</strong>
+                              </span>
+                              <span>By: {h.changed_by}</span>
+                              <span className="text-white/40">{new Date(h.timestamp).toLocaleDateString()}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* 1. What is Happening with My Project? */}

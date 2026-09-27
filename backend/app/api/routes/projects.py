@@ -8,7 +8,7 @@ from app.services.feature_service import engineer_features
 from app.services.dphis_service import calculate_dphis
 from app.ml.models.cost_model import cost_model
 from app.ml.models.delay_model import delay_model
-from app.services.alert_service import evaluate_and_trigger_alert
+from app.services.alert_service import evaluate_and_trigger_alert, evaluate_project_threshold_crossing
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
@@ -219,6 +219,7 @@ class NormalAssetIngestRequest(BaseModel):
     sector: Optional[str] = None
     state: Optional[str] = None
     username: Optional[str] = None
+    dphis_threshold: Optional[float] = 70.0
 
 @router.post("/ingest-normal-asset", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def ingest_normal_asset(payload: NormalAssetIngestRequest):
@@ -252,6 +253,25 @@ async def ingest_normal_asset(payload: NormalAssetIngestRequest):
     project_doc = pipeline_res["project"]
     features_57 = pipeline_res["features_57"]
     project_id = project_doc["project_id"]
+
+    # Set project-specific threshold attributes
+    dphis_threshold = float(payload.dphis_threshold if payload.dphis_threshold is not None else 70.0)
+    current_score = float(project_doc.get("dphis", 50.0))
+    project_doc["dphis_threshold"] = dphis_threshold
+    project_doc["threshold_enabled"] = True
+    project_doc["threshold_source"] = "project_creator"
+    project_doc["threshold_configured_by"] = payload.username or "project_creator"
+    project_doc["threshold_configured_at"] = datetime.utcnow()
+    project_doc["threshold_updated_at"] = datetime.utcnow()
+    project_doc["threshold_status"] = "below" if current_score < dphis_threshold else "triggered"
+    project_doc["current_dphis"] = current_score
+    project_doc["previous_dphis"] = None
+    project_doc["threshold_history"] = [{
+        "old_value": None,
+        "new_value": dphis_threshold,
+        "changed_by": payload.username or "project_creator",
+        "timestamp": datetime.utcnow().isoformat()
+    }]
 
     # Upsert into projects collection
     await db.projects.update_one(
@@ -302,6 +322,15 @@ async def ingest_normal_asset(payload: NormalAssetIngestRequest):
             {"$addToSet": {"assigned_users": uname}}
         )
 
+    # Initial threshold evaluation for newly created project
+    await evaluate_project_threshold_crossing(
+        project_id=project_id,
+        current_dphis=float(project_doc.get("dphis", 50.0)),
+        previous_dphis=None,
+        custom_threshold=dphis_threshold,
+        trigger_source="project_creation"
+    )
+
     project_doc.pop("_id", None)
     return project_doc
 
@@ -338,8 +367,35 @@ async def create_project(payload: ProjectCreate):
     doc["dphis"] = dphis_obj.dphis
     doc["risk_level"] = dphis_obj.level.value
 
+    # Project-specific threshold setup
+    dphis_threshold = float(getattr(payload, "dphis_threshold", 70.0) or 70.0)
+    doc["dphis_threshold"] = dphis_threshold
+    doc["threshold_enabled"] = True
+    doc["threshold_source"] = "project_creator"
+    doc["threshold_configured_by"] = "project_creator"
+    doc["threshold_configured_at"] = datetime.utcnow()
+    doc["threshold_updated_at"] = datetime.utcnow()
+    doc["threshold_status"] = "below" if dphis_obj.dphis < dphis_threshold else "triggered"
+    doc["current_dphis"] = dphis_obj.dphis
+    doc["previous_dphis"] = None
+    doc["threshold_history"] = [{
+        "old_value": None,
+        "new_value": dphis_threshold,
+        "changed_by": "project_creator",
+        "timestamp": datetime.utcnow().isoformat()
+    }]
+
     await db.projects.insert_one(doc)
     await db.project_snapshots.insert_one(baseline_snap)
+
+    # Evaluate initial threshold crossing
+    await evaluate_project_threshold_crossing(
+        project_id=payload.project_id,
+        current_dphis=dphis_obj.dphis,
+        previous_dphis=None,
+        custom_threshold=dphis_threshold,
+        trigger_source="project_creation"
+    )
 
     doc.pop("_id", None)
     return doc
@@ -420,13 +476,11 @@ async def add_snapshot(project_id: str, payload: SnapshotCreate):
         }}
     )
 
-    # Trigger alert if critical or escalation
-    await evaluate_and_trigger_alert(
+    # Evaluate threshold crossing with project-specific threshold
+    threshold_eval = await evaluate_project_threshold_crossing(
         project_id=project_id,
-        project_name=proj.get("project_name", project_id),
         current_dphis=dphis_obj.dphis,
-        current_severity=dphis_obj.level.value,
-        previous_severity=prev_level
+        previous_dphis=prev_dphis
     )
 
     snap_doc.pop("_id", None)
@@ -434,5 +488,105 @@ async def add_snapshot(project_id: str, payload: SnapshotCreate):
         "snapshot": snap_doc,
         "updated_dphis": dphis_obj.dphis,
         "risk_level": dphis_obj.level.value,
-        "trend_direction": dphis_obj.trend.direction
+        "trend_direction": dphis_obj.trend.direction,
+        "threshold_eval": threshold_eval
     }
+
+class ProjectThresholdPatch(BaseModel):
+    dphis_threshold: float
+    threshold_enabled: Optional[bool] = True
+    changed_by: Optional[str] = "admin"
+
+@router.patch("/{project_id}/threshold", response_model=dict)
+async def update_project_threshold(project_id: str, payload: ProjectThresholdPatch):
+    """
+    Allows Admin to configure a project-specific DPHIS alert threshold.
+    Records full change history (old_value, new_value, changed_by, timestamp).
+    Re-evaluates threshold status against current project DPHIS.
+    """
+    db = get_database()
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not available")
+
+    project = await db.projects.find_one({"project_id": project_id})
+    if not project:
+        raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
+
+    old_threshold = float(project.get("dphis_threshold", 70.0))
+    new_threshold = round(float(payload.dphis_threshold), 1)
+    admin_id = payload.changed_by or "admin"
+    now_utc = datetime.utcnow()
+
+    history_entry = {
+        "old_value": old_threshold,
+        "new_value": new_threshold,
+        "changed_by": admin_id,
+        "timestamp": now_utc.isoformat()
+    }
+
+    current_dphis = float(project.get("current_dphis") or project.get("dphis") or 50.0)
+    prev_dphis = project.get("previous_dphis")
+
+    new_status = "below" if current_dphis < new_threshold else "triggered"
+
+    update_fields = {
+        "dphis_threshold": new_threshold,
+        "threshold_enabled": payload.threshold_enabled if payload.threshold_enabled is not None else project.get("threshold_enabled", True),
+        "threshold_source": "admin",
+        "threshold_configured_by": admin_id,
+        "threshold_updated_at": now_utc,
+        "threshold_status": new_status,
+        "updated_at": now_utc
+    }
+
+    await db.projects.update_one(
+        {"project_id": project_id},
+        {
+            "$set": update_fields,
+            "$push": {"threshold_history": history_entry}
+        }
+    )
+
+    eval_res = None
+    if payload.threshold_enabled:
+        eval_res = await evaluate_project_threshold_crossing(
+            project_id=project_id,
+            current_dphis=current_dphis,
+            previous_dphis=prev_dphis,
+            custom_threshold=new_threshold,
+            trigger_source="admin_threshold_update"
+        )
+
+    updated_proj = await db.projects.find_one({"project_id": project_id}, {"_id": 0})
+    return {
+        "message": f"Threshold updated to {new_threshold} for project {project_id}",
+        "project_id": project_id,
+        "old_threshold": old_threshold,
+        "new_threshold": new_threshold,
+        "threshold_status": updated_proj.get("threshold_status", new_status),
+        "threshold_history": updated_proj.get("threshold_history", []),
+        "evaluation": eval_res
+    }
+
+class ProjectRiskEventRequest(BaseModel):
+    project_id: str
+    current_dphis: float
+    previous_dphis: Optional[float] = None
+    threshold: Optional[float] = None
+
+@router.post("/project-risk-events", response_model=dict)
+@router.post("/risk-events", response_model=dict)
+async def handle_project_risk_event(payload: ProjectRiskEventRequest):
+    """
+    Evaluates project-specific threshold crossing and triggers n8n automated workflow.
+    Ensures idempotency and persists alert prior to webhook delivery.
+    """
+    res = await evaluate_project_threshold_crossing(
+        project_id=payload.project_id,
+        current_dphis=payload.current_dphis,
+        previous_dphis=payload.previous_dphis,
+        custom_threshold=payload.threshold,
+        trigger_source="api_event"
+    )
+    return res
+

@@ -11,6 +11,7 @@ import MyProjects from './pages/MyProjects';
 import DataModels from './pages/DataModels';
 import UsersAudit from './pages/UsersAudit';
 import ProjectInsightsModal from './components/ProjectInsightsModal';
+import MyProjectOverview from './components/MyProjectOverview';
 import Login from './pages/Login';
 import { useTheme } from './hooks/useTheme';
 import { getRiskCategory } from './lib/risk';
@@ -386,11 +387,26 @@ export default function App() {
 
       {/* VIEWPORT CONTENT CONTAINER — BUTTERY SMOOTH SCROLL */}
       {currentTab === 'motion' ? (
-        <div
-          ref={containerRef}
-          className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll"
-        >
-          {/* SECTION 01 / 04 — HERO "India, in motion." */}
+        !isAdmin ? (
+          <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll">
+            <MyProjectOverview
+              currentUser={currentUser}
+              pins={pins}
+              onViewProject={(projId) => {
+                const found = pins.find(p => p.id === projId);
+                if (found) setSelectedPin(found);
+                setInsightsModalProjectId(projId);
+              }}
+              onNavigateToProjects={() => setCurrentTab('projects')}
+              onOpenAddProject={() => setShowAddModal(true)}
+            />
+          </div>
+        ) : (
+          <div
+            ref={containerRef}
+            className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll"
+          >
+            {/* SECTION 01 / 04 — HERO "India, in motion." */}
           <section className="buttery-smooth-section w-full h-screen relative flex items-center justify-between px-6 sm:px-12 md:px-20 pointer-events-none">
             <div className="max-w-xl space-y-4 sm:space-y-6 pointer-events-auto mt-12 sm:mt-16">
               <h1 className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-display tracking-tight leading-[0.9] ${
@@ -895,6 +911,7 @@ export default function App() {
             </div>
           </section>
         </div>
+        )
       ) : (
         /* ROLE-GOVERNED VIEWPORT ROUTING */
         <div className="relative z-10 w-full h-full overflow-y-auto">
@@ -920,7 +937,7 @@ export default function App() {
             />
           )}
 
-          {currentTab === 'intelligence' && (
+          {currentTab === 'intelligence' && isAdmin && (
             <ProjectIntelligence
               projectId={selectedPin?.id}
               currentUser={currentUser}
@@ -939,14 +956,14 @@ export default function App() {
             />
           )}
 
-          {currentTab === 'investigation' && (
+          {currentTab === 'investigation' && isAdmin && (
             <Investigation
               projectId={selectedPin?.id}
               onOpenAddProject={() => setShowAddModal(true)}
             />
           )}
 
-          {currentTab === 'analytics' && (
+          {currentTab === 'analytics' && isAdmin && (
             <Analytics
               pinsCount={pins.length}
               onOpenAddProject={() => setShowAddModal(true)}
@@ -988,18 +1005,18 @@ export default function App() {
             />
           )}
 
-          {currentTab === 'data_models' && (
+          {currentTab === 'data_models' && isAdmin && (
             <DataModels />
           )}
 
-          {currentTab === 'users_audit' && (
+          {currentTab === 'users_audit' && isAdmin && (
             <UsersAudit />
           )}
         </div>
       )}
 
-      {/* FLOATING BOTTOM DOCK CONTROLS (Only on Motion tab) */}
-      {currentTab === 'motion' && (
+      {/* FLOATING BOTTOM DOCK CONTROLS (Only on Motion tab for Admins) */}
+      {currentTab === 'motion' && isAdmin && (
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
           <button
             onClick={() => setShowAddModal(true)}

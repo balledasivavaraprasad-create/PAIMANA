@@ -36,10 +36,12 @@ export default function Assistant({ selectedProjectId = 'P1024', currentUser }: 
         { feature: 'Risk Engine', impact: 'Ready', description: 'Delay and cost calculations ready' },
       ],
       suggestedActions: [
-        `What are the main delay reasons for project ${selectedProjectId}?`,
-        'Which projects have spent money without finishing physical work?',
-        `What actions should we take to speed up project ${selectedProjectId}?`,
-        `Is project ${selectedProjectId} likely to miss its target deadline?`
+        'Which of my projects need attention?',
+        `Why is this project at risk?`,
+        'What caused the delay?',
+        'What should we do to recover lost time?',
+        'Which milestone is at risk?',
+        'Which projects have increasing risk?'
       ],
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },

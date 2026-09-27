@@ -31,6 +31,7 @@ export default function AddProjectModal({
   // Contextual metadata
   const [state, setState] = useState<string>('Maharashtra');
   const [ministry, setMinistry] = useState<string>(currentUser?.ministry || 'Ministry of Road Transport & Highways');
+  const [dphisThreshold, setDphisThreshold] = useState<number>(70);
 
   // Submission State
   const [loading, setLoading] = useState(false);
@@ -78,7 +79,8 @@ export default function AddProjectModal({
         physical_progress_percent: progNum,
         ministry: ministry.trim(),
         state: state.trim(),
-        username: currentUser?.username
+        username: currentUser?.username,
+        dphis_threshold: Number(dphisThreshold) || 70
       });
 
       setStatusStep('LightGBM Models Calibrated · DPHIS Index Calculated!');
@@ -354,6 +356,37 @@ export default function AddProjectModal({
                   }`}
                 />
               </div>
+            </div>
+
+            {/* Project-Specific DPHIS Alert Threshold */}
+            <div className={`p-4 rounded-xl border ${
+              isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50/80 border-amber-300'
+            }`}>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-bold text-amber-500 dark:text-amber-400 tracking-wider flex items-center gap-1.5 font-display">
+                  <span>🔔</span> RISK ALERT THRESHOLD *
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    required
+                    value={dphisThreshold}
+                    onChange={e => setDphisThreshold(Number(e.target.value))}
+                    className={`w-20 px-3 py-1.5 rounded-lg border text-sm font-mono font-bold text-center outline-none ${
+                      isDark ? 'bg-black/60 border-amber-500/50 text-amber-300 focus:border-amber-400' : 'bg-white border-amber-400 text-amber-900 focus:border-amber-600'
+                    }`}
+                  />
+                  <span className="text-xs font-mono text-slate-400">/ 100</span>
+                </div>
+              </div>
+              <p className="text-[11.5px] text-[var(--text-secondary)] leading-relaxed">
+                Set the DPHIS score at which this project should automatically trigger an alert.
+              </p>
+              <p className="text-[11px] text-amber-600 dark:text-amber-400/90 font-medium mt-1">
+                When this project's DPHIS reaches or crosses this value, an alert will automatically be sent to you and the responsible administrator.
+              </p>
             </div>
 
             {/* Footer Buttons */}

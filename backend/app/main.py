@@ -53,11 +53,18 @@ async def health_check():
         "database": "connected"
     }
 
-from app.api.routes.projects import get_public_risk_overview
+from app.api.routes.projects import get_public_risk_overview, handle_project_risk_event, ProjectRiskEventRequest
 @app.get(f"{settings.API_V1_STR}/public/risk-overview", tags=["Public"])
 @app.get("/api/public/risk-overview", tags=["Public"])
 async def public_risk_overview_alias():
     return await get_public_risk_overview()
+
+@app.post(f"{settings.API_V1_STR}/project-risk-events", tags=["Alerts & Notifications"])
+@app.post("/api/project-risk-events", tags=["Alerts & Notifications"])
+@app.post("/project-risk-events", tags=["Alerts & Notifications"])
+async def project_risk_events_top_level(payload: ProjectRiskEventRequest):
+    return await handle_project_risk_event(payload)
+
 
 # Include API Routers under /api/v1 and /api aliases
 app.include_router(auth_router, prefix=settings.API_V1_STR)

@@ -33,9 +33,26 @@ class ProjectBase(BaseModel):
     risk_level: Optional[str] = "moderate"
     data_quality_score: Optional[float] = 95.0
     assigned_users: List[str] = Field(default_factory=list)
+    dphis_threshold: Optional[float] = 70.0
+    threshold_enabled: Optional[bool] = True
+    threshold_source: Optional[str] = "project_creator"
+    threshold_configured_by: Optional[str] = None
+    threshold_configured_at: Optional[datetime] = None
+    threshold_updated_at: Optional[datetime] = None
+    threshold_status: Optional[str] = "below"
+    previous_dphis: Optional[float] = None
+    current_dphis: Optional[float] = None
+    threshold_last_crossed_at: Optional[datetime] = None
+    last_threshold_alert_id: Optional[str] = None
+    threshold_history: List[Dict[str, Any]] = Field(default_factory=list)
 
 class ProjectCreate(ProjectBase):
     pass
+
+class ProjectThresholdUpdate(BaseModel):
+    dphis_threshold: float = Field(..., ge=1.0, le=100.0, description="DPHIS score at which this project should trigger an alert")
+    threshold_enabled: Optional[bool] = True
+    configured_by: Optional[str] = None
 
 class ProjectUpdate(BaseModel):
     project_name: Optional[str] = None
@@ -51,6 +68,11 @@ class ProjectUpdate(BaseModel):
     risk_level: Optional[str] = None
     data_quality_score: Optional[float] = None
     assigned_users: Optional[List[str]] = None
+    dphis_threshold: Optional[float] = None
+    threshold_enabled: Optional[bool] = None
+    threshold_source: Optional[str] = None
+    threshold_configured_by: Optional[str] = None
+    threshold_status: Optional[str] = None
 
 class ProjectInDB(ProjectBase):
     created_at: datetime = Field(default_factory=datetime.utcnow)

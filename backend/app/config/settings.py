@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     N8N_WEBHOOK_URL: str = "http://localhost:5678/webhook/paimana-risk-alert"
     N8N_RISK_WEBHOOK_URL: str = "https://sivavaraprasad.app.n8n.cloud/webhook/project-risk-event"
     N8N_TEST_WEBHOOK_URL: str = "https://sivavaraprasad.app.n8n.cloud/webhook-test/project-risk-event"
+    N8N_THRESHOLD_WEBHOOK_URL: str = "https://hrishikesh1.app.n8n.cloud/webhook/project-risk-threshold"
     ALERT_COOLDOWN_HOURS: int = 24
 
     # SMTP Authentication & Email Service

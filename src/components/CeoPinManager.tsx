@@ -10,6 +10,8 @@ export interface ProjectPin {
   risk: 'critical' | 'high' | 'moderate' | 'low';
   cost: string;
   delay: string;
+  dphis_threshold?: number;
+  threshold_status?: string;
 }
 
 interface CeoPinManagerProps {
