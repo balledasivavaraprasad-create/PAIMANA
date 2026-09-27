@@ -211,13 +211,16 @@ export function HeaderNav({
             <button
               onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
               title="Profile & Settings"
-              className={`w-7 sm:w-8 h-7 sm:h-8 rounded-full border flex items-center justify-center font-mono font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-sm select-none ${
+              style={{ color: '#ffffff' }}
+              className={`w-7 sm:w-8 h-7 sm:h-8 rounded-full flex items-center justify-center font-mono font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-md select-none header-avatar-light ${
                 isDark
-                  ? 'bg-gradient-to-tr from-sky-600 to-indigo-600 text-white border-white/25 hover:border-white/50'
-                  : 'bg-gradient-to-tr from-slate-900 to-indigo-800 text-white border-black/25 hover:border-black/50'
+                  ? 'bg-gradient-to-tr from-sky-600 to-indigo-600 text-white border border-white/25 hover:border-white/50'
+                  : 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 text-white border-2 border-white ring-2 ring-indigo-500/35 shadow-[0_2px_10px_rgba(79,70,229,0.35)] hover:scale-105'
               }`}
             >
-              {user.full_name ? user.full_name.charAt(0).toUpperCase() : user.username ? user.username.charAt(0).toUpperCase() : '👤'}
+              <span style={{ color: '#ffffff' }} className="header-avatar-light">
+                {user.full_name ? user.full_name.charAt(0).toUpperCase() : user.username ? user.username.charAt(0).toUpperCase() : '👤'}
+              </span>
             </button>
 
             {/* Dropdown Menu */}

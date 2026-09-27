@@ -4,6 +4,7 @@ import ProjectInsightsModal from '../components/ProjectInsightsModal';
 import { ProjectPin } from '../components/CeoPinManager';
 import { UserProfile } from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
+import { useTheme } from '../hooks/useTheme';
 
 interface Props {
   currentUser?: UserProfile | null;
@@ -15,7 +16,7 @@ interface Props {
   onRemoveProject?: (projectId: string) => void;
 }
 
-function CompactDphisGauge({ score }: { score: number }) {
+function CompactDphisGauge({ score, isDark = true }: { score: number; isDark?: boolean }) {
   const size = 68;
   const strokeWidth = 6;
   const center = size / 2;
@@ -32,7 +33,7 @@ function CompactDphisGauge({ score }: { score: number }) {
           cx={center}
           cy={center}
           r={radius}
-          stroke="rgba(255, 255, 255, 0.15)"
+          stroke={isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.12)"}
           strokeWidth={strokeWidth}
           fill="transparent"
         />
@@ -50,10 +51,10 @@ function CompactDphisGauge({ score }: { score: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="font-mono-code font-bold text-base text-white leading-none">
+        <span className={`font-mono-code font-bold text-base leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>
           {score}
         </span>
-        <span className="text-[8px] font-mono-code font-bold text-white/60 uppercase mt-0.5">
+        <span className={`text-[8px] font-mono-code font-bold uppercase mt-0.5 ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
           DPHIS
         </span>
       </div>
@@ -70,6 +71,8 @@ export default function MyProjects({
   onOpenAddProject,
   onRemoveProject
 }: Props) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'ANALYST';
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW'>('ALL');
@@ -264,60 +267,62 @@ export default function MyProjects({
                     </h3>
                   </div>
 
-                  {/* DPHIS Score with Round Circular Progress Bar & Scrollbar */}
-                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3.5">
-                    <CompactDphisGauge score={pin.dphis} />
+                  {/* DPHIS / Risk Score Display without progress bar */}
+                  <div className={`p-3.5 rounded-xl border flex items-center gap-3.5 ${
+                    isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-slate-200'
+                  }`}>
+                    <CompactDphisGauge score={pin.dphis} isDark={isDark} />
 
                     <div className="flex-1 space-y-1.5 min-w-0">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-mono-code font-bold text-white/80 text-[11px] uppercase tracking-wider">
-                          DPHIS Risk Score:
+                        <span className={`font-mono-code font-bold text-[11px] uppercase tracking-wider ${
+                          isDark ? 'text-white/80' : 'text-slate-700'
+                        }`}>
+                          DPHIS / Risk Score
                         </span>
-                        <span className="font-mono-code font-bold text-white">
-                          {pin.dphis} <span className="text-white/40 font-normal">/ 100</span>
+                        <span className={`font-mono-code font-bold text-sm ${isDark ? 'text-white' : 'text-slate-950'}`}>
+                          {pin.dphis} <span className={`text-xs font-normal ${isDark ? 'text-white/40' : 'text-slate-500'}`}>/ 100</span>
                         </span>
                       </div>
 
-                      {/* Compact DPHIS scrollbar/bar */}
-                      <div className="h-2 w-full rounded-full bg-white/10 p-0.5 overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${Math.min(100, Math.max(5, pin.dphis))}%`,
-                            background: pin.dphis >= 80 
-                              ? 'linear-gradient(90deg, #f97316, #ef4444)' 
-                              : pin.dphis >= 65 
-                              ? 'linear-gradient(90deg, #eab308, #f97316)' 
-                              : pin.dphis >= 45 
-                              ? '#eab308' 
-                              : '#10b981'
-                          }}
-                        />
-                      </div>
-
-                      <div className="text-[10px] font-mono text-white/60 flex items-center justify-between">
-                        <span>Low (0)</span>
-                        <span className={cat.level === 'critical' || cat.level === 'high' ? 'text-red-400 font-bold' : 'text-emerald-400 font-medium'}>
-                          {cat.label}
+                      {/* Risk Tier Badge beneath DPHIS / Risk Score */}
+                      <div>
+                        <span className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider border ${
+                          cat.level === 'critical'
+                            ? (isDark ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-red-100 text-red-700 border-red-300')
+                            : cat.level === 'high'
+                            ? (isDark ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-amber-100 text-amber-900 border-amber-300')
+                            : cat.level === 'moderate'
+                            ? (isDark ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-yellow-100 text-yellow-900 border-yellow-300')
+                            : (isDark ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-emerald-100 text-emerald-800 border-emerald-300')
+                        }`}>
+                          {cat.level === 'critical' ? 'Critical Risk' : cat.level === 'high' ? 'High Risk' : cat.level === 'moderate' ? 'Moderate Risk' : 'Low Risk'}
                         </span>
-                        <span>Critical (100)</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* High Delay Risk Flashcard / Diagnosis */}
+                  {/* Delay Risk Diagnosis - Black text in light mode for readability */}
                   <div className={`p-3 rounded-xl border text-xs leading-relaxed ${
-                    cat.level === 'critical'
-                      ? 'bg-red-500/15 border-red-500/30 text-red-200'
-                      : cat.level === 'high'
-                      ? 'bg-amber-500/15 border-amber-500/30 text-amber-200'
-                      : cat.level === 'moderate'
-                      ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-200'
-                      : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
+                    isDark
+                      ? (cat.level === 'critical'
+                          ? 'bg-red-500/15 border-red-500/30 text-red-200'
+                          : cat.level === 'high'
+                          ? 'bg-amber-500/15 border-amber-500/30 text-amber-200'
+                          : cat.level === 'moderate'
+                          ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-200'
+                          : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200')
+                      : (cat.level === 'critical'
+                          ? 'bg-red-50 border-red-200 text-black'
+                          : cat.level === 'high'
+                          ? 'bg-amber-50 border-amber-300 text-black'
+                          : cat.level === 'moderate'
+                          ? 'bg-yellow-50 border-yellow-300 text-black'
+                          : 'bg-emerald-50 border-emerald-300 text-black')
                   }`}>
                     <div className="flex items-center gap-1.5 font-bold mb-1">
                       <span>{cat.level === 'critical' || cat.level === 'high' ? '⚠️' : 'ℹ️'}</span>
-                      <span className="uppercase tracking-wider font-mono text-[11px]">
+                      <span className={`uppercase tracking-wider font-mono text-[11px] ${isDark ? '' : 'text-black font-bold'}`}>
                         {cat.level === 'critical' 
                           ? 'Critical Delay Risk' 
                           : cat.level === 'high' 
@@ -327,7 +332,7 @@ export default function MyProjects({
                           : 'On Track'}
                       </span>
                     </div>
-                    <p className="text-[11px] opacity-90 leading-snug">
+                    <p className={`text-[11px] leading-snug ${isDark ? 'opacity-90' : 'text-black font-medium'}`}>
                       {cat.level === 'critical' 
                         ? 'Physical execution is severely lagging behind the master schedule. Immediate intervention required.'
                         : cat.level === 'high'

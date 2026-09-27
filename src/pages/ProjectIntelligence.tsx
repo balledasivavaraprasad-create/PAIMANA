@@ -6,6 +6,7 @@ import {
 } from '../lib/api';
 import { ProjectPin } from '../components/CeoPinManager';
 import { getRiskCategory } from '../lib/risk';
+import { useTheme } from '../hooks/useTheme';
 
 interface Props {
   projectId?: string;
@@ -123,6 +124,8 @@ export default function ProjectIntelligence({
   onNavigateToInvestigation, 
   onSelectProject
 }: Props) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'ANALYST';
   
   // Navigation state: null = project list view, string = deep intelligence view
@@ -332,7 +335,11 @@ export default function ProjectIntelligence({
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search by project name, ID, sector, state, or ministry..."
-                className="w-full bg-[#0B0F17]/80 border border-white/20 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/50"
+                className={`w-full rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none transition-colors border ${
+                  isDark
+                    ? 'bg-[#0B0F17]/80 border-white/20 text-white placeholder:text-white/40 focus:border-white/50'
+                    : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-500 shadow-sm'
+                }`}
               />
             </div>
 
@@ -342,7 +349,11 @@ export default function ProjectIntelligence({
               <select
                 value={sectorFilter}
                 onChange={e => setSectorFilter(e.target.value)}
-                className="bg-[#0B0F17]/80 border border-white/20 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-white/50 cursor-pointer"
+                className={`rounded-xl px-3 py-2 text-xs font-mono focus:outline-none cursor-pointer border ${
+                  isDark
+                    ? 'bg-[#0B0F17]/80 border-white/20 text-white focus:border-white/50'
+                    : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 shadow-sm'
+                }`}
               >
                 <option value="ALL">All Sectors ({inferredSectors.length})</option>
                 {inferredSectors.map(s => (
@@ -354,7 +365,11 @@ export default function ProjectIntelligence({
               <select
                 value={stateFilter}
                 onChange={e => setStateFilter(e.target.value)}
-                className="bg-[#0B0F17]/80 border border-white/20 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-white/50 cursor-pointer"
+                className={`rounded-xl px-3 py-2 text-xs font-mono focus:outline-none cursor-pointer border ${
+                  isDark
+                    ? 'bg-[#0B0F17]/80 border-white/20 text-white focus:border-white/50'
+                    : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 shadow-sm'
+                }`}
               >
                 <option value="ALL">All States ({inferredStates.length})</option>
                 {inferredStates.map(st => (
@@ -366,7 +381,11 @@ export default function ProjectIntelligence({
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value as any)}
-                className="bg-[#0B0F17]/80 border border-white/20 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-white/50 cursor-pointer"
+                className={`rounded-xl px-3 py-2 text-xs font-mono focus:outline-none cursor-pointer border ${
+                  isDark
+                    ? 'bg-[#0B0F17]/80 border-white/20 text-white focus:border-white/50'
+                    : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 shadow-sm'
+                }`}
               >
                 <option value="dphis_desc">Sort: DPHIS High → Low</option>
                 <option value="dphis_asc">Sort: DPHIS Low → High</option>
@@ -393,8 +412,8 @@ export default function ProjectIntelligence({
                   onClick={() => setRiskFilter(st)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer whitespace-nowrap border ${
                     active
-                      ? 'bg-white text-black font-bold border-white shadow-sm'
-                      : 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15'
+                      ? (isDark ? 'bg-white text-black font-bold border-white shadow-sm' : 'bg-black text-white font-bold border-black shadow-sm')
+                      : (isDark ? 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-sm')
                   }`}
                 >
                   {labelMap[st]}
@@ -404,16 +423,16 @@ export default function ProjectIntelligence({
           </div>
         </div>
 
-        {/* Project Cards Grid */}
+        {/* Project Directory Table */}
         {directoryLoading ? (
           <GlassCard variant="medium" padding={32} className="text-center space-y-3">
-            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
-            <div className="text-xs font-mono text-white/70">Loading risk telemetry from database...</div>
+            <div className={`w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto ${isDark ? 'border-white' : 'border-slate-900'}`} />
+            <div className={`text-xs font-mono ${isDark ? 'text-white/70' : 'text-slate-600'}`}>Loading risk telemetry from database...</div>
           </GlassCard>
         ) : filteredProjects.length === 0 ? (
           <GlassCard variant="medium" padding={32} className="text-center space-y-4">
-            <div className="text-base font-bold text-white">No Projects Match Selected Filters</div>
-            <p className="text-xs sm:text-sm text-white/70 max-w-md mx-auto">
+            <div className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>No Projects Match Selected Filters</div>
+            <p className={`text-xs sm:text-sm max-w-md mx-auto ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
               No projects satisfy your active search query or filter parameters. Try clearing the filters.
             </p>
             <button
@@ -423,106 +442,149 @@ export default function ProjectIntelligence({
                 setSectorFilter('ALL');
                 setStateFilter('ALL');
               }}
-              className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer"
+              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                isDark 
+                  ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' 
+                  : 'bg-black/5 hover:bg-black/10 text-slate-900 border-black/15'
+              }`}
             >
               Clear All Filters
             </button>
           </GlassCard>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {filteredProjects.map(p => {
-              const pScore = p.dphis ?? 50;
-              const cat = getRiskCategory(pScore);
-              const pId = p.project_id || p.id;
-              const pOutlay = p.cost?.revised || 4218;
+          <div className={`overflow-hidden rounded-2xl border backdrop-blur-xl shadow-2xl transition-all ${
+            isDark 
+              ? 'border-white/15 bg-[#0A1222]/85 shadow-black/60' 
+              : 'border-slate-300 bg-white/95 shadow-xl'
+          }`}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className={`border-b text-[11px] font-mono uppercase tracking-wider ${
+                    isDark 
+                      ? 'border-white/15 bg-white/5 text-slate-300' 
+                      : 'border-slate-200 bg-slate-100 text-slate-700'
+                  }`}>
+                    <th className="py-3.5 px-4 font-bold">Project Details</th>
+                    <th className="py-3.5 px-4 font-bold">Sector / State</th>
+                    <th className="py-3.5 px-4 font-bold">Sanctioned Outlay</th>
+                    <th className="py-3.5 px-4 font-bold text-center">DPHIS Risk Score</th>
+                    <th className="py-3.5 px-4 font-bold text-center">Risk Tier</th>
+                    <th className="py-3.5 px-4 font-bold text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className={`divide-y font-mono text-xs ${
+                  isDark ? 'divide-white/10' : 'divide-slate-200'
+                }`}>
+                  {filteredProjects.map(p => {
+                    const pScore = p.dphis ?? 50;
+                    const cat = getRiskCategory(pScore);
+                    const pId = p.project_id || p.id;
+                    const pOutlay = p.cost?.revised || 4218;
 
-              return (
-                <div
-                  key={pId}
-                  onClick={() => {
-                    setActiveProjectId(pId);
-                    onSelectProject?.(pId);
-                  }}
-                  className="oled-solid-card p-5 sm:p-6 space-y-4 hover:border-white/50 transition-all cursor-pointer flex flex-col justify-between group"
-                >
-                  <div className="space-y-3.5">
-                    {/* Top Row: ID, State, and Risk Tier */}
-                    <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono-code font-bold text-xs text-white px-2 py-0.5 rounded bg-white/10">
-                          {pId}
-                        </span>
-                        <span className="text-xs text-white/70 font-medium">
-                          📍 {p.state}
-                        </span>
-                      </div>
-                      <span className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold border ${cat.badgeBg}`}>
-                        {cat.label}
-                      </span>
-                    </div>
+                    return (
+                      <tr
+                        key={pId}
+                        onClick={() => {
+                          setActiveProjectId(pId);
+                          onSelectProject?.(pId);
+                        }}
+                        className={`transition-colors cursor-pointer group ${
+                          isDark ? 'hover:bg-white/5' : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        {/* Project Details */}
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono-code font-bold text-xs text-sky-500 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded shrink-0">
+                              {pId}
+                            </span>
+                            <span className={`font-sans font-bold text-sm line-clamp-1 max-w-sm transition-colors ${
+                              isDark ? 'text-white group-hover:text-sky-300' : 'text-slate-900 group-hover:text-sky-600'
+                            }`} title={p.project_name}>
+                              {p.project_name}
+                            </span>
+                          </div>
+                          <div className={`text-[11px] font-sans mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                            {p.ministry || 'Central Infrastructure Ministry'}
+                          </div>
+                        </td>
 
-                    {/* Project Title & Sector */}
-                    <div>
-                      <h3 className="font-bold text-sm sm:text-base text-white leading-snug group-hover:text-white transition-colors line-clamp-2">
-                        {p.project_name}
-                      </h3>
-                      <div className="text-xs text-white/60 mt-1 font-mono">
-                        {p.sector || 'Infrastructure'} · {p.ministry || 'Central Sector'}
-                      </div>
-                    </div>
+                        {/* Sector / State */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <div className={`text-xs font-medium ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                            {p.sector || 'Infrastructure'}
+                          </div>
+                          <div className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                            📍 {p.state}
+                          </div>
+                        </td>
 
-                    {/* Compact Circular Gauge + Scrollbar */}
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
-                      <MiniDphisGauge score={pScore} />
+                        {/* Outlay */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <div className={`text-xs font-bold ${isDark ? 'text-sky-300' : 'text-sky-700'}`}>
+                            ₹{pOutlay.toLocaleString()} Cr
+                          </div>
+                          <div className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                            {p.delay_str || (p.schedule_slippage_months ? `+${p.schedule_slippage_months} mo slippage` : 'On Schedule')}
+                          </div>
+                        </td>
 
-                      <div className="flex-1 space-y-1.5 min-w-0">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-mono-code font-bold text-white/80 text-[11px] uppercase tracking-wider">
-                            DPHIS Index
+                        {/* DPHIS Score */}
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border ${
+                            isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-300'
+                          }`}>
+                            <span className={`font-mono-code font-bold text-sm ${
+                              isDark ? 'text-white' : 'text-slate-900'
+                            }`}>
+                              {pScore}
+                            </span>
+                            <span className={`text-[10px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                              / 100
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Risk Tier */}
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                          <span className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider border ${
+                            cat.level === 'critical'
+                              ? (isDark ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-red-100 text-red-700 border-red-300')
+                              : cat.level === 'high'
+                              ? (isDark ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-amber-100 text-amber-900 border-amber-300')
+                              : cat.level === 'moderate'
+                              ? (isDark ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-yellow-100 text-yellow-900 border-yellow-300')
+                              : (isDark ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-emerald-100 text-emerald-800 border-emerald-300')
+                          }`}>
+                            {cat.level === 'critical' ? 'Critical' : cat.level === 'high' ? 'High Risk' : cat.level === 'moderate' ? 'Moderate' : 'Low Risk'}
                           </span>
-                          <span className="font-mono-code font-bold text-white">
-                            {pScore} <span className="text-white/40 font-normal">/ 100</span>
-                          </span>
-                        </div>
+                        </td>
 
-                        {/* DPHIS Bar / Scrollbar */}
-                        <div className="h-2 w-full rounded-full bg-white/10 p-0.5 overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${Math.min(100, Math.max(5, pScore))}%`,
-                              background: pScore >= 80 
-                                ? 'linear-gradient(90deg, #f97316, #ef4444)' 
-                                : pScore >= 65 
-                                ? 'linear-gradient(90deg, #eab308, #f97316)' 
-                                : pScore >= 45 
-                                ? '#eab308' 
-                                : '#10b981'
+                        {/* Inspect Risk Intelligence Action */}
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveProjectId(pId);
+                              onSelectProject?.(pId);
                             }}
-                          />
-                        </div>
-
-                        <div className="text-[10px] font-mono text-white/60 flex items-center justify-between">
-                          <span>0</span>
-                          <span className="font-semibold text-white/90">Sanctioned: ₹{pOutlay} Cr</span>
-                          <span>100</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Click to Inspect Prompt */}
-                  <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                    <span className="text-xs font-mono text-white/70 group-hover:text-white transition-colors">
-                      Inspect Risk Intelligence
-                    </span>
-                    <span className="text-xs font-bold text-white group-hover:translate-x-1 transition-transform">
-                      →
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer shadow-sm ${
+                              isDark 
+                                ? 'bg-white/10 hover:bg-white hover:text-black text-white border-white/20 group-hover:bg-white group-hover:text-black' 
+                                : 'bg-slate-900 hover:bg-black text-white border-slate-900 shadow-sm'
+                            }`}
+                          >
+                            <span>Inspect Risk Intelligence</span>
+                            <span className="text-sm leading-none">→</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

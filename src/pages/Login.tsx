@@ -62,7 +62,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
   // Dynamic Risk & Statistics Overview from Live Database
   const [publicOverview, setPublicOverview] = useState<PublicRiskOverview | null>(null);
-  const [showRiskWatch, setShowRiskWatch] = useState(false);
 
   // Ministries list
   const [ministries, setMinistries] = useState<MinistryItem[]>([]);
@@ -341,18 +340,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             }`}>
               Engine: <strong className={isDark ? 'text-white' : 'text-black'}>Early Warning Active</strong>
             </span>
-            <button
-              type="button"
-              onClick={() => setShowRiskWatch(prev => !prev)}
-              className={`text-xs px-3 py-1 rounded-full border font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                showRiskWatch 
-                  ? 'bg-amber-400 text-black border-amber-300 shadow'
-                  : (isDark ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' : 'bg-slate-200 hover:bg-slate-300 text-black border-slate-300')
-              }`}
-            >
-              <span>⚠️ Live Risk Watch</span>
-              <span className="text-[10px]">{showRiskWatch ? '▲ Hide' : '▼ View'}</span>
-            </button>
           </div>
         </div>
 
@@ -408,60 +395,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <span className="text-[10px] text-rose-400 font-medium">Need Immediate Action</span>
           </div>
         </div>
-
-        {/* Live Risk Intelligence Watchlist (Restricted Sanitized Columns Only) */}
-        {showRiskWatch && publicOverview && publicOverview.risk_watchlist.length > 0 && (
-          <div className="mb-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 backdrop-blur-md transition-all animate-fadeIn">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 mb-3 border-b border-amber-500/20">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-400" />
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-300">
-                  Projects at Risk · Current Watchlist
-                </h3>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400 bg-black/40 px-2.5 py-0.5 rounded-full border border-white/10">
-                🔒 Public Summary View
-              </span>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-white/10 text-[10px] font-mono uppercase tracking-wider text-slate-400">
-                    <th className="py-2 px-3">Project Name</th>
-                    <th className="py-2 px-3">Sector</th>
-                    <th className="py-2 px-3">State</th>
-                    <th className="py-2 px-3">Risk Score</th>
-                    <th className="py-2 px-3">Approved Cost</th>
-                    <th className="py-2 px-3">Delay</th>
-                    <th className="py-2 px-3">Risk Level</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5 font-mono text-[11px]">
-                  {publicOverview.risk_watchlist.map((p, idx) => (
-                    <tr key={idx} className="hover:bg-white/5 transition-colors">
-                      <td className="py-2.5 px-3 font-semibold text-white max-w-xs truncate" title={p.project_name}>
-                        {p.project_name}
-                      </td>
-                      <td className="py-2.5 px-3 text-slate-300">{p.sector}</td>
-                      <td className="py-2.5 px-3 text-slate-300">{p.state}</td>
-                      <td className="py-2.5 px-3 font-bold text-amber-400">{p.dphis}</td>
-                      <td className="py-2.5 px-3 text-sky-400">₹{p.cost_revised_cr.toLocaleString()} Cr</td>
-                      <td className="py-2.5 px-3 text-rose-400">+{p.schedule_slippage_months} mo</td>
-                      <td className="py-2.5 px-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
-                          p.risk_level === 'critical' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                        }`}>
-                          {p.risk_level}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
 
         {/* Sector Chips Bar (Dynamic from Database) */}
         <div className="flex items-center gap-2 pt-3 border-t border-white/10 overflow-x-auto scrollbar-none text-xs">
@@ -898,19 +831,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </div>
       </main>
 
-      {/* ---------------- Bottom: Active Corridor Badge & Slide Indicators ---------------- */}
-      <footer className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
-        {/* Left: Active Corridor Badge */}
-        <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border backdrop-blur-md shadow-lg ${
-          isDark ? 'bg-[#0E192E]/70 border-white/15 text-slate-200' : 'bg-white/80 border-slate-300 text-slate-800'
-        }`}>
-          <span className="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_8px_#38bdf8]" />
-          <span className="text-[11px] font-mono">
-            {SLIDES[currentSlide]?.label}
-          </span>
-        </div>
-
-        {/* Right: Dot Navigation */}
+      {/* ---------------- Bottom: Slide Indicators ---------------- */}
+      <footer className="relative z-10 flex items-center justify-center gap-4 mt-6">
         <div className="flex items-center gap-2">
           {SLIDES.map((_, idx) => (
             <button

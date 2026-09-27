@@ -1003,6 +1003,7 @@ export default function App() {
             <Assistant
               selectedProjectId={selectedPin?.id || ''}
               currentUser={currentUser}
+              allProjects={pins}
               onNavigateToProject={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);

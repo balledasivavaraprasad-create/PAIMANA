@@ -254,10 +254,18 @@
   color: #000000 !important;
 }
 
-/* Force text-white and light-toned utility classes to black in light mode */
-:root[data-theme="light"] .text-white,
-:root[data-theme="light"] [class*="text-white"]:not(button[class*="bg-black"] *):not(button[class*="bg-black"]):not(.bg-black):not(.bg-black *):not(button[class*="bg-zinc-900"] *):not(button[class*="bg-slate-900"] *) {
+/* Force text-white and light-toned utility classes to black in light mode (exempting dark buttons, user chat bubble, header avatar) */
+:root[data-theme="light"] .text-white:not(.user-bubble-light):not(.user-bubble-light *):not(.header-avatar-light):not(.header-avatar-light *),
+:root[data-theme="light"] [class*="text-white"]:not(button[class*="bg-black"] *):not(button[class*="bg-black"]):not(.bg-black):not(.bg-black *):not(button[class*="bg-zinc-900"] *):not(button[class*="bg-slate-900"] *):not(.user-bubble-light):not(.user-bubble-light *):not(.header-avatar-light):not(.header-avatar-light *) {
   color: #000000 !important;
+}
+
+/* Ensure User Chat Bubble and Header Avatar in light mode keep crisp pure white text */
+:root[data-theme="light"] .user-bubble-light,
+:root[data-theme="light"] .user-bubble-light *,
+:root[data-theme="light"] .header-avatar-light,
+:root[data-theme="light"] .header-avatar-light * {
+  color: #ffffff !important;
 }
 
 :root[data-theme="light"] [class*="text-white/90"],

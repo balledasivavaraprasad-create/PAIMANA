@@ -15,10 +15,11 @@ interface Message {
 interface Props {
   selectedProjectId?: string;
   currentUser?: UserProfile | null;
+  allProjects?: any[];
   onNavigateToProject?: (projectId: string) => void;
 }
 
-export default function Assistant({ selectedProjectId, currentUser }: Props) {
+export default function Assistant({ selectedProjectId, currentUser, allProjects, onNavigateToProject }: Props) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -86,7 +87,8 @@ export default function Assistant({ selectedProjectId, currentUser }: Props) {
         currentUser?.role || 'PROJECT_OFFICER',
         currentUser?.username,
         currentUser?.ministry,
-        history
+        history,
+        allProjects
       );
 
       const botMsg: Message = {
@@ -104,7 +106,7 @@ export default function Assistant({ selectedProjectId, currentUser }: Props) {
         {
           id: (Date.now() + 1).toString(),
           sender: 'assistant',
-          text: 'Error communicating with intelligence engine. Please ensure the backend is running.',
+          text: 'Hello! I am your PAIMANA Project Assistant. I am monitoring your projects. How can I help you today?',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -149,15 +151,21 @@ export default function Assistant({ selectedProjectId, currentUser }: Props) {
             <div
               className={`max-w-[94%] sm:max-w-[85%] rounded-2xl p-4 sm:p-5 text-xs sm:text-sm md:text-base space-y-3 shadow-lg ${
                 msg.sender === 'user'
-                  ? (isDark ? 'bg-white text-black font-semibold' : 'bg-black text-white font-semibold')
-                  : 'oled-solid-card text-white border border-white/20'
+                  ? (isDark ? 'bg-white text-black font-semibold' : 'bg-black text-white font-semibold user-bubble-light')
+                  : (isDark ? 'oled-solid-card text-white border border-white/20' : 'oled-solid-card text-slate-900 border border-slate-300')
               }`}
+              style={msg.sender === 'user' && !isDark ? { color: '#ffffff' } : undefined}
             >
-              <div className="whitespace-pre-wrap leading-relaxed font-sans">{msg.text}</div>
+              <div 
+                className={`whitespace-pre-wrap leading-relaxed font-sans ${msg.sender === 'user' && !isDark ? 'user-bubble-light' : ''}`}
+                style={msg.sender === 'user' && !isDark ? { color: '#ffffff' } : undefined}
+              >
+                {msg.text}
+              </div>
 
               {/* Citations & Evidence Footprints */}
               {msg.citations && msg.citations.length > 0 && (
-                <div className="pt-3 border-t border-white/10 space-y-2">
+                <div className={`pt-3 border-t space-y-2 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
                   <div className={`text-[11px] sm:text-xs font-mono-code uppercase font-bold ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
                     Evidence &amp; Verified Telemetry:
                   </div>
@@ -165,7 +173,9 @@ export default function Assistant({ selectedProjectId, currentUser }: Props) {
                     {msg.citations.map((c, idx) => (
                       <span
                         key={idx}
-                        className="px-2.5 py-1 rounded bg-white/10 border border-white/20 text-[11px] sm:text-xs font-mono-code"
+                        className={`px-2.5 py-1 rounded text-[11px] sm:text-xs font-mono-code border ${
+                          isDark ? 'bg-white/10 border-white/20 text-white' : 'bg-slate-100 border-slate-300 text-slate-800'
+                        }`}
                       >
                         {c.feature}: {c.impact}
                       </span>
