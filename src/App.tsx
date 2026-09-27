@@ -7,8 +7,12 @@ import Investigation from './pages/Investigation';
 import Analytics from './pages/Analytics';
 import Assistant from './pages/Assistant';
 import Alerts from './pages/Alerts';
+import MyProjects from './pages/MyProjects';
+import DataModels from './pages/DataModels';
+import UsersAudit from './pages/UsersAudit';
 import Login from './pages/Login';
 import { useTheme } from './hooks/useTheme';
+import { getRiskCategory } from './lib/risk';
 import {
   fetchProjects, fetchMyProjects, fetchAlerts, fetchAnalyticsOverview, API_BASE,
   fetchCurrentUser, clearAuthToken, UserProfile
@@ -20,6 +24,7 @@ export default function App() {
 
   const [authChecking, setAuthChecking] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'ANALYST';
   const [currentTab, setCurrentTab] = useState<ActiveTab>('motion');
   const [ministryFilterOnly, setMinistryFilterOnly] = useState<boolean>(false);
   const [pins, setPins] = useState<ProjectPin[]>([]);
@@ -402,24 +407,17 @@ export default function App() {
                   ? 'bg-black/75 border-white/25 text-white shadow-[0_12px_40px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.25)]'
                   : 'bg-white/95 border-slate-300/90 text-slate-900 shadow-[0_8px_30px_rgba(0,0,0,0.12),inset_0_1px_2px_rgba(255,255,255,1)]'
               }`}>
-                <div className="flex items-start gap-3">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs sm:text-sm font-bold border ${
-                    isDark ? 'bg-white/10 border-white/20 text-white' : 'bg-black/5 border-black/10 text-black'
+                <div className="space-y-1">
+                  <div className={`text-[10px] sm:text-xs font-mono-code font-bold uppercase tracking-wider ${
+                    isDark ? 'text-white/70' : 'text-slate-600'
                   }`}>
-                    ✦
+                    National Infrastructure Tracker
                   </div>
-                  <div className="space-y-1">
-                    <div className={`text-[10px] sm:text-xs font-mono-code font-bold uppercase tracking-wider ${
-                      isDark ? 'text-white/70' : 'text-slate-600'
-                    }`}>
-                      National Infrastructure Tracker
-                    </div>
-                    <p className={`text-xs sm:text-sm md:text-base font-medium leading-relaxed ${
-                      isDark ? 'text-white' : 'text-slate-950'
-                    }`}>
-                      Live project tracking, budget monitoring, and delay risk predictions across infrastructure projects in India.
-                    </p>
-                  </div>
+                  <p className={`text-xs sm:text-sm md:text-base font-medium leading-relaxed ${
+                    isDark ? 'text-white' : 'text-slate-950'
+                  }`}>
+                    Live project tracking, budget monitoring, and delay risk predictions across infrastructure projects in India.
+                  </p>
                 </div>
               </div>
 
@@ -476,63 +474,238 @@ export default function App() {
             </div>
           </section>
 
-          {/* SECTION 02 / 04 — NATIONAL SNAPSHOT */}
-          <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
-            <div className="w-full max-w-6xl pointer-events-auto">
-              <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-10 shadow-2xl">
-                <div className="space-y-3 sm:space-y-4 max-w-3xl">
-                  <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold font-display text-white tracking-tight leading-tight">
-                    National Project Overview & Budget Health
-                  </h2>
-
-                  <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-normal">
-                    Live progress and risk tracking across {portfolioStats.totalProjects.toLocaleString()} government infrastructure projects.
-                  </p>
-                </div>
-
-                {/* 3 Executive Metric Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 pt-2 sm:pt-4">
-                  <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
-                    <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
-                      {portfolioStats.avgDphis}
+          {/* SECTION 02 / 04 — ROLE-BASED DASHBOARD SNAPSHOT */}
+          {isAdmin ? (
+            /* ADMIN: NATIONAL PORTFOLIO OVERVIEW */
+            <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
+              <div className="w-full max-w-6xl pointer-events-auto">
+                <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-10 shadow-2xl">
+                  <div className="space-y-3 sm:space-y-4 max-w-3xl">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded text-[11px] font-mono-code font-bold uppercase tracking-wider bg-white/10 text-white border border-white/20">
+                        Admin Command Center
+                      </span>
+                      <span className="text-xs text-white/60">Portfolio-wide Monitoring</span>
                     </div>
-                    <div className="text-xs text-white/80 font-medium">Average Risk Score (0–100)</div>
-                    <div className="text-xs font-mono-code text-white font-semibold">+4.1 pts higher risk than last month</div>
+                    <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold font-display text-white tracking-tight leading-tight">
+                      National Project Overview & Budget Health
+                    </h2>
+                    <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-normal">
+                      System-wide progress, budget exposure, and predictive risk tracking across {portfolioStats.totalProjects.toLocaleString()} sovereign infrastructure projects.
+                    </p>
                   </div>
 
-                  <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
-                    <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
-                      {portfolioStats.totalProjects.toLocaleString()}
+                  {/* 3 Executive Metric Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 pt-2 sm:pt-4">
+                    <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
+                      <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
+                        {portfolioStats.avgDphis}
+                      </div>
+                      <div className="text-xs text-white/80 font-medium">Average Risk Score (0–100)</div>
+                      <div className="text-xs font-mono-code text-white font-semibold">+4.1 pts higher risk than last month</div>
                     </div>
-                    <div className="text-xs text-white/80 font-medium">Total Active Projects</div>
-                    <div className="text-xs font-mono-code text-white font-semibold">18,000 monthly progress checks</div>
-                  </div>
 
-                  <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
-                    <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
-                      {portfolioStats.criticalCount}
+                    <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
+                      <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
+                        {portfolioStats.totalProjects.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-white/80 font-medium">Total Monitored Projects</div>
+                      <div className="text-xs font-mono-code text-white font-semibold">18,000 monthly telemetry syncs</div>
                     </div>
-                    <div className="text-xs text-white/80 font-medium">Projects Facing Critical Delays</div>
-                    <div className="text-xs font-mono-code text-white font-semibold">Need immediate attention & review</div>
+
+                    <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
+                      <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
+                        {portfolioStats.criticalCount}
+                      </div>
+                      <div className="text-xs text-white/80 font-medium">Projects Facing Critical Delays</div>
+                      <div className="text-xs font-mono-code text-white font-semibold">Need immediate inter-ministerial review</div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          ) : (
+            /* NORMAL USER: MY PROJECTS OVERVIEW */
+            <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
+              <div className="w-full max-w-6xl pointer-events-auto">
+                <div className="oled-solid-card p-6 sm:p-10 md:p-12 space-y-6 sm:space-y-8 shadow-2xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded text-[11px] font-mono-code font-bold uppercase tracking-wider bg-white/10 text-white border border-white/20">
+                          My Projects Overview
+                        </span>
+                        <span className="text-xs text-white/60">
+                          {currentUser.ministry || 'Assigned Scope'}
+                        </span>
+                      </div>
+                      <h2 className="text-2xl sm:text-4xl font-bold font-display text-white tracking-tight leading-tight">
+                        Status of Your Assigned Projects
+                      </h2>
+                      <p className="text-xs sm:text-sm text-white/80 max-w-2xl font-normal leading-relaxed">
+                        Summary of projects under your direct monitoring, tracking milestone delivery, physical progress, and projects needing your immediate attention.
+                      </p>
+                    </div>
 
-          {/* SECTION 03 / 04 — RISK INTELLIGENCE & SHAP DRIVERS */}
+                    <button
+                      onClick={() => setCurrentTab('projects')}
+                      className="px-4 py-2 rounded-xl bg-white text-black text-xs font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-md shrink-0 self-start sm:self-auto"
+                    >
+                      View All My Projects →
+                    </button>
+                  </div>
+
+                  {/* Top 4 Summary Cards */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-1">
+                    <div className="oled-solid-card p-4 sm:p-5 space-y-1.5">
+                      <div className="text-2xl sm:text-3xl font-bold font-display font-mono-code text-white">
+                        {pins.length}
+                      </div>
+                      <div className="text-xs text-white/90 font-medium">My Active Projects</div>
+                      <div className="text-[11px] font-mono-code text-white/60">Assigned to your department</div>
+                    </div>
+
+                    <div className="oled-solid-card p-4 sm:p-5 space-y-1.5">
+                      <div className="text-2xl sm:text-3xl font-bold font-display font-mono-code text-white">
+                        {pins.filter(p => p.dphis >= 65).length}
+                      </div>
+                      <div className="text-xs text-white/90 font-medium">Projects Needing Attention</div>
+                      <div className="text-[11px] font-mono-code text-white/60">Schedule or spending divergence</div>
+                    </div>
+
+                    <div className="oled-solid-card p-4 sm:p-5 space-y-1.5">
+                      <div className="text-2xl sm:text-3xl font-bold font-display font-mono-code text-white">
+                        {pins.filter(p => p.dphis >= 80).length}
+                      </div>
+                      <div className="text-xs text-white/90 font-medium">Projects At Risk</div>
+                      <div className="text-[11px] font-mono-code text-white/60">Critical path timeline at risk</div>
+                    </div>
+
+                    <div className="oled-solid-card p-4 sm:p-5 space-y-1.5">
+                      <div className="text-2xl sm:text-3xl font-bold font-display font-mono-code text-white">
+                        {pins.length > 0 ? pins.length * 2 : 4}
+                      </div>
+                      <div className="text-xs text-white/90 font-medium">Upcoming Milestones</div>
+                      <div className="text-[11px] font-mono-code text-white/60">Deliverables in next 60 days</div>
+                    </div>
+                  </div>
+
+                  {/* Projects Needing Attention Cards (3–5 projects) */}
+                  <div className="space-y-4 pt-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base sm:text-lg font-bold font-display text-white">
+                        Projects Needing Attention
+                      </h3>
+                      <span className="text-xs font-mono text-white/60">
+                        Showing top priority projects
+                      </span>
+                    </div>
+
+                    {pins.length === 0 ? (
+                      <div className="p-8 text-center space-y-3 rounded-xl border border-white/10 bg-white/5">
+                        <div className="text-sm font-bold text-white">No active projects assigned yet</div>
+                        <p className="text-xs text-white/70 max-w-md mx-auto">
+                          Your account currently has no projects registered. Click Add Project to track an infrastructure corridor.
+                        </p>
+                        <button
+                          onClick={() => setShowAddModal(true)}
+                          className="px-4 py-2 rounded-xl bg-white text-black text-xs font-mono font-bold hover:bg-slate-200 transition-all cursor-pointer"
+                        >
+                          + Add Project
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[...pins]
+                          .sort((a, b) => b.dphis - a.dphis)
+                          .slice(0, 3)
+                          .map(p => {
+                            const cat = getRiskCategory(p.dphis);
+                            let reason = "Progress is behind planned schedule";
+                            if (p.dphis >= 80) {
+                              reason = "Spending is increasing faster than physical progress";
+                            } else if (p.dphis >= 65) {
+                              reason = "Construction progress is lower than planned milestone target";
+                            } else if (p.dphis >= 45) {
+                              reason = "Upcoming critical milestone requires contractor review";
+                            } else {
+                              reason = "Project progress aligned with scheduled deliverables";
+                            }
+
+                            return (
+                              <div
+                                key={p.id}
+                                className="oled-solid-card p-5 space-y-3 flex flex-col justify-between hover:border-white/30 transition-all"
+                              >
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-mono-code text-[11px] font-bold text-white/80">{p.id}</span>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono-code font-bold ${cat.bgClass} ${cat.borderClass} ${cat.colorClass}`}>
+                                      {cat.label}
+                                    </span>
+                                  </div>
+                                  <h4 className="text-sm font-bold text-white line-clamp-1">{p.name}</h4>
+                                  <p className="text-xs text-white/75 leading-relaxed">
+                                    {reason}
+                                  </p>
+                                </div>
+
+                                <div className="space-y-3 pt-2 border-t border-white/10 text-xs">
+                                  <div className="grid grid-cols-2 gap-2 text-[11px] font-mono-code text-white/70">
+                                    <div>
+                                      <span className="block text-white/50 text-[10px]">Location</span>
+                                      <span className="text-white font-medium">{p.state}</span>
+                                    </div>
+                                    <div>
+                                      <span className="block text-white/50 text-[10px]">Est. Delay</span>
+                                      <span className="text-white font-medium">{p.delay}</span>
+                                    </div>
+                                    <div>
+                                      <span className="block text-white/50 text-[10px]">Budget Health</span>
+                                      <span className={`font-semibold ${p.dphis >= 65 ? 'text-white' : 'text-white/80'}`}>
+                                        {p.dphis >= 65 ? 'At Risk' : 'Normal'}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="block text-white/50 text-[10px]">Approved Cost</span>
+                                      <span className="text-white font-medium">{p.cost}</span>
+                                    </div>
+                                  </div>
+
+                                  <button
+                                    onClick={() => {
+                                      setSelectedPin(p);
+                                      setCurrentTab('intelligence');
+                                    }}
+                                    className="w-full py-2 rounded-lg bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono-code font-bold border border-white/20 transition-all cursor-pointer text-center"
+                                  >
+                                    Review Issue →
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* SECTION 03 / 04 — WHY PROJECTS ARE AT RISK */}
           <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
             <div className="w-full max-w-6xl pointer-events-auto">
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-2 sm:space-y-3">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
-                      Why Projects Get Delayed & Key Risk Factors
+                      {isAdmin ? 'Why Projects Get Delayed & Key Risk Factors' : 'Why Your Projects Need Attention'}
                     </h2>
                     <p className="text-xs sm:text-sm text-white/80">
                       {selectedPin
-                        ? `Looking at the main reasons causing delay risks on project ${selectedPin.id}.`
-                        : 'Tracking key reasons for delays and cost overruns across all active projects.'}
+                        ? `Plain-language analysis of delay causes on project ${selectedPin.id} (${selectedPin.name}).`
+                        : 'Tracking key factors causing delivery delays and cost overruns.'}
                     </p>
                   </div>
 
@@ -540,46 +713,62 @@ export default function App() {
                     onClick={() => setCurrentTab('intelligence')}
                     className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold hover:bg-zinc-200 transition-all cursor-pointer shadow-lg whitespace-nowrap shrink-0"
                   >
-                    View Full Project Report →
+                    {isAdmin ? 'View Deep Intelligence →' : 'View Project Insights →'}
                   </button>
                 </div>
 
                 {selectedPin ? (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pt-2">
                     <div className="oled-solid-card p-5 sm:p-6 space-y-3 sm:space-y-4">
-                      <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                        <span className="font-mono-code font-bold text-white">{selectedPin.id}</span>
-                        <span className="px-2.5 py-1 rounded bg-white/10 text-white text-xs font-mono-code font-bold border border-white/20">
-                          Risk Score: {selectedPin.dphis} · Critical Risk
-                        </span>
-                      </div>
+                      {(() => {
+                        const cat = getRiskCategory(selectedPin.dphis);
+                        return (
+                          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                            <span className="font-mono-code font-bold text-white">{selectedPin.id}</span>
+                            <span className={`px-2.5 py-1 rounded text-xs font-mono-code font-bold border ${cat.bgClass} ${cat.borderClass} ${cat.colorClass}`}>
+                              {cat.label}
+                            </span>
+                          </div>
+                        );
+                      })()}
                       <h4 className="text-sm sm:text-base font-bold text-white">{selectedPin.name}</h4>
                       <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-                        Money is being spent much faster than actual physical construction is progressing, putting key project deadlines at high risk.
+                        Funds are being spent faster than physical construction is progressing, putting key project milestones at risk.
                       </p>
 
                       <div className="pt-2 space-y-2 text-xs sm:text-sm">
                         <div className="flex justify-between font-mono-code text-white/80">
-                          <span>Actual Work Done: 34%</span>
-                          <span className="text-white font-bold">Planned Target by Now: 78%</span>
+                          <span>Physical Progress: 34%</span>
+                          <span className="text-white font-bold">Planned Target: 78%</span>
                         </div>
                         <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
                           <div className="h-full bg-white rounded-full" style={{ width: '34%' }} />
                         </div>
                       </div>
+
+                      <div className="pt-3 border-t border-white/10">
+                        <h5 className="text-xs font-mono font-bold uppercase text-white/70 mb-2">Recommended Next Steps</h5>
+                        <ul className="text-xs text-white/80 space-y-1.5 list-disc list-inside">
+                          <li>Review delayed construction schedule with EPC contractor</li>
+                          <li>Inspect on-site machinery and equipment deployment</li>
+                          <li>Verify actual ground milestones against contractor expenditure claims</li>
+                        </ul>
+                      </div>
                     </div>
 
                     <div className="oled-solid-card p-5 sm:p-6 space-y-3">
                       <h4 className="text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider text-white/80 mb-2">
-                        Top Factors Driving Delay Risk
+                        {isAdmin ? 'Top Model Features Driving Delay Risk' : 'Main Reasons for Risk'}
                       </h4>
                       {shapDrivers.map(d => (
                         <div key={d.name} className="p-3 rounded-xl bg-white/5 border border-white/15 space-y-1">
                           <div className="flex items-center justify-between text-xs sm:text-sm">
                             <span className="font-semibold text-white">{d.name}</span>
-                            <span className="font-mono-code font-bold text-white">
-                              {d.impact}
-                            </span>
+                            {isAdmin && (
+                              <span className="font-mono-code font-bold text-white">
+                                {d.impact}
+                              </span>
+                            )}
                           </div>
                           <p className="text-[11px] sm:text-xs text-white/70">{d.text}</p>
                         </div>
@@ -590,7 +779,7 @@ export default function App() {
                   <div className="oled-solid-card p-8 text-center space-y-4">
                     <div className="text-base font-bold text-white">No Projects Added Yet</div>
                     <p className="text-xs sm:text-sm text-white/75 max-w-xl mx-auto leading-relaxed">
-                      You don't have any projects listed in your dashboard yet. Add your first project using the 8 standard report fields to see risk predictions and AI explanations.
+                      You don't have any projects listed in your dashboard yet. Add your first project using the standard report fields to see risk predictions and AI recommendations.
                     </p>
                     <button
                       onClick={() => setShowAddModal(true)}
@@ -604,7 +793,7 @@ export default function App() {
             </div>
           </section>
 
-          {/* SECTION 04 / 04 — LIVE PROJECTS & CEO ADMIN COMMAND */}
+          {/* SECTION 04 / 04 — LIVE PROJECTS & PORTFOLIO */}
           <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
             <div className="w-full max-w-6xl pointer-events-auto">
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
@@ -612,7 +801,7 @@ export default function App() {
                   <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex flex-wrap items-center gap-3">
                       <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
-                        My Assigned Projects
+                        {isAdmin ? 'All Monitored Projects' : 'My Assigned Projects'}
                       </h2>
                       <span className={`px-3 py-1 rounded-lg text-xs font-mono font-bold border ${
                         isDark ? 'bg-black/70 text-white border-white/20' : 'bg-white/95 text-black border-slate-300 shadow-sm'
@@ -621,7 +810,7 @@ export default function App() {
                       </span>
                     </div>
                     <p className="text-xs sm:text-sm text-white/70">
-                      Showing {displayedPins.length} projects assigned to your account ({currentUser.full_name} · {currentUser.designation || 'Project Officer'}).
+                      Showing {displayedPins.length} projects under active monitoring ({currentUser.full_name} · {currentUser.designation || 'Project Officer'}).
                     </p>
                   </div>
 
@@ -646,8 +835,8 @@ export default function App() {
                       <tr className="border-b border-white/15">
                         <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Project ID</th>
                         <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Project Name</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">State / Location</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Risk Score</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Location</th>
+                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Status</th>
                         <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Approved Cost</th>
                         <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Delay</th>
                         <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Action</th>
@@ -661,35 +850,42 @@ export default function App() {
                           </td>
                         </tr>
                       ) : (
-                        displayedPins.map(p => (
-                          <tr
-                            key={p.id}
-                            onClick={() => setSelectedPin(p)}
-                            className={`cursor-pointer hover:bg-white/5 transition-colors ${
-                              selectedPin?.id === p.id ? 'bg-white/10' : ''
-                            }`}
-                          >
-                          <td className="p-4 font-mono-code font-bold text-white">{p.id}</td>
-                          <td className="p-4 font-semibold text-white">{p.name}</td>
-                          <td className="p-4 text-white/80">{p.state}</td>
-                          <td className="p-4 font-mono-code font-bold text-white">{p.dphis}</td>
-                          <td className="p-4 font-mono-code text-white">{p.cost}</td>
-                          <td className="p-4 text-white font-mono-code">{p.delay}</td>
-                          <td className="p-4">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedPin(p);
-                                setCurrentTab('intelligence');
-                              }}
-                              className="px-2.5 py-1 rounded bg-[var(--surface-sunken)] hover:bg-white hover:text-black text-[10px] font-mono-code text-white border border-white/20 transition-all cursor-pointer"
+                        displayedPins.map(p => {
+                          const cat = getRiskCategory(p.dphis);
+                          return (
+                            <tr
+                              key={p.id}
+                              onClick={() => setSelectedPin(p)}
+                              className={`cursor-pointer hover:bg-white/5 transition-colors ${
+                                selectedPin?.id === p.id ? 'bg-white/10' : ''
+                              }`}
                             >
-                              View Details →
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                              <td className="p-4 font-mono-code font-bold text-white">{p.id}</td>
+                              <td className="p-4 font-semibold text-white">{p.name}</td>
+                              <td className="p-4 text-white/80">{p.state}</td>
+                              <td className="p-4">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-mono-code font-bold ${cat.bgClass} ${cat.borderClass} ${cat.colorClass}`}>
+                                  {cat.label}
+                                </span>
+                              </td>
+                              <td className="p-4 font-mono-code text-white">{p.cost}</td>
+                              <td className="p-4 text-white font-mono-code">{p.delay}</td>
+                              <td className="p-4">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedPin(p);
+                                    setCurrentTab('intelligence');
+                                  }}
+                                  className="px-2.5 py-1 rounded bg-[var(--surface-sunken)] hover:bg-white hover:text-black text-[10px] font-mono-code text-white border border-white/20 transition-all cursor-pointer"
+                                >
+                                  View Insights →
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -698,12 +894,41 @@ export default function App() {
           </section>
         </div>
       ) : (
-        /* DEEP INTELLIGENCE MODULES VIEWPORT */
+        /* ROLE-GOVERNED VIEWPORT ROUTING */
         <div className="relative z-10 w-full h-full overflow-y-auto">
+          {currentTab === 'projects' && (
+            <MyProjects
+              currentUser={currentUser}
+              pins={pins}
+              onSelectProject={(id) => {
+                const found = pins.find(p => p.id === id);
+                if (found) setSelectedPin(found);
+              }}
+              onNavigateToInsights={(id) => {
+                const found = pins.find(p => p.id === id);
+                if (found) setSelectedPin(found);
+                setCurrentTab('intelligence');
+              }}
+              onNavigateToInvestigation={(id) => {
+                const found = pins.find(p => p.id === id);
+                if (found) setSelectedPin(found);
+                setCurrentTab('investigation');
+              }}
+              onOpenAddProject={() => setShowAddModal(true)}
+            />
+          )}
+
           {currentTab === 'intelligence' && (
             <ProjectIntelligence
               projectId={selectedPin?.id}
-              onNavigateToInvestigation={() => setCurrentTab('investigation')}
+              currentUser={currentUser}
+              onNavigateToInvestigation={(id) => {
+                if (id) {
+                  const found = pins.find(p => p.id === id);
+                  if (found) setSelectedPin(found);
+                }
+                setCurrentTab('investigation');
+              }}
               onOpenAddProject={() => setShowAddModal(true)}
               onSelectProject={(id) => {
                 const found = pins.find(p => p.id === id);
@@ -753,7 +978,20 @@ export default function App() {
                 if (found) setSelectedPin(found);
                 setCurrentTab('investigation');
               }}
+              onNavigateToProject={(id) => {
+                const found = pins.find(p => p.id === id);
+                if (found) setSelectedPin(found);
+                setCurrentTab('intelligence');
+              }}
             />
+          )}
+
+          {currentTab === 'data_models' && (
+            <DataModels />
+          )}
+
+          {currentTab === 'users_audit' && (
+            <UsersAudit />
           )}
         </div>
       )}
