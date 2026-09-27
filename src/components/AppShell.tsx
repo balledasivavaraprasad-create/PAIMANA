@@ -23,7 +23,7 @@ export function AppShell({ currentPage, onNavigate, children }: AppShellProps) {
         <header className="flex-shrink-0 h-14 px-6 flex items-center justify-between border-b border-[var(--border-hairline)] bg-[var(--glass-bg)] backdrop-blur-md z-20">
           <div className="flex items-center gap-3">
             <h1 className="text-sm font-semibold font-display tracking-tight text-[var(--text-primary)]">
-              PAIMANA AI Infrastructure Intelligence
+              InfraBuild AI Infrastructure Intelligence
             </h1>
             <span className="text-[10px] uppercase font-mono-data tracking-wider px-2 py-0.5 rounded bg-[var(--accent-soft)] text-[var(--accent)] font-semibold border border-[var(--accent-soft)]">
               Project Monitoring

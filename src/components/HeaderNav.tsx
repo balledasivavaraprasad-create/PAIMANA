@@ -36,14 +36,14 @@ export function HeaderNav({
     <header className={`fixed top-0 left-0 right-0 z-50 h-11 sm:h-12 px-3 sm:px-6 flex items-center justify-between pointer-events-none shadow-md gap-2 sm:gap-4 transition-colors duration-200 ${
       isDark ? 'bg-[#0B0F17] border-b border-white/10' : 'bg-white/90 backdrop-blur-md border-b border-black/10'
     }`}>
-      {/* Top Left Logo - Clean, economical PAIMANA branding */}
+      {/* Top Left Logo - Clean, economical InfraBuild AI branding */}
       <div 
         onClick={() => onTabChange('motion')}
         className="pointer-events-auto cursor-pointer select-none shrink-0 group flex items-center gap-2"
       >
         <div className="flex flex-col">
-          <div className={`text-xs sm:text-sm font-bold tracking-widest font-mono-code uppercase leading-none ${isDark ? 'text-white' : 'text-black'}`}>
-            PAIMANA
+          <div className={`text-xs sm:text-sm font-bold tracking-wider font-mono-code uppercase leading-none ${isDark ? 'text-white' : 'text-black'}`}>
+            InfraBuild AI
           </div>
           <div className={`text-[8px] tracking-wider font-mono-code uppercase mt-0.5 hidden xs:block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
             PROJECT INTELLIGENCE

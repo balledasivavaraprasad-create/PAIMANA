@@ -160,7 +160,7 @@ export default function Dashboard({ onNavigate }: Props) {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] font-mono-data">
-                PAIMANA AI · Portfolio Insight
+                InfraBuild AI · Portfolio Insight
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded bg-[var(--surface-sunken)] text-[var(--text-muted)] border border-[var(--border-hairline)]">
                 Live Evidence Digest

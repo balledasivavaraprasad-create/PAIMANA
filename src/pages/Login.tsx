@@ -322,7 +322,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <div>
             <div className="flex items-baseline gap-3 flex-wrap">
               <span className={`font-serif text-2xl sm:text-3xl font-bold tracking-wide ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                PAIMANA
+                InfraBuild AI
               </span>
               <span className={`text-xs sm:text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 National Infrastructure Predictive Monitoring &amp; Early-Warning Platform
@@ -991,7 +991,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <div className="max-h-64 overflow-y-auto text-xs space-y-3 text-slate-400 pr-2">
               {policyTab === 'terms' ? (
                 <>
-                  <p><strong>1. Acceptance of Terms:</strong> By logging into the PAIMANA platform, you affirm authorization as an accredited officer or analyst of the Government of India or affiliated implementing authority.</p>
+                  <p><strong>1. Acceptance of Terms:</strong> By logging into the InfraBuild AI platform, you affirm authorization as an accredited officer or analyst of the Government of India or affiliated implementing authority.</p>
                   <p><strong>2. Authorized Usage:</strong> Analytical models, forecasts, and early-warning alerts are designed for decision-support and proactive risk mitigation across major infrastructure portfolios.</p>
                   <p><strong>3. Confidentiality:</strong> All contractor milestone evaluations and financial disbursement data remain protected under official data governance protocols.</p>
                 </>

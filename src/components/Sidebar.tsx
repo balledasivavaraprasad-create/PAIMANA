@@ -70,11 +70,11 @@ export default function Sidebar({ currentPage, onNavigate }: SidebarProps) {
       <div className="p-4 border-b border-[var(--border-hairline)]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-[var(--accent)] text-white flex items-center justify-center font-bold text-xs font-display shadow-md">
-            PAI
+            IB
           </div>
           <div>
             <div className="font-semibold text-sm font-display tracking-tight text-[var(--text-primary)]">
-              PAIMANA AI
+              InfraBuild AI
             </div>
             <div className="text-[10px] text-[var(--text-muted)] tracking-wider">
               Project Intelligence System

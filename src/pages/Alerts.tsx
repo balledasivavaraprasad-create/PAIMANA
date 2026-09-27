@@ -174,7 +174,7 @@ export default function Alerts({ onNavigateToInvestigation, currentUser, pinsCou
               value={recipientEmail}
               onChange={e => setRecipientEmail(e.target.value)}
               className="w-full bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-sm font-mono-code text-white focus:outline-none focus:border-white"
-              placeholder="user@paimana.gov.in"
+              placeholder="user@infrabuild.gov.in"
             />
             <p className="text-[11px] text-white/50">Where alert emails are sent</p>
           </div>

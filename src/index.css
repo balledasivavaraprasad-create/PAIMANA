@@ -361,4 +361,20 @@
   border-color: rgba(255, 255, 255, 0.16) !important;
 }
 
+/* =========================================================================
+   BUTTERY SMOOTH MOTION SCROLL SYSTEM
+   ========================================================================= */
+.buttery-smooth-scroll {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-top: 48px;
+}
+
+.buttery-smooth-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
+
 

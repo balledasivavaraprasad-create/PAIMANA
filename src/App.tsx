@@ -179,29 +179,37 @@ export default function App() {
   };
 
   useEffect(() => {
+    let animationFrameId: number | null = null;
     const handleScroll = () => {
-      if (!containerRef.current) return;
-      const scrollTop = containerRef.current.scrollTop;
-      const scrollHeight = containerRef.current.scrollHeight - containerRef.current.clientHeight;
-      
-      const progress = Math.min(Math.max(scrollTop / (scrollHeight || 1), 0), 1);
-      setScrollProgress(progress);
+      if (animationFrameId !== null) return;
+      animationFrameId = window.requestAnimationFrame(() => {
+        animationFrameId = null;
+        if (!containerRef.current) return;
+        const scrollTop = containerRef.current.scrollTop;
+        const scrollHeight = containerRef.current.scrollHeight - containerRef.current.clientHeight;
+        
+        const progress = Math.min(Math.max(scrollTop / (scrollHeight || 1), 0), 1);
+        setScrollProgress(progress);
 
-      const vh = window.innerHeight;
-      if (scrollTop < vh * 0.5) {
-        setActiveSection('01');
-      } else if (scrollTop < vh * 1.5) {
-        setActiveSection('02');
-      } else if (scrollTop < vh * 2.5) {
-        setActiveSection('03');
-      } else {
-        setActiveSection('04');
-      }
+        const vh = window.innerHeight;
+        if (scrollTop < vh * 0.5) {
+          setActiveSection('01');
+        } else if (scrollTop < vh * 1.5) {
+          setActiveSection('02');
+        } else if (scrollTop < vh * 2.5) {
+          setActiveSection('03');
+        } else {
+          setActiveSection('04');
+        }
+      });
     };
 
     const ref = containerRef.current;
     if (ref) ref.addEventListener('scroll', handleScroll, { passive: true });
-    return () => ref?.removeEventListener('scroll', handleScroll);
+    return () => {
+      if (ref) ref.removeEventListener('scroll', handleScroll);
+      if (animationFrameId !== null) window.cancelAnimationFrame(animationFrameId);
+    };
   }, [currentTab]);
 
   const handleAddPin = async (newPin: ProjectPin) => {
@@ -249,11 +257,11 @@ export default function App() {
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-mono font-bold text-2xl border ${
             isDark ? 'bg-black text-white border-white/30 shadow-[0_0_24px_rgba(255,255,255,0.2)]' : 'bg-white text-black border-black/20 shadow-md'
           }`}>
-            P
+            IB
           </div>
           <div className="text-center">
             <div className={`text-xs font-mono font-bold tracking-widest uppercase ${isDark ? 'text-white' : 'text-black'}`}>
-              PAIMANA PROJECT PLATFORM
+              INFRABUILD AI PLATFORM
             </div>
             <div className={`text-[11px] font-mono mt-1 ${isDark ? 'text-white/70' : 'text-black/70'}`}>
               Loading your projects and account...
@@ -359,7 +367,7 @@ export default function App() {
 
         {/* Scroll-Driven Darkening Overlay - subtle in dark mode, clean in light mode */}
         <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ease-out ${isDark ? 'bg-black' : 'bg-transparent'}`}
+          className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ease-out ${isDark ? 'bg-black' : 'bg-transparent'}`}
           style={{
             opacity: isDark
               ? (currentTab === 'motion' ? Math.min(0.12, scrollProgress * 0.12) : 0.10)
@@ -369,14 +377,14 @@ export default function App() {
       </div>
       )}
 
-      {/* VIEWPORT CONTENT CONTAINER */}
+      {/* VIEWPORT CONTENT CONTAINER — BUTTERY SMOOTH SCROLL */}
       {currentTab === 'motion' ? (
         <div
           ref={containerRef}
-          className="relative z-10 w-full h-full overflow-y-auto scroll-smooth snap-y snap-mandatory"
+          className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll"
         >
           {/* SECTION 01 / 04 — HERO "India, in motion." */}
-          <section className="snap-start w-full h-screen relative flex items-center justify-between px-6 sm:px-12 md:px-20 pointer-events-none">
+          <section className="buttery-smooth-section w-full h-screen relative flex items-center justify-between px-6 sm:px-12 md:px-20 pointer-events-none">
             <div className="max-w-xl space-y-4 sm:space-y-6 pointer-events-auto mt-12 sm:mt-16">
               <h1 className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-display tracking-tight leading-[0.9] ${
                 isDark
@@ -388,11 +396,32 @@ export default function App() {
                 motion.
               </h1>
 
-              <p className={`text-xs sm:text-sm md:text-base font-semibold leading-relaxed max-w-md pt-2 ${
-                isDark ? 'text-white/90 drop-shadow-md' : 'text-black'
+              {/* Tagline Flashcard — Highly Visible Frosted Glass Card */}
+              <div className={`p-4 sm:p-5 rounded-2xl border backdrop-blur-2xl max-w-lg transition-all duration-300 shadow-xl ${
+                isDark
+                  ? 'bg-black/75 border-white/25 text-white shadow-[0_12px_40px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.25)]'
+                  : 'bg-white/95 border-slate-300/90 text-slate-900 shadow-[0_8px_30px_rgba(0,0,0,0.12),inset_0_1px_2px_rgba(255,255,255,1)]'
               }`}>
-                Live project tracking, budget monitoring, and delay risk predictions across infrastructure projects in India.
-              </p>
+                <div className="flex items-start gap-3">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs sm:text-sm font-bold border ${
+                    isDark ? 'bg-white/10 border-white/20 text-white' : 'bg-black/5 border-black/10 text-black'
+                  }`}>
+                    ✦
+                  </div>
+                  <div className="space-y-1">
+                    <div className={`text-[10px] sm:text-xs font-mono-code font-bold uppercase tracking-wider ${
+                      isDark ? 'text-white/70' : 'text-slate-600'
+                    }`}>
+                      National Infrastructure Tracker
+                    </div>
+                    <p className={`text-xs sm:text-sm md:text-base font-medium leading-relaxed ${
+                      isDark ? 'text-white' : 'text-slate-950'
+                    }`}>
+                      Live project tracking, budget monitoring, and delay risk predictions across infrastructure projects in India.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               {/* User Department Badge */}
               <div className="pt-2 flex flex-wrap items-center gap-2.5">
@@ -448,7 +477,7 @@ export default function App() {
           </section>
 
           {/* SECTION 02 / 04 — NATIONAL SNAPSHOT */}
-          <section className="snap-start w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
+          <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
             <div className="w-full max-w-6xl pointer-events-auto">
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-10 shadow-2xl">
                 <div className="space-y-3 sm:space-y-4 max-w-3xl">
@@ -492,7 +521,7 @@ export default function App() {
           </section>
 
           {/* SECTION 03 / 04 — RISK INTELLIGENCE & SHAP DRIVERS */}
-          <section className="snap-start w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
+          <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
             <div className="w-full max-w-6xl pointer-events-auto">
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -576,7 +605,7 @@ export default function App() {
           </section>
 
           {/* SECTION 04 / 04 — LIVE PROJECTS & CEO ADMIN COMMAND */}
-          <section className="snap-start w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
+          <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
             <div className="w-full max-w-6xl pointer-events-auto">
               <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
