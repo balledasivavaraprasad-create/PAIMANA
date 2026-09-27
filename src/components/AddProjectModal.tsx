@@ -118,7 +118,7 @@ export default function AddProjectModal({
         <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse" />
+              <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${isDark ? 'bg-white' : 'bg-black'}`} />
               <h2 className="text-xl font-serif font-bold tracking-wide">
                 Ingest Infrastructure Asset
               </h2>
@@ -146,13 +146,17 @@ export default function AddProjectModal({
         {loading ? (
           <div className="py-12 flex flex-col items-center justify-center space-y-4 text-center">
             <div className="relative w-16 h-16">
-              <div className="w-16 h-16 rounded-full border-4 border-sky-400/20 border-t-sky-400 animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center font-mono font-bold text-sky-400 text-xs">
+              <div className={`w-16 h-16 rounded-full border-4 animate-spin ${
+                isDark ? 'border-white/20 border-t-white' : 'border-black/20 border-t-black'
+              }`} />
+              <div className={`absolute inset-0 flex items-center justify-center font-mono font-bold text-xs ${
+                isDark ? 'text-white' : 'text-black'
+              }`}>
                 AI
               </div>
             </div>
             <div className="space-y-1">
-              <h4 className="font-mono font-bold text-sm text-sky-400 animate-pulse">
+              <h4 className={`font-mono font-bold text-sm animate-pulse ${isDark ? 'text-white' : 'text-black'}`}>
                 {statusStep || 'Processing Ingestion Pipeline...'}
               </h4>
               <p className="text-[11px] text-slate-400 font-mono">
@@ -163,12 +167,16 @@ export default function AddProjectModal({
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Autofill helper */}
-            <div className="flex justify-between items-center bg-sky-500/10 border border-sky-500/20 p-2.5 rounded-lg text-xs font-mono">
-              <span className="text-sky-300">Prefill sample values from Flash Report:</span>
+            <div className={`flex justify-between items-center p-2.5 rounded-lg text-xs font-mono border ${
+              isDark ? 'bg-white/5 border-white/15 text-white' : 'bg-black/5 border-black/15 text-black'
+            }`}>
+              <span className={isDark ? 'text-white/80' : 'text-black/80'}>Prefill sample values from Flash Report:</span>
               <button
                 type="button"
                 onClick={handleAutofillSample}
-                className="px-2.5 py-1 rounded bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/40 text-[11px] font-bold cursor-pointer"
+                className={`px-2.5 py-1 rounded border text-[11px] font-bold cursor-pointer transition-colors ${
+                  isDark ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' : 'bg-black/10 hover:bg-black/20 text-black border-black/20'
+                }`}
               >
                 ⚡ Populate Sample Corridor
               </button>
@@ -187,7 +195,7 @@ export default function AddProjectModal({
                   value={projectId}
                   onChange={e => setProjectId(e.target.value)}
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-sky-400' : 'bg-white border-slate-300 text-black focus:border-sky-600'
+                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
               </div>
@@ -203,7 +211,7 @@ export default function AddProjectModal({
                   value={projectName}
                   onChange={e => setProjectName(e.target.value)}
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-sky-400' : 'bg-white border-slate-300 text-black focus:border-sky-600'
+                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
               </div>
@@ -223,7 +231,7 @@ export default function AddProjectModal({
                   value={originalCost}
                   onChange={e => setOriginalCost(e.target.value)}
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-sky-400' : 'bg-white border-slate-300 text-black focus:border-sky-600'
+                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
               </div>
@@ -240,7 +248,7 @@ export default function AddProjectModal({
                   value={revisedCost}
                   onChange={e => setRevisedCost(e.target.value)}
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-sky-400' : 'bg-white border-slate-300 text-black focus:border-sky-600'
+                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
               </div>
@@ -257,7 +265,7 @@ export default function AddProjectModal({
                   value={expenditure}
                   onChange={e => setExpenditure(e.target.value)}
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-sky-400' : 'bg-white border-slate-300 text-black focus:border-sky-600'
+                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
               </div>
@@ -279,7 +287,7 @@ export default function AddProjectModal({
                   value={physicalProgress}
                   onChange={e => setPhysicalProgress(e.target.value)}
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-sky-400' : 'bg-white border-slate-300 text-black focus:border-sky-600'
+                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
               </div>
@@ -294,7 +302,7 @@ export default function AddProjectModal({
                   value={sNo}
                   onChange={e => setSNo(Number(e.target.value))}
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-sky-400' : 'bg-white border-slate-300 text-black focus:border-sky-600'
+                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
               </div>
@@ -309,7 +317,7 @@ export default function AddProjectModal({
                   value={page}
                   onChange={e => setPage(Number(e.target.value))}
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-sky-400' : 'bg-white border-slate-300 text-black focus:border-sky-600'
+                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
               </div>
@@ -327,7 +335,7 @@ export default function AddProjectModal({
                   onChange={e => setMinistry(e.target.value)}
                   placeholder="e.g. Ministry of Road Transport & Highways"
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-sky-400' : 'bg-white border-slate-300 text-black focus:border-sky-600'
+                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
               </div>
@@ -342,7 +350,7 @@ export default function AddProjectModal({
                   onChange={e => setState(e.target.value)}
                   placeholder="e.g. Maharashtra, Uttar Pradesh"
                   className={`w-full px-3 py-2 rounded-lg border text-xs font-mono outline-none ${
-                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-sky-400' : 'bg-white border-slate-300 text-black focus:border-sky-600'
+                    isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
               </div>
@@ -365,7 +373,9 @@ export default function AddProjectModal({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-mono font-bold text-xs shadow-lg shadow-sky-500/20 cursor-pointer transition-all disabled:opacity-50"
+                  className={`px-5 py-2 rounded-lg font-mono font-bold text-xs shadow-lg cursor-pointer transition-all disabled:opacity-50 ${
+                    isDark ? 'bg-white hover:bg-slate-200 text-black' : 'bg-black hover:bg-zinc-800 text-white'
+                  }`}
                 >
                   {loading ? 'Ingesting Asset...' : 'Ingest & Compute DPHIS →'}
                 </button>

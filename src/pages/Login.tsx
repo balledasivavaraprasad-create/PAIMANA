@@ -100,7 +100,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     return () => clearInterval(interval);
   }, [signupStep, resendTimer]);
 
-  // Clean and sanitize any network/protocol errors to prevent raw browser errors like 'Load failed'
+  // Clean and sanitize any network/protocol errors to prevent raw browser errors like 'Load failed' or 'Not Found'
   const sanitizeErrorMessage = (err: any, fallback: string): string => {
     if (!err) return fallback;
     const raw = typeof err === 'string' ? err : (err.message || fallback);
@@ -111,6 +111,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       lower.includes('networkerror') ||
       lower.includes('typeerror') ||
       lower.includes('network request failed') ||
+      lower.includes('not found') ||
+      lower.includes('404') ||
+      lower.includes('cannot post') ||
+      lower.includes('cannot get') ||
+      lower.includes('econnrefused') ||
       lower.includes('cors')
     ) {
       return 'Connection to authentication service was interrupted. Please check credentials or retry.';
@@ -138,19 +143,36 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   };
 
   // Fast 1-click Demo Fill
-  const fillDemoCredentials = (role: 'admin' | 'analyst' | 'morth' | 'siva') => {
+  const fillDemoCredentials = async (role: 'admin' | 'analyst' | 'morth' | 'siva', autoSubmit = false) => {
+    setLoginError('');
+    let email = '';
+    let password = '';
     if (role === 'admin') {
-      setLoginEmail('admin');
-      setLoginPassword('paimana2026');
+      email = 'admin';
+      password = 'paimana2026';
     } else if (role === 'analyst') {
-      setLoginEmail('analyst');
-      setLoginPassword('paimana2026');
+      email = 'analyst';
+      password = 'paimana2026';
     } else if (role === 'siva') {
-      setLoginEmail('balledasivavaraprasad@gmail.com');
-      setLoginPassword('paimana2026');
+      email = 'balledasivavaraprasad@gmail.com';
+      password = 'paimana2026';
     } else {
-      setLoginEmail('ramesh.kumar@morth.gov.in');
-      setLoginPassword('Password1234!');
+      email = 'ramesh.kumar@morth.gov.in';
+      password = 'Password1234!';
+    }
+    setLoginEmail(email);
+    setLoginPassword(password);
+
+    if (autoSubmit) {
+      setLoginLoading(true);
+      try {
+        const data = await loginUser({ email, password });
+        onLoginSuccess(data);
+      } catch (err: any) {
+        setLoginError(sanitizeErrorMessage(err, 'Authentication failed. Please check credentials.'));
+      } finally {
+        setLoginLoading(false);
+      }
     }
   };
 
@@ -587,8 +609,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                   <button
                     type="button"
-                    onClick={() => fillDemoCredentials('admin')}
-                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate ${
+                    onClick={() => fillDemoCredentials('admin', true)}
+                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate cursor-pointer ${
                       isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
                     }`}
                     title="MoSPI Admin (paimana2026)"
@@ -597,8 +619,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => fillDemoCredentials('analyst')}
-                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate ${
+                    onClick={() => fillDemoCredentials('analyst', true)}
+                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate cursor-pointer ${
                       isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
                     }`}
                     title="Risk Analyst (paimana2026)"
@@ -607,8 +629,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => fillDemoCredentials('morth')}
-                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate ${
+                    onClick={() => fillDemoCredentials('morth', true)}
+                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate cursor-pointer ${
                       isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
                     }`}
                     title="Dr. Ramesh Kumar (Road Transport & Highways)"
@@ -617,8 +639,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => fillDemoCredentials('siva')}
-                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate ${
+                    onClick={() => fillDemoCredentials('siva', true)}
+                    className={`py-1.5 px-2 rounded-md border text-[10px] font-mono transition-colors truncate cursor-pointer ${
                       isDark ? 'bg-white/5 hover:bg-white/15 border-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
                     }`}
                     title="Siva Prasad (balledasivavaraprasad@gmail.com)"

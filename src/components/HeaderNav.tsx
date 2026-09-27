@@ -121,8 +121,8 @@ export function HeaderNav({
             onClick={() => onSignInClick ? onSignInClick() : onTabChange('login')}
             className={`px-2.5 py-1 rounded-md border text-[11px] sm:text-xs font-mono-code font-bold transition-all cursor-pointer flex items-center gap-1 shadow-sm ${
               isDark
-                ? 'bg-sky-500/20 hover:bg-sky-500/30 border-sky-400/40 text-sky-300'
-                : 'bg-sky-50 hover:bg-sky-100 border-sky-300 text-sky-800'
+                ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white'
+                : 'bg-black/10 hover:bg-black/20 border-black/20 text-black'
             }`}
           >
             <span>✦</span>

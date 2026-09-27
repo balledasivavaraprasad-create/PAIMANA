@@ -243,17 +243,19 @@ export default function App() {
   if (authChecking) {
     return (
       <div className={`w-screen h-screen flex flex-col items-center justify-center transition-colors ${
-        isDark ? 'bg-[#0B0F17] text-white' : 'bg-[#F8FAFC] text-[#0F172A]'
+        isDark ? 'bg-black text-white' : 'bg-white text-black'
       }`}>
         <div className="flex flex-col items-center gap-4 animate-pulse">
-          <div className="w-14 h-14 rounded-2xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center font-mono font-bold text-sky-400 text-2xl shadow-[0_0_30px_rgba(56,189,248,0.3)]">
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-mono font-bold text-2xl border ${
+            isDark ? 'bg-black text-white border-white/30 shadow-[0_0_24px_rgba(255,255,255,0.2)]' : 'bg-white text-black border-black/20 shadow-md'
+          }`}>
             P
           </div>
           <div className="text-center">
-            <div className="text-xs font-mono font-bold tracking-widest uppercase">
+            <div className={`text-xs font-mono font-bold tracking-widest uppercase ${isDark ? 'text-white' : 'text-black'}`}>
               PAIMANA INSTITUTIONAL PLATFORM
             </div>
-            <div className="text-[11px] font-mono text-slate-400 mt-1">
+            <div className={`text-[11px] font-mono mt-1 ${isDark ? 'text-white/70' : 'text-black/70'}`}>
               Verifying official credentials against sovereign database...
             </div>
           </div>
@@ -399,11 +401,11 @@ export default function App() {
                 }`}>
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span>
-                    Officer: <strong className="text-sky-400">{currentUser.full_name}</strong>
+                    Officer: <strong className={isDark ? 'text-white' : 'text-black'}>{currentUser.full_name}</strong>
                   </span>
                   <span className="opacity-40">|</span>
                   <span>
-                    Jurisdiction: <strong>{currentUser.ministry}</strong>
+                    Jurisdiction: <strong className={isDark ? 'text-white' : 'text-black'}>{currentUser.ministry}</strong>
                   </span>
                 </div>
 
@@ -412,8 +414,8 @@ export default function App() {
                     onClick={() => setMinistryFilterOnly(!ministryFilterOnly)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all border cursor-pointer ${
                       ministryFilterOnly
-                        ? 'bg-sky-500 text-slate-950 border-sky-400 shadow-md'
-                        : (isDark ? 'bg-white/10 text-white hover:bg-white/20 border-white/20' : 'bg-slate-200/90 text-slate-800 hover:bg-slate-300 border-slate-300')
+                        ? (isDark ? 'bg-white text-black border-white shadow-md' : 'bg-black text-white border-black shadow-md')
+                        : (isDark ? 'bg-black/70 text-white hover:bg-black/90 border-white/20' : 'bg-white/95 text-black hover:bg-white border-slate-300 shadow-sm')
                     }`}
                   >
                     {ministryFilterOnly ? `Showing: ${currentUser.ministry} Corridors ✓` : `Focus: ${currentUser.ministry}`}
@@ -584,7 +586,9 @@ export default function App() {
                       <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
                         Infrastructure Portfolio Ledger
                       </h2>
-                      <span className="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-400/30">
+                      <span className={`px-3 py-1 rounded-lg text-xs font-mono font-bold border ${
+                        isDark ? 'bg-black/70 text-white border-white/20' : 'bg-white/95 text-black border-slate-300 shadow-sm'
+                      }`}>
                         Official Jurisdiction: {currentUser.ministry || 'Assigned Sovereign Portfolios'}
                       </span>
                     </div>
