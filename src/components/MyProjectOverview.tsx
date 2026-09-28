@@ -3,6 +3,7 @@ import { useTheme } from '../hooks/useTheme';
 import { ProjectPin } from './CeoPinManager';
 import { UserProfile } from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
+import { CurvedGrowthArrow, CurvedDecreaseArrow } from './CurvedTrendArrow';
 
 interface MyProjectOverviewProps {
   currentUser?: UserProfile | null;
@@ -164,7 +165,8 @@ export default function MyProjectOverview({
             {needingAttentionCount}
           </div>
           <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
-            <span>Progress or spending divergence</span>
+            <CurvedGrowthArrow className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-amber-300 font-medium">Progress / spending divergence</span>
           </div>
         </div>
 
@@ -177,7 +179,8 @@ export default function MyProjectOverview({
             {highRiskCount}
           </div>
           <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
-            <span>Escalated delay index</span>
+            <CurvedGrowthArrow className="w-3.5 h-3.5 text-red-400" />
+            <span className="text-red-300 font-medium">Critical schedule slippage</span>
           </div>
         </div>
 
@@ -190,7 +193,8 @@ export default function MyProjectOverview({
             {upcomingMilestonesCount}
           </div>
           <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
-            <span>Due in next 60 days</span>
+            <CurvedGrowthArrow className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-emerald-300 font-medium">Due in next 60 days</span>
           </div>
         </div>
       </div>

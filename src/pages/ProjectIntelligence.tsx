@@ -8,6 +8,7 @@ import { ProjectPin } from '../components/CeoPinManager';
 import { getRiskCategory } from '../lib/risk';
 import { useTheme } from '../hooks/useTheme';
 import { computeRealTimeShapFactors } from '../lib/shap';
+import { CurvedGrowthArrow, CurvedDecreaseArrow, TrendBadge } from '../components/CurvedTrendArrow';
 
 interface Props {
   projectId?: string;
@@ -456,11 +457,26 @@ export default function ProjectIntelligence({
                       <div className="font-semibold text-sm sm:text-base text-white">{f.feature}</div>
                       <div className="text-xs sm:text-sm text-white/80">{f.description}</div>
                     </div>
-                    <div className="sm:text-right font-mono-code shrink-0">
-                      <div className="text-base sm:text-xl font-bold text-white">
-                        {f.impact > 0 ? `+${f.impact}` : f.impact} pts
+                    <div className="sm:text-right font-mono-code shrink-0 space-y-1">
+                      <TrendBadge 
+                        value={`${f.impact > 0 ? '+' : ''}${f.impact} pts`} 
+                        mode="risk" 
+                        className="text-sm sm:text-base py-1 px-2.5" 
+                        iconClassName="w-4 h-4"
+                      />
+                      <div className="text-xs text-white/60 uppercase flex items-center justify-end gap-1">
+                        {f.impact > 0 ? (
+                          <>
+                            <CurvedGrowthArrow className="w-3 h-3 text-amber-400" />
+                            <span>Increases Risk</span>
+                          </>
+                        ) : (
+                          <>
+                            <CurvedDecreaseArrow className="w-3 h-3 text-emerald-400" />
+                            <span>Lowers Risk</span>
+                          </>
+                        )}
                       </div>
-                      <div className="text-xs text-white/60 uppercase">{f.impact > 0 ? '+ Increases Risk' : '− Lowers Risk'}</div>
                     </div>
                   </div>
                 ))}
@@ -474,15 +490,17 @@ export default function ProjectIntelligence({
                   <div className="text-2xl sm:text-3xl font-bold font-mono-code text-white">
                     ₹{prediction?.cost.predicted_final_cost || 4520} Cr
                   </div>
-                  <div className="text-xs sm:text-sm text-white/85 font-semibold">
-                    +{prediction?.cost.predicted_overrun_pct || 7.2}% projected budget overrun
+                  <div className="text-xs sm:text-sm text-white/85 font-semibold flex items-center gap-1.5">
+                    <CurvedGrowthArrow className="w-3.5 h-3.5 text-amber-400" />
+                    <span>+{prediction?.cost.predicted_overrun_pct || 7.2}% projected budget overrun</span>
                   </div>
                 </div>
 
                 <div className="p-5 rounded-xl bg-white/5 border border-white/15 space-y-2">
                   <div className="text-xs font-mono-code uppercase text-white/70">Timeline Slippage Projection</div>
-                  <div className="text-2xl sm:text-3xl font-bold font-mono-code text-white">
-                    +{prediction?.delay.expected_delay_months || 24} Months
+                  <div className="text-2xl sm:text-3xl font-bold font-mono-code text-white flex items-center gap-2">
+                    <CurvedGrowthArrow className="w-6 h-6 text-amber-400" />
+                    <span>+{prediction?.delay.expected_delay_months || 24} Months</span>
                   </div>
                   <div className="text-xs sm:text-sm text-white/85">
                     Predicted Completion: {prediction?.delay.predicted_completion_date || '2027-12-31'}

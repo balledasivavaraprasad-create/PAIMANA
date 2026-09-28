@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import GlassCard from '../components/GlassCard';
 import MetricCard from '../components/MetricCard';
+import { CurvedGrowthArrow } from '../components/CurvedTrendArrow';
 import { fetchAnalyticsOverview, fetchRiskTrend, AnalyticsOverview } from '../lib/api';
 
 interface Props {
@@ -135,7 +136,10 @@ export default function Analytics({ onNavigateToProject, pinsCount, onOpenAddPro
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-sm sm:text-base font-bold font-mono-code text-white">Index: {t.average_dphis}</div>
-                  <div className="text-[10px] sm:text-xs text-white/80 font-mono-code font-semibold">+{(t.average_dphis - 38.0).toFixed(1)} pts higher than average</div>
+                  <div className="text-[10px] sm:text-xs text-white/80 font-mono-code font-semibold flex items-center justify-end gap-1">
+                    <CurvedGrowthArrow className="w-3 h-3 text-amber-400" />
+                    <span>+{(t.average_dphis - 38.0).toFixed(1)} pts higher than average</span>
+                  </div>
                 </div>
               </div>
             ))}

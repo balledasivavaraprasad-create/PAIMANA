@@ -6,6 +6,7 @@ import {
 } from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
 import { computeRealTimeShapFactors } from '../lib/shap';
+import { CurvedGrowthArrow, CurvedDecreaseArrow, TrendBadge } from './CurvedTrendArrow';
 
 interface ProjectInsightsModalProps {
   isOpen: boolean;
@@ -423,16 +424,24 @@ export default function ProjectInsightsModal({
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-xs text-white">{f.feature}</span>
-                          <span className={`text-xs font-mono font-bold ${f.impact > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                            {f.impact > 0 ? `+${f.impact}` : f.impact} pts
-                          </span>
+                          <TrendBadge value={`${f.impact > 0 ? '+' : ''}${f.impact} pts`} mode="risk" iconClassName="w-3 h-3" />
                         </div>
                         <p className="text-[11px] text-white/75 leading-relaxed">
                           {f.description}
                         </p>
                       </div>
-                      <div className="text-[10px] font-mono uppercase tracking-wider text-white/40 pt-1 border-t border-white/5">
-                        {f.impact > 0 ? '⚠️ Increases Project Delay Risk' : '✓ Supports On-Time Delivery'}
+                      <div className="text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 pt-1.5 border-t border-white/5">
+                        {f.impact > 0 ? (
+                          <span className="text-amber-400 flex items-center gap-1">
+                            <CurvedGrowthArrow className="w-3 h-3 text-amber-400" />
+                            <span>Increases Project Risk</span>
+                          </span>
+                        ) : (
+                          <span className="text-emerald-400 flex items-center gap-1">
+                            <CurvedDecreaseArrow className="w-3 h-3 text-emerald-400" />
+                            <span>Reduces Risk / Supports On-Time</span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))}

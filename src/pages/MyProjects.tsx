@@ -5,6 +5,7 @@ import { ProjectPin } from '../components/CeoPinManager';
 import { UserProfile } from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
 import { useTheme } from '../hooks/useTheme';
+import { CurvedGrowthArrow, CurvedDecreaseArrow } from '../components/CurvedTrendArrow';
 
 interface Props {
   currentUser?: UserProfile | null;
@@ -459,7 +460,11 @@ export default function MyProjects({
                           : 'bg-emerald-50 border-emerald-300 text-black')
                   }`}>
                     <div className="flex items-center gap-1.5 font-bold mb-1">
-                      <span>{cat.level === 'critical' || cat.level === 'high' ? '⚠️' : 'ℹ️'}</span>
+                      {cat.level === 'critical' || cat.level === 'high' ? (
+                        <CurvedGrowthArrow className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                      ) : (
+                        <CurvedDecreaseArrow className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      )}
                       <span className={`uppercase tracking-wider font-mono text-[11px] ${isDark ? '' : 'text-black font-bold'}`}>
                         {cat.level === 'critical' ? 'Critical Delay Risk' : cat.level === 'high' ? 'High Delay Risk' : cat.level === 'moderate' ? 'Moderate Attention Needed' : 'On Track'}
                       </span>
@@ -560,8 +565,13 @@ export default function MyProjects({
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold border ${cat.badgeBg}`}>
-                        {cat.label}
+                      <span className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold border inline-flex items-center gap-1 ${cat.badgeBg}`}>
+                        {cat.level === 'critical' || cat.level === 'high' ? (
+                          <CurvedGrowthArrow className="w-3 h-3 text-red-400" />
+                        ) : (
+                          <CurvedDecreaseArrow className="w-3 h-3 text-emerald-400" />
+                        )}
+                        <span>{cat.label}</span>
                       </span>
                     </td>
                     <td className="p-4">

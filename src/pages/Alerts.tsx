@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import GlassCard from '../components/GlassCard';
 import { fetchAlerts, acknowledgeAlert, UserProfile, AlertItem } from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
+import { CurvedGrowthArrow } from '../components/CurvedTrendArrow';
 
 interface Props {
   onNavigateToInvestigation?: (projectId: string) => void;
@@ -188,7 +189,10 @@ export default function Alerts({
                     <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-1 font-mono text-xs">
                       <div className="text-[10px] text-white/60 uppercase">Project Threshold</div>
                       <div className="text-lg font-bold text-amber-300">{thresh} / 100</div>
-                      <div className="text-[10px] text-red-400 font-semibold">Crossed by +{Math.max(0, (score - thresh)).toFixed(1)} pts</div>
+                      <div className="text-[10px] text-red-400 font-semibold flex items-center gap-1">
+                        <CurvedGrowthArrow className="w-3 h-3 text-red-400" />
+                        <span>Crossed by +{Math.max(0, (score - thresh)).toFixed(1)} pts</span>
+                      </div>
                     </div>
                   </div>
 

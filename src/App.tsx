@@ -17,6 +17,7 @@ import Login from './pages/Login';
 import { useTheme } from './hooks/useTheme';
 import { getRiskCategory } from './lib/risk';
 import { computeRealTimeShapFactors } from './lib/shap';
+import { CurvedGrowthArrow, TrendBadge } from './components/CurvedTrendArrow';
 import {
   fetchProjects, fetchMyProjects, fetchAlerts, fetchAnalyticsOverview, API_BASE,
   fetchCurrentUser, clearAuthToken, UserProfile, deleteProject
@@ -561,7 +562,10 @@ export default function App() {
                         {portfolioStats.avgDphis}
                       </div>
                       <div className="text-xs text-white/80 font-medium">Average Risk Score (0–100)</div>
-                      <div className="text-xs font-mono-code text-white font-semibold">+4.1 pts higher risk than last month</div>
+                      <div className="text-xs font-mono-code text-white font-semibold flex items-center gap-1.5">
+                        <CurvedGrowthArrow className="w-3.5 h-3.5 text-amber-400" />
+                        <span>+4.1 pts higher risk than last month</span>
+                      </div>
                     </div>
 
                     <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
@@ -842,11 +846,7 @@ export default function App() {
                           <div key={d.name} className="p-3 rounded-xl bg-white/5 border border-white/15 space-y-1">
                             <div className="flex items-center justify-between text-xs sm:text-sm">
                               <span className="font-semibold text-white">{d.name}</span>
-                              <span className={`font-mono text-xs font-bold ${
-                                d.impact.startsWith('+') ? 'text-amber-300' : 'text-emerald-400'
-                              }`}>
-                                {d.impact}
-                              </span>
+                              <TrendBadge value={d.impact} mode="risk" iconClassName="w-3.5 h-3.5" />
                             </div>
                             <p className="text-[11px] sm:text-xs text-white/70">{d.text}</p>
                           </div>
