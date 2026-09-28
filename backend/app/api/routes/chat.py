@@ -233,11 +233,11 @@ Instructions:
 3. If the user asks for changes, summarize the corridors with schedule slippage changes, delay increments, or budget revisions from the database.
 4. If the user asks to list their projects or compare, use the verified project records provided in the context above.
 5. If the user asks a general question, answer clearly and helpfully.
-6. Keep answers concise, natural, and executive-ready. Never dump random, unrequested project data.
+6. Keep answers concise, natural, well-structured, and executive-ready. Use clear section headers (### Header) and bullet points. When grouping projects by State or Category, state the category clearly and list projects underneath with (ID: <id>) and key metrics (Progress: X%, Delay: Y months). Avoid messy or unclosed asterisk patterns.
 
 Respond strictly as a JSON object:
 {{
-  "reply": "Markdown formatted response answering the user's question directly.",
+  "reply": "Clean, structured executive response with clear headings and bullet points.",
   "grounded_evidence": [{{"feature": "...", "impact": "..."}}],
   "suggested_actions": ["3 short, relevant follow-up prompts"]
 }}"""

@@ -76,6 +76,7 @@ app.include_router(investigations_router, prefix=settings.API_V1_STR)
 app.include_router(alerts_router, prefix=settings.API_V1_STR)
 app.include_router(analytics_router, prefix=settings.API_V1_STR)
 app.include_router(chat_router, prefix=settings.API_V1_STR)
+app.include_router(chat_router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import GlassCard from '../components/GlassCard';
+import FormattedMessage from '../components/FormattedMessage';
 import { sendChatMessage, UserProfile } from '../lib/api';
 import { useTheme } from '../hooks/useTheme';
 
@@ -155,12 +156,12 @@ export default function Assistant({ selectedProjectId, currentUser, allProjects,
               }`}
               style={msg.sender === 'user' && !isDark ? { color: '#ffffff' } : undefined}
             >
-              <div 
-                className={`whitespace-pre-wrap leading-relaxed font-sans ${msg.sender === 'user' && !isDark ? 'user-bubble-light' : ''}`}
-                style={msg.sender === 'user' && !isDark ? { color: '#ffffff' } : undefined}
-              >
-                {msg.text}
-              </div>
+              <FormattedMessage
+                text={msg.text}
+                isDark={isDark}
+                isUser={msg.sender === 'user'}
+                onNavigateToProject={onNavigateToProject}
+              />
 
               {/* Citations & Evidence Footprints */}
               {msg.citations && msg.citations.length > 0 && (
