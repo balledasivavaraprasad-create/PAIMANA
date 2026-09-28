@@ -1,3 +1,5 @@
+import { DEMO_SIVA_17_PROJECTS, DEMO_ADMIN_28_PROJECTS, SEEDED_PROJECTS_MAP } from './seededProjects';
+
 // Auto-detect whether port 8001 (PAIMANA) or 8000 hosts the backend engine
 export let API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8001/api/v1';
 
@@ -29,12 +31,21 @@ export interface ProjectData {
     original: number;
     revised: number;
     currency: string;
+    cumulative_expenditure?: number;
+    expenditure?: number;
+    [key: string]: any;
   };
   schedule: {
     original_start: string;
     original_end: string;
     revised_end: string;
+    [key: string]: any;
   };
+  physical_progress?: number;
+  physical_progress_pct?: number;
+  financial_progress?: number;
+  schedule_slippage_months?: number | null;
+  [key: string]: any;
   dphis: number;
   risk_level: 'critical' | 'high' | 'moderate' | 'low';
   data_quality_score?: number;
@@ -267,83 +278,12 @@ export async function fetchMyProjects(username?: string, limit = 50): Promise<Pr
         return localIngested;
       }
       // Seeded accounts offline fallback
-      if (uLower === 'admin') {
-        return [
-          {
-            project_id: '617321',
-            project_name: 'Varanasi-Ranchi-Kolkata Expressway Package 1',
-            ministry: 'Ministry of Road Transport and Highways',
-            department: 'National Highway Development Unit',
-            sector: 'Roads & Highways',
-            state: 'Uttar Pradesh',
-            location: { latitude: 25.3, longitude: 83.0, district: 'Varanasi', state: 'Uttar Pradesh' },
-            cost: { original: 4218, revised: 4520, currency: 'INR_CR' },
-            schedule: { original_start: '2023-01-01', original_end: '2026-12-31', revised_end: '2027-12-31' },
-            dphis: 85.0,
-            risk_level: 'critical'
-          },
-          {
-            project_id: 'N22000464',
-            project_name: 'Mumbai-Ahmedabad High Speed Rail Corridor',
-            ministry: 'Ministry of Railways',
-            department: 'High Speed Rail Corporation',
-            sector: 'Railways',
-            state: 'Maharashtra / Gujarat',
-            location: { latitude: 19.0, longitude: 72.8, district: 'Mumbai', state: 'Maharashtra' },
-            cost: { original: 108000, revised: 112000, currency: 'INR_CR' },
-            schedule: { original_start: '2020-01-01', original_end: '2026-06-30', revised_end: '2028-06-30' },
-            dphis: 78.4,
-            risk_level: 'high'
-          }
-        ];
-      } else if (uLower === 'analyst') {
-        return [
-          {
-            project_id: '705368',
-            project_name: 'Delhi-Meerut Regional Rapid Transit (RRTS)',
-            ministry: 'Ministry of Housing and Urban Affairs',
-            department: 'National Capital Region Transport',
-            sector: 'Urban Transit & Metro',
-            state: 'Delhi / UP',
-            location: { latitude: 28.6, longitude: 77.2, district: 'Delhi', state: 'Delhi' },
-            cost: { original: 30274, revised: 31500, currency: 'INR_CR' },
-            schedule: { original_start: '2019-03-01', original_end: '2025-06-30', revised_end: '2026-06-30' },
-            dphis: 72.5,
-            risk_level: 'high'
-          }
-        ];
+      if (uLower === 'admin' || uLower === 'analyst') {
+        return DEMO_ADMIN_28_PROJECTS;
       } else if (uLower.includes('ramesh')) {
-        return [
-          {
-            project_id: '618488',
-            project_name: 'NH-48 Varanasi-Ranchi Expressway Package 4',
-            ministry: 'Ministry of Road Transport and Highways',
-            department: 'National Highway Development Unit',
-            sector: 'Roads & Highways',
-            state: 'Uttar Pradesh',
-            location: { latitude: 26.8, longitude: 80.9, district: 'Varanasi', state: 'Uttar Pradesh' },
-            cost: { original: 4218, revised: 4520, currency: 'INR_CR' },
-            schedule: { original_start: '2024-01-01', original_end: '2026-12-31', revised_end: '2027-12-31' },
-            dphis: 85.0,
-            risk_level: 'critical'
-          }
-        ];
+        return DEMO_ADMIN_28_PROJECTS.slice(0, 12);
       } else if (uLower.includes('balleda') || uLower.includes('siva')) {
-        return [
-          {
-            project_id: '617225',
-            project_name: 'Bangalore Metro Phase 2A (Silk Board to KR Puram)',
-            ministry: 'Ministry of Housing & Urban Affairs',
-            department: 'Bangalore Metro Rail Corporation',
-            sector: 'Urban Transit & Metro',
-            state: 'Karnataka',
-            location: { latitude: 12.97, longitude: 77.59, district: 'Bengaluru', state: 'Karnataka' },
-            cost: { original: 5994, revised: 6200, currency: 'INR_CR' },
-            schedule: { original_start: '2021-06-01', original_end: '2026-03-31', revised_end: '2027-03-31' },
-            dphis: 68.2,
-            risk_level: 'high'
-          }
-        ];
+        return DEMO_SIVA_17_PROJECTS;
       }
     }
     // New users start with 0 projects!
@@ -476,14 +416,20 @@ export async function fetchProjects(risk?: string, limit = 50, ministry?: string
     url.searchParams.set('limit', String(limit));
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error('Failed to fetch projects');
-    return await res.json();
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) return data;
+    return DEMO_ADMIN_28_PROJECTS;
   } catch (err) {
     console.warn('Backend offline or failed, returning mock pins fallback', err);
-    return [];
+    if (username && (username.toLowerCase().includes('balleda') || username.toLowerCase().includes('siva'))) {
+      return DEMO_SIVA_17_PROJECTS;
+    }
+    return DEMO_ADMIN_28_PROJECTS;
   }
 }
 
 export const FALLBACK_PROJECTS_MAP: Record<string, ProjectData> = {
+  ...SEEDED_PROJECTS_MAP,
   '82792908': {
     project_id: '82792908',
     project_name: 'Western Dedicated Freight Corridor (Dadri to JNPT)',

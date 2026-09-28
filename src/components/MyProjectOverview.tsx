@@ -142,7 +142,7 @@ export default function MyProjectOverview({
       {/* Top 4 Frosted Summary Flashcards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* 1. Active Projects */}
-        <div className="oled-solid-card frosted-glass-card p-4 sm:p-5 space-y-2">
+        <div className="frosted-glass-card p-4 sm:p-5 space-y-2">
           <div className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
             Active Projects
           </div>
@@ -156,7 +156,7 @@ export default function MyProjectOverview({
         </div>
 
         {/* 2. Projects Needing Attention */}
-        <div className="oled-solid-card frosted-glass-card p-4 sm:p-5 space-y-2 border-amber-500/30">
+        <div className="frosted-glass-card p-4 sm:p-5 space-y-2 border-amber-500/30">
           <div className="text-[11px] font-mono text-amber-400 uppercase tracking-wider font-semibold">
             Projects Needing Attention
           </div>
@@ -169,7 +169,7 @@ export default function MyProjectOverview({
         </div>
 
         {/* 3. High-Risk Projects */}
-        <div className="oled-solid-card frosted-glass-card p-4 sm:p-5 space-y-2 border-red-500/30">
+        <div className="frosted-glass-card p-4 sm:p-5 space-y-2 border-red-500/30">
           <div className="text-[11px] font-mono text-red-400 uppercase tracking-wider font-semibold">
             High-Risk Projects
           </div>
@@ -182,7 +182,7 @@ export default function MyProjectOverview({
         </div>
 
         {/* 4. Upcoming Milestones */}
-        <div className="oled-solid-card frosted-glass-card p-4 sm:p-5 space-y-2">
+        <div className="frosted-glass-card p-4 sm:p-5 space-y-2">
           <div className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
             Upcoming Milestones
           </div>
@@ -219,7 +219,7 @@ export default function MyProjectOverview({
             return (
               <div
                 key={pin.id}
-                className="oled-solid-card frosted-glass-card p-5 sm:p-6 space-y-4 hover:border-white/40 transition-all flex flex-col justify-between"
+                className="frosted-glass-card p-5 sm:p-6 space-y-4 hover:border-white/40 transition-all flex flex-col justify-between"
               >
                 <div className="space-y-3.5">
                   {/* Top Bar: ID & Location */}

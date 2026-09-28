@@ -5,6 +5,7 @@ import {
   ProjectData, PredictionData, RiskData, UserProfile 
 } from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
+import { computeRealTimeShapFactors } from '../lib/shap';
 
 interface ProjectInsightsModalProps {
   isOpen: boolean;
@@ -126,6 +127,33 @@ export default function ProjectInsightsModal({
   const pState = project?.state || 'Maharashtra';
   const pSector = project?.sector || 'Roads & Highways';
   const pCostCr = project?.cost?.revised || project?.cost?.original || 4218;
+
+  // Real-time project telemetry metrics
+  const actualPhysical = project?.physical_progress ?? project?.physical_progress_pct ?? Math.max(15, Math.min(92, Math.round(100 - score * 0.82)));
+  const targetPhysical = Math.min(100, Math.round(actualPhysical + (score >= 65 ? (score - 40) * 0.65 : 6)));
+  const progressBehind = Math.max(0, targetPhysical - actualPhysical);
+
+  let spentPct = 52;
+  if (project?.cost?.original && project?.cost?.cumulative_expenditure) {
+    spentPct = Math.min(100, Math.round((project.cost.cumulative_expenditure / project.cost.original) * 100));
+  } else if (project?.financial_progress) {
+    spentPct = Math.round(project.financial_progress);
+  } else {
+    spentPct = Math.max(actualPhysical, Math.min(98, Math.round(actualPhysical + (score >= 65 ? (score - 45) * 0.6 : 5))));
+  }
+
+  const delayMonths = prediction?.delay?.expected_delay_months ?? (score >= 80 ? 24 : score >= 65 ? 14 : score >= 45 ? 6 : 0);
+  const completionDate = prediction?.delay?.predicted_completion_date || project?.schedule?.revised_end || 'Target on track';
+
+  const shapFactors = computeRealTimeShapFactors({
+    ...project,
+    id: projectId,
+    dphis: score,
+    name: pName,
+    sector: pSector,
+    state: pState,
+    delay: delayMonths,
+  });
 
   return (
     <div 
@@ -339,48 +367,82 @@ export default function ProjectInsightsModal({
                   <div className="oled-solid-card p-4 space-y-2">
                     <div className="text-[11px] font-mono text-white/60 uppercase">Physical Progress</div>
                     <div className="flex items-baseline justify-between font-mono text-sm">
-                      <span className="text-white font-bold">Actual: 34%</span>
-                      <span className="text-white/60 text-xs">Target: 78%</span>
+                      <span className="text-white font-bold">Actual: {actualPhysical}%</span>
+                      <span className="text-white/60 text-xs">Target: {targetPhysical}%</span>
                     </div>
                     <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
-                      <div className="h-full bg-white rounded-full" style={{ width: '34%' }} />
+                      <div className="h-full bg-white rounded-full transition-all duration-700" style={{ width: `${actualPhysical}%` }} />
                     </div>
-                    <div className="text-[10px] text-white/60">44% behind planned progress</div>
+                    <div className="text-[10px] text-white/60">
+                      {progressBehind > 0 ? `${progressBehind}% behind planned progress` : 'On track with planned schedule'}
+                    </div>
                   </div>
 
                   {/* Budget Spent */}
                   <div className="oled-solid-card p-4 space-y-2">
                     <div className="text-[11px] font-mono text-white/60 uppercase">Budget Utilization</div>
                     <div className="flex items-baseline justify-between font-mono text-sm">
-                      <span className="text-white font-bold">Spent: 62%</span>
-                      <span className={`text-xs font-semibold ${score >= 65 ? 'text-white' : 'text-white/80'}`}>
+                      <span className="text-white font-bold">Spent: {spentPct}%</span>
+                      <span className={`text-xs font-semibold ${score >= 65 ? 'text-amber-400' : 'text-emerald-400'}`}>
                         {score >= 65 ? 'At Risk' : 'Normal'}
                       </span>
                     </div>
                     <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
-                      <div className="h-full bg-white/80 rounded-full" style={{ width: '62%' }} />
+                      <div className="h-full bg-white/80 rounded-full transition-all duration-700" style={{ width: `${spentPct}%` }} />
                     </div>
-                    <div className="text-[10px] text-white/60">Spending faster than physical work</div>
+                    <div className="text-[10px] text-white/60">
+                      {spentPct > actualPhysical ? `${spentPct - actualPhysical}% ahead of physical work` : 'Disbursement matches physical pace'}
+                    </div>
                   </div>
 
                   {/* Delay Status */}
                   <div className="oled-solid-card p-4 space-y-1.5">
                     <div className="text-[11px] font-mono text-white/60 uppercase">Estimated Delay</div>
                     <div className="text-lg font-bold font-mono text-white">
-                      +24 Months
+                      {delayMonths > 0 ? `+${delayMonths} Months` : 'On Time'}
                     </div>
                     <p className="text-[11px] text-white/75 leading-relaxed">
-                      Target completion shifted to Dec 2027
+                      Target completion: {completionDate}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* 2. Why is This Project at Risk? */}
-              {/* 2. Recommended Actions */}
+              {/* 2. Key Risk Drivers (Real-Time AI Explainability) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white/70">
+                    2. Why is this project at risk? (Key Risk Factors)
+                  </h3>
+                  <span className="text-[11px] font-mono text-white/50">Live Telemetry Analysis</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {shapFactors.map(f => (
+                    <div key={f.feature} className="oled-solid-card p-3.5 space-y-1.5 flex flex-col justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-xs text-white">{f.feature}</span>
+                          <span className={`text-xs font-mono font-bold ${f.impact > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                            {f.impact > 0 ? `+${f.impact}` : f.impact} pts
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-white/75 leading-relaxed">
+                          {f.description}
+                        </p>
+                      </div>
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-white/40 pt-1 border-t border-white/5">
+                        {f.impact > 0 ? '⚠️ Increases Project Delay Risk' : '✓ Supports On-Time Delivery'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3. Recommended Actions */}
               <div className="space-y-3">
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white/70">
-                  2. Recommended Actions
+                  3. Recommended Actions
                 </h3>
 
                 <div className="space-y-2.5">

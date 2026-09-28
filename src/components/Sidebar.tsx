@@ -48,7 +48,6 @@ const icons: Record<string, React.ReactNode> = {
 const navItems: Array<{ id: Page; label: string; badge?: number }> = [
   { id: 'overview', label: 'Overview' },
   { id: 'projects', label: 'Projects' },
-  { id: 'intelligence', label: 'Risk Intelligence' },
   { id: 'analytics', label: 'Portfolio Analytics' },
   { id: 'assistant', label: 'Intelligence Assistant' },
   { id: 'alerts', label: 'Alerts', badge: 14 },

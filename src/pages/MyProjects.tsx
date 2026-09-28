@@ -192,79 +192,93 @@ export default function MyProjects({
         )}
       </GlassCard>
 
-      {/* Filter and Search Bar with Risk Intelligence Controls */}
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          {/* Search */}
-          <div className="relative flex-1 max-w-md">
+      {/* Filter and Search Bar with 3-Tier Layout */}
+      <div className="space-y-3.5">
+        {/* LINE 1: Search Bar (Left) + View Mode Toggle (Right) */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="relative w-full max-w-lg">
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search by project name, ID, or state..."
-              className="w-full bg-[#0B0F17]/80 border border-white/20 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/50"
+              placeholder="Search by project name, ID, sector, or state..."
+              className={`w-full rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none transition-all border ${
+                isDark
+                  ? 'bg-[#0B0F17]/85 border-white/20 text-white placeholder:text-white/40 focus:border-white/50 shadow-sm'
+                  : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-500 shadow-sm'
+              }`}
             />
           </div>
 
-          {/* Status Filter Buttons */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-            {(['ALL', 'CRITICAL', 'HIGH', 'MODERATE', 'LOW'] as const).map(st => {
-              const labelMap = {
-                ALL: 'All Status',
-                CRITICAL: 'Critical',
-                HIGH: 'High Risk',
-                MODERATE: 'Needs Attention',
-                LOW: 'On Track'
-              };
-              const active = statusFilter === st;
-              return (
-                <button
-                  key={st}
-                  onClick={() => setStatusFilter(st)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer whitespace-nowrap border ${
-                    active
-                      ? 'bg-white text-black font-bold border-white shadow-sm'
-                      : 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15'
-                  }`}
-                >
-                  {labelMap[st]}
-                </button>
-              );
-            })}
-
-            {/* View Mode Toggle */}
-            <div className="ml-2 hidden sm:flex items-center bg-white/5 border border-white/15 rounded-lg p-0.5">
-              <button
-                onClick={() => setViewMode('cards')}
-                title="Card view"
-                className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
-                  viewMode === 'cards' ? 'bg-white text-black font-bold' : 'text-white/70 hover:text-white'
-                }`}
-              >
-                Cards
-              </button>
-              <button
-                onClick={() => setViewMode('table')}
-                title="Table view"
-                className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
-                  viewMode === 'table' ? 'bg-white text-black font-bold' : 'text-white/70 hover:text-white'
-                }`}
-              >
-                Table
-              </button>
-            </div>
+          {/* View Mode Toggle */}
+          <div className={`flex items-center rounded-xl p-0.5 shrink-0 border ${
+            isDark ? 'bg-white/5 border-white/15' : 'bg-slate-100 border-slate-300'
+          }`}>
+            <button
+              onClick={() => setViewMode('cards')}
+              title="Card view"
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                viewMode === 'cards' 
+                  ? (isDark ? 'bg-white text-black shadow-sm' : 'bg-black text-white shadow-sm')
+                  : (isDark ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900')
+              }`}
+            >
+              Cards
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              title="Table view"
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                viewMode === 'table' 
+                  ? (isDark ? 'bg-white text-black shadow-sm' : 'bg-black text-white shadow-sm')
+                  : (isDark ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900')
+              }`}
+            >
+              Table
+            </button>
           </div>
         </div>
 
-        {/* Secondary Filter Toolbar: Sector, State, Sort By */}
-        <div className="flex flex-wrap items-center gap-3 pt-1">
+        {/* LINE 2: Status Filter Buttons */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {(['ALL', 'CRITICAL', 'HIGH', 'MODERATE', 'LOW'] as const).map(st => {
+            const labelMap = {
+              ALL: 'All Status',
+              CRITICAL: 'Critical',
+              HIGH: 'High Risk',
+              MODERATE: 'Need Attention',
+              LOW: 'On Track'
+            };
+            const active = statusFilter === st;
+            return (
+              <button
+                key={st}
+                onClick={() => setStatusFilter(st)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer whitespace-nowrap border ${
+                  active
+                    ? (isDark ? 'bg-white text-black font-bold border-white shadow-md' : 'bg-black text-white font-bold border-black shadow-md')
+                    : (isDark ? 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-sm')
+                }`}
+              >
+                {labelMap[st]}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* LINE 3: Secondary Filter Toolbar: Sector, State, Sort By */}
+        <div className="flex flex-wrap items-center gap-3 pt-0.5">
           {/* Sector Filter */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-mono text-white/60">Sector:</span>
+            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-600'}`}>Sector:</span>
             <select
               value={sectorFilter}
               onChange={e => setSectorFilter(e.target.value)}
-              className="bg-[#0B0F17] border border-white/20 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white/50 cursor-pointer"
+              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm ${
+                isDark 
+                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50' 
+                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500'
+              }`}
             >
               <option value="ALL">All Sectors ({inferredSectors.length})</option>
               {inferredSectors.map(s => (
@@ -275,11 +289,15 @@ export default function MyProjects({
 
           {/* State Filter */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-mono text-white/60">State:</span>
+            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-600'}`}>State:</span>
             <select
               value={stateFilter}
               onChange={e => setStateFilter(e.target.value)}
-              className="bg-[#0B0F17] border border-white/20 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white/50 cursor-pointer"
+              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm ${
+                isDark 
+                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50' 
+                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500'
+              }`}
             >
               <option value="ALL">All States ({inferredStates.length})</option>
               {inferredStates.map(st => (
@@ -290,16 +308,20 @@ export default function MyProjects({
 
           {/* Sort By */}
           <div className="flex items-center gap-1.5 sm:ml-auto">
-            <span className="text-[11px] font-mono text-white/60">Sort:</span>
+            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-600'}`}>Sort:</span>
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as any)}
-              className="bg-[#0B0F17] border border-white/20 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white/50 cursor-pointer"
+              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm ${
+                isDark 
+                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50' 
+                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500'
+              }`}
             >
-              <option value="dphis_desc">Highest Risk (DPHIS)</option>
-              <option value="dphis_asc">Lowest Risk (DPHIS)</option>
-              <option value="cost_desc">Highest Sanctioned Budget</option>
-              <option value="delay_desc">Highest Schedule Delay</option>
+              <option value="dphis_desc">Highest Risk (Score)</option>
+              <option value="dphis_asc">Lowest Risk (Score)</option>
+              <option value="cost_desc">Approved Budget (High to Low)</option>
+              <option value="delay_desc">Project Delay (Longest First)</option>
               <option value="name_asc">Project Name (A–Z)</option>
             </select>
           </div>
