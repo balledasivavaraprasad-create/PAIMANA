@@ -1,17 +1,23 @@
-import { DEMO_SIVA_17_PROJECTS, DEMO_ADMIN_28_PROJECTS, SEEDED_PROJECTS_MAP } from './seededProjects';
+import { DEMO_USER_10_PROJECTS, DEMO_SIVA_17_PROJECTS, DEMO_ADMIN_28_PROJECTS, SEEDED_PROJECTS_MAP } from './seededProjects';
 
-// Auto-detect whether port 8001 (PAIMANA) or 8000 hosts the backend engine
-export let API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8001/api/v1';
+// Auto-detect backend engine: Render production URL on Vercel, localhost:8001/8000 in local dev
+export let API_BASE = import.meta.env.VITE_API_BASE || (
+  typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')
+    ? 'https://paimana-backend.onrender.com/api/v1'
+    : 'http://localhost:8001/api/v1'
+);
 
 if (typeof window !== 'undefined') {
-  // Probe port 8001 first (dedicated PAIMANA port), fallback to 8000
-  fetch('http://localhost:8001/api/v1/ministries', { method: 'GET' })
-    .then(r => { if (r.ok) API_BASE = 'http://localhost:8001/api/v1'; })
-    .catch(() => {
-      fetch('http://localhost:8000/api/v1/ministries', { method: 'GET' })
-        .then(r => { if (r.ok) API_BASE = 'http://localhost:8000/api/v1'; })
-        .catch(() => {});
-    });
+  if (window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1')) {
+    // Probe port 8001 first (dedicated PAIMANA port), fallback to 8000
+    fetch('http://localhost:8001/api/v1/ministries', { method: 'GET' })
+      .then(r => { if (r.ok) API_BASE = 'http://localhost:8001/api/v1'; })
+      .catch(() => {
+        fetch('http://localhost:8000/api/v1/ministries', { method: 'GET' })
+          .then(r => { if (r.ok) API_BASE = 'http://localhost:8000/api/v1'; })
+          .catch(() => {});
+      });
+  }
 }
 
 export interface ProjectData {
@@ -261,34 +267,45 @@ export async function fetchPublicRiskOverview(): Promise<PublicRiskOverview> {
 }
 
 export async function fetchMyProjects(username?: string, limit = 50): Promise<ProjectData[]> {
+  const uLower = (username || '').toLowerCase().trim();
+  const isAdminUser = uLower === 'admin' || uLower === 'analyst' || uLower.includes('admin');
+
   try {
     const url = new URL(`${API_BASE}/projects/my-projects`);
     if (username) url.searchParams.set('username', username);
     url.searchParams.set('limit', String(limit));
     const res = await fetch(url.toString());
-    if (!res.ok) throw new Error('Failed to fetch user-specific projects');
-    return await res.json();
-  } catch (err) {
-    console.warn('Backend offline or failed to fetch user-associated projects', err);
-    if (username) {
-      const uLower = username.toLowerCase();
-      // Check for locally ingested projects first
-      const localIngested = JSON.parse(localStorage.getItem(`paimana_user_projects_${uLower}`) || '[]');
-      if (localIngested.length > 0) {
-        return localIngested;
-      }
-      // Seeded accounts offline fallback
-      if (uLower === 'admin' || uLower === 'analyst') {
-        return DEMO_ADMIN_28_PROJECTS;
-      } else if (uLower.includes('ramesh')) {
-        return DEMO_ADMIN_28_PROJECTS.slice(0, 12);
-      } else if (uLower.includes('balleda') || uLower.includes('siva')) {
-        return DEMO_SIVA_17_PROJECTS;
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        if (isAdminUser) {
+          // Guarantee 25+ projects for admin (e.g. 28)
+          if (data.length < 25) {
+            const existingIds = new Set(data.map((p: ProjectData) => p.project_id));
+            const supplement = DEMO_ADMIN_28_PROJECTS.filter(p => !existingIds.has(p.project_id));
+            return [...data, ...supplement].slice(0, Math.max(28, limit));
+          }
+          return data;
+        } else {
+          // Guarantee exactly 10 projects for user account
+          if (data.length < 10) {
+            const existingIds = new Set(data.map((p: ProjectData) => p.project_id));
+            const supplement = DEMO_USER_10_PROJECTS.filter(p => !existingIds.has(p.project_id));
+            return [...data, ...supplement].slice(0, 10);
+          }
+          return data.slice(0, 10);
+        }
       }
     }
-    // New users start with 0 projects!
-    return [];
+  } catch (err) {
+    console.warn('Backend offline or failed to fetch user-associated projects', err);
   }
+
+  // Resilient fallback: User account ALWAYS gets 10 projects; Admin account ALWAYS gets 28 projects (25+)
+  if (isAdminUser) {
+    return DEMO_ADMIN_28_PROJECTS;
+  }
+  return DEMO_USER_10_PROJECTS;
 }
 
 export interface NormalAssetIngestRequest {
@@ -407,6 +424,8 @@ export async function updateAlertNotificationStatus(
 }
 
 export async function fetchProjects(risk?: string, limit = 50, ministry?: string, search?: string, username?: string): Promise<ProjectData[]> {
+  const uLower = (username || '').toLowerCase().trim();
+  const isRegularUser = !!username && uLower !== 'admin' && uLower !== 'analyst' && !uLower.includes('admin');
   try {
     const url = new URL(`${API_BASE}/projects`);
     if (risk) url.searchParams.set('risk', risk);
@@ -417,14 +436,27 @@ export async function fetchProjects(risk?: string, limit = 50, ministry?: string
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error('Failed to fetch projects');
     const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) return data;
-    return DEMO_ADMIN_28_PROJECTS;
+    if (Array.isArray(data) && data.length > 0) {
+      if (isRegularUser) {
+        if (data.length < 10) {
+          const existingIds = new Set(data.map((p: ProjectData) => p.project_id));
+          const supplement = DEMO_USER_10_PROJECTS.filter(p => !existingIds.has(p.project_id));
+          return [...data, ...supplement].slice(0, 10);
+        }
+        return data.slice(0, 10);
+      } else {
+        if (data.length < 25) {
+          const existingIds = new Set(data.map((p: ProjectData) => p.project_id));
+          const supplement = DEMO_ADMIN_28_PROJECTS.filter(p => !existingIds.has(p.project_id));
+          return [...data, ...supplement].slice(0, Math.max(28, limit));
+        }
+        return data;
+      }
+    }
+    return isRegularUser ? DEMO_USER_10_PROJECTS : DEMO_ADMIN_28_PROJECTS;
   } catch (err) {
     console.warn('Backend offline or failed, returning mock pins fallback', err);
-    if (username && (username.toLowerCase().includes('balleda') || username.toLowerCase().includes('siva'))) {
-      return DEMO_SIVA_17_PROJECTS;
-    }
-    return DEMO_ADMIN_28_PROJECTS;
+    return isRegularUser ? DEMO_USER_10_PROJECTS : DEMO_ADMIN_28_PROJECTS;
   }
 }
 
@@ -1321,6 +1353,18 @@ export async function loginUser(credentials: { email: string; password: string }
   }
 
   // Guaranteed Demo / Offline user fallback:
+  const DEFAULT_USER_10_IDS = [
+    'N28000157', 'N28000122', 'N28000135', '702639', '701766',
+    '702958', 'N28000058', '702637', '617225', 'N28000144'
+  ];
+  const DEFAULT_ADMIN_28_IDS = [
+    '604795', 'N28000157', 'N28000122', 'N28000135', 'N30000002', 'N28000058',
+    'N16000434', '702637', '617225', 'N28000144', 'N28000148', 'N28000086',
+    '701415', 'N22000464', '705237', '82792908', 'PRJ_1913', 'N16000513',
+    '701263', 'N22000463', 'N16000518', '617321', 'N22000406', '705728',
+    '298178', '709798', '705429', '702668'
+  ];
+
   let authUser: AuthResponse | null = null;
   if (emLower === 'admin' || emLower === 'admin@paimana.gov.in') {
     authUser = {
@@ -1332,7 +1376,7 @@ export async function loginUser(credentials: { email: string; password: string }
       full_name: 'Dr. Amitabh Verma',
       ministry: 'Central Infrastructure',
       designation: 'MoSPI Lead Director',
-      assigned_projects: ['82792908', '617321', 'N22000464', '705237', 'N22000463', '705728', '604795']
+      assigned_projects: DEFAULT_ADMIN_28_IDS
     };
   } else if (emLower === 'analyst' || emLower === 'analyst@paimana.gov.in') {
     authUser = {
@@ -1344,7 +1388,7 @@ export async function loginUser(credentials: { email: string; password: string }
       full_name: 'Priyanka Sen',
       ministry: 'Ministry of Statistics & Programme Implementation',
       designation: 'Lead Infrastructure Risk Analyst',
-      assigned_projects: ['705368', '400104', '705454', '705583', '400298', '618488']
+      assigned_projects: DEFAULT_ADMIN_28_IDS
     };
   } else if (emLower.includes('ramesh') || emLower.includes('morth')) {
     authUser = {
@@ -1356,7 +1400,7 @@ export async function loginUser(credentials: { email: string; password: string }
       full_name: 'Dr. Ramesh Kumar',
       ministry: 'Ministry of Road Transport & Highways',
       designation: 'Chief Engineer & Project Director',
-      assigned_projects: ['618488', '619138', '617914', '618569', '619186']
+      assigned_projects: DEFAULT_USER_10_IDS
     };
   } else if (emLower.includes('balleda') || emLower.includes('siva')) {
     authUser = {
@@ -1368,7 +1412,7 @@ export async function loginUser(credentials: { email: string; password: string }
       full_name: 'Balleda Siva Vara Prasad',
       ministry: 'Housing & Urban Affairs',
       designation: 'Project Officer',
-      assigned_projects: ['N28000157', '617225', 'N28000122', 'N28000135', '702639']
+      assigned_projects: DEFAULT_USER_10_IDS
     };
   } else if (emLower.includes('pardhu')) {
     authUser = {
@@ -1380,12 +1424,13 @@ export async function loginUser(credentials: { email: string; password: string }
       full_name: 'Pardhu',
       ministry: 'Road Transport & Highways',
       designation: 'Project Officer',
-      assigned_projects: ['618239', 'N22000032', '618799']
+      assigned_projects: DEFAULT_USER_10_IDS
     };
   } else {
     const offlineUsers = JSON.parse(localStorage.getItem('paimana_offline_users') || '{}');
     const found = offlineUsers[emLower];
     if (found) {
+      const isAdm = (found.role || '').toUpperCase() === 'ADMIN' || (found.role || '').toUpperCase() === 'ANALYST';
       authUser = {
         access_token: `local-token-${found.username}`,
         token_type: 'bearer',
@@ -1394,7 +1439,7 @@ export async function loginUser(credentials: { email: string; password: string }
         email: found.email,
         full_name: found.full_name,
         ministry: found.ministry || 'Central Infrastructure',
-        assigned_projects: found.assigned_projects || []
+        assigned_projects: isAdm ? DEFAULT_ADMIN_28_IDS : DEFAULT_USER_10_IDS
       };
     } else if (em.length >= 3 && pwd.length >= 6) {
       const cleanUsername = em.includes('@') ? em.split('@')[0] : em;
@@ -1407,7 +1452,7 @@ export async function loginUser(credentials: { email: string; password: string }
         full_name: cleanUsername.charAt(0).toUpperCase() + cleanUsername.slice(1),
         ministry: 'Ministry of Road Transport & Highways',
         designation: 'Project Officer',
-        assigned_projects: []
+        assigned_projects: DEFAULT_USER_10_IDS
       };
     }
   }

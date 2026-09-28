@@ -70,11 +70,13 @@ async def project_risk_events_top_level(payload: ProjectRiskEventRequest):
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(auth_router, prefix="/api")
 app.include_router(projects_router, prefix=settings.API_V1_STR)
+app.include_router(projects_router, prefix="/api")
 app.include_router(risk_router, prefix=settings.API_V1_STR)
 app.include_router(predictions_router, prefix=settings.API_V1_STR)
 app.include_router(investigations_router, prefix=settings.API_V1_STR)
 app.include_router(alerts_router, prefix=settings.API_V1_STR)
 app.include_router(analytics_router, prefix=settings.API_V1_STR)
+app.include_router(analytics_router, prefix="/api")
 app.include_router(chat_router, prefix=settings.API_V1_STR)
 app.include_router(chat_router, prefix="/api")
 

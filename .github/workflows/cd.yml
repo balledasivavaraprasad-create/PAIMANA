@@ -1,0 +1,145 @@
+name: CD Pipeline - Continuous Deployment & Smoke Tests
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline - Validation, Tests & Build"]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  # ========================================================
+  # JOB 1: Backend Deployment & Smoke Testing (Render)
+  # ========================================================
+  deploy-and-smoke-backend:
+    name: Backend Smoke Tests (Render)
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    timeout-minutes: 10
+
+    env:
+      RENDER_HEALTH_URL: "https://paimana-backend.onrender.com/health"
+      RENDER_API_URL: "https://paimana-backend.onrender.com/api/v1/public/risk-overview"
+
+    steps:
+      - name: Trigger Render Deploy Hook (If Configured)
+        if: env.RENDER_DEPLOY_HOOK_URL != ''
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          echo "Triggering Render deployment webhook..."
+          curl -X POST -s -S "$RENDER_DEPLOY_HOOK_URL"
+          echo "Deploy hook sent successfully."
+
+      - name: Wait and Smoke Test Render Backend /health
+        run: |
+          echo "Testing Render backend endpoint: $RENDER_HEALTH_URL"
+          max_attempts=12
+          attempt=1
+          delay=10
+
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts: Checking $RENDER_HEALTH_URL..."
+            HTTP_CODE=$(curl -s -o /tmp/health_resp.json -w "%{http_code}" "$RENDER_HEALTH_URL" || true)
+            echo "HTTP Status Code: $HTTP_CODE"
+
+            if [ "$HTTP_CODE" -eq 200 ]; then
+              echo "✅ Backend /health endpoint responded with HTTP 200!"
+              cat /tmp/health_resp.json
+              echo ""
+              break
+            fi
+
+            echo "Backend warming up or deploying... waiting ${delay}s"
+            sleep $delay
+            attempt=$((attempt + 1))
+          done
+
+          if [ $attempt -gt $max_attempts ]; then
+            echo "❌ Render backend health check timed out."
+            exit 1
+          fi
+
+      - name: Smoke Test Backend API /public/risk-overview
+        run: |
+          echo "Testing Render API endpoint: $RENDER_API_URL"
+          HTTP_CODE=$(curl -s -o /tmp/api_resp.json -w "%{http_code}" "$RENDER_API_URL" || true)
+          echo "API HTTP Status: $HTTP_CODE"
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "✅ Public risk overview API returned HTTP 200!"
+            cat /tmp/api_resp.json
+            echo ""
+          else
+            echo "⚠️ Public API responded with HTTP $HTTP_CODE (non-fatal if database is initializing)"
+          fi
+
+  # ========================================================
+  # JOB 2: Frontend Deployment & Smoke Testing (Vercel)
+  # ========================================================
+  deploy-and-smoke-frontend:
+    name: Frontend Smoke Tests (Vercel)
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    timeout-minutes: 8
+
+    env:
+      VERCEL_URL: "https://paimana-seven.vercel.app"
+
+    steps:
+      - name: Trigger Vercel Deploy Hook (If Configured)
+        if: env.VERCEL_DEPLOY_HOOK_URL != ''
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          echo "Triggering Vercel deployment hook..."
+          curl -X POST -s -S "$VERCEL_DEPLOY_HOOK_URL"
+          echo "Vercel deploy hook triggered."
+
+      - name: Smoke Test Vercel Production URL
+        run: |
+          echo "Testing Vercel frontend endpoint: $VERCEL_URL"
+          max_attempts=6
+          attempt=1
+          delay=10
+
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts: Checking $VERCEL_URL..."
+            HTTP_CODE=$(curl -s -L -o /tmp/frontend_resp.html -w "%{http_code}" "$VERCEL_URL" || true)
+            echo "HTTP Status Code: $HTTP_CODE"
+
+            if [ "$HTTP_CODE" -eq 200 ]; then
+              echo "✅ Frontend responded with HTTP 200 OK!"
+              # Check for standard single-page app root container
+              if grep -q "root" /tmp/frontend_resp.html; then
+                echo "✅ Verified Single-Page Application root mount element is present."
+              fi
+              break
+            fi
+
+            echo "Vercel deploying... waiting ${delay}s"
+            sleep $delay
+            attempt=$((attempt + 1))
+          done
+
+          if [ $attempt -gt $max_attempts ]; then
+            echo "❌ Vercel frontend smoke test failed."
+            exit 1
+          fi
+
+  # ========================================================
+  # JOB 3: Deployment Success Notification
+  # ========================================================
+  deployment-status:
+    name: Production Deployment Status
+    needs: [deploy-and-smoke-backend, deploy-and-smoke-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report Live Deployments
+        run: |
+          echo "=========================================================="
+          echo "🚀 PAIMANA PRODUCTION DEPLOYMENT VALIDATED SUCCESSFULLY"
+          echo "=========================================================="
+          echo "Backend:  https://paimana-backend.onrender.com"
+          echo "Health:   https://paimana-backend.onrender.com/health"
+          echo "Frontend: https://paimana-seven.vercel.app"
+          echo "=========================================================="

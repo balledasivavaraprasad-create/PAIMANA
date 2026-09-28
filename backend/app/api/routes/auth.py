@@ -33,6 +33,20 @@ MINISTRIES = [
     {"id": 9, "name": "Ports, Shipping & Waterways", "sector": "Ports & Shipping"},
 ]
 
+DEFAULT_USER_10_IDS = [
+    'N28000157', 'N28000122', 'N28000135', '702639', '701766', 
+    '702958', 'N28000058', '702637', '617225', 'N28000144'
+]
+
+DEFAULT_ADMIN_28_IDS = [
+    '82792908', '617321', 'N22000464', '705237', 'N22000463', 
+    '705728', '701263', 'N16000513', '702668', 'N30000002', 
+    '701415', 'N16000518', '709798', 'N22000406', '705429', 
+    '298178', 'N28000086', '702637', '604795', 'N16000434',
+    'N28000157', 'N28000122', 'N28000135', '617225', 'N28000144', 
+    'N28000148', 'N28000058', 'PRJ_1913'
+]
+
 def generate_otp() -> str:
     return f"{random.randint(100000, 999999)}"
 
@@ -120,7 +134,7 @@ async def register(req: UserRegisterRequest, request: Request):
         "notify_via_email": True,
         "terms_accepted": True,
         "ai_ack_accepted": True,
-        "assigned_projects": [],
+        "assigned_projects": DEFAULT_USER_10_IDS,
         "created_at": datetime.now(timezone.utc)
     }
 
@@ -294,7 +308,7 @@ async def login(
             email="admin@paimana.gov.in",
             full_name="National Director (MoSPI)",
             ministry="Ministry of Statistics and Programme Implementation",
-            assigned_projects=admin_doc.get("assigned_projects", []) if admin_doc else []
+            assigned_projects=(admin_doc.get("assigned_projects") if admin_doc and admin_doc.get("assigned_projects") else DEFAULT_ADMIN_28_IDS)
         )
     if user_identifier.lower() in ("analyst", "analyst@paimana.gov.in") and password in ("analyst123", "paimana2026"):
         analyst_doc = await db.users.find_one({"username": "analyst"}) if db is not None else None
@@ -323,7 +337,7 @@ async def login(
             email="analyst@paimana.gov.in",
             full_name="Lead Infrastructure Risk Analyst",
             ministry="Central Project Intelligence Unit",
-            assigned_projects=analyst_doc.get("assigned_projects", []) if analyst_doc else []
+            assigned_projects=(analyst_doc.get("assigned_projects") if analyst_doc and analyst_doc.get("assigned_projects") else DEFAULT_ADMIN_28_IDS)
         )
 
     # 2. Database verification
@@ -369,15 +383,25 @@ async def login(
                 except Exception:
                     pass
 
+                role_val = user.get("role", UserRole.PROJECT_OFFICER)
+                is_adm = str(role_val).upper() in ("ADMIN", "ANALYST", "USERROLE.ADMIN", "USERROLE.MO_SPI_ANALYST")
+                user_projs = user.get("assigned_projects", [])
+                if is_adm and len(user_projs) < 25:
+                    final_assigned = DEFAULT_ADMIN_28_IDS
+                elif not is_adm and len(user_projs) != 10:
+                    final_assigned = user_projs[:10] if len(user_projs) >= 10 else DEFAULT_USER_10_IDS
+                else:
+                    final_assigned = user_projs
+
                 return Token(
                     access_token=token,
                     token_type="bearer",
-                    role=user.get("role", UserRole.PROJECT_OFFICER),
+                    role=role_val,
                     username=user["username"],
                     email=user["email"],
                     full_name=user.get("full_name", user["username"]),
                     ministry=user.get("ministry", "Central Infrastructure"),
-                    assigned_projects=user.get("assigned_projects", [])
+                    assigned_projects=final_assigned
                 )
 
     raise HTTPException(
@@ -390,6 +414,15 @@ async def login(
 # ============================================================
 @router.get("/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
+    user_projs = current_user.get("assigned_projects", [])
+    is_adm = str(current_user.get("role", "")).upper() in ("ADMIN", "ANALYST", "USERROLE.ADMIN", "USERROLE.MO_SPI_ANALYST")
+    if is_adm and len(user_projs) < 25:
+        final_assigned = DEFAULT_ADMIN_28_IDS
+    elif not is_adm and len(user_projs) != 10:
+        final_assigned = user_projs[:10] if len(user_projs) >= 10 else DEFAULT_USER_10_IDS
+    else:
+        final_assigned = user_projs
+
     return {
         "username": current_user.get("username"),
         "role": current_user.get("role"),
@@ -400,7 +433,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "dphis_alert_threshold": current_user.get("dphis_alert_threshold", 75.0),
         "alert_email": current_user.get("alert_email") or current_user.get("email"),
         "notify_via_email": current_user.get("notify_via_email", True),
-        "assigned_projects": current_user.get("assigned_projects", [])
+        "assigned_projects": final_assigned
     }
 
 @router.get("/auth/preferences")

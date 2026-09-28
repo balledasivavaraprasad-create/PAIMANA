@@ -4,6 +4,7 @@ import {
   fetchProjectPredictions, fetchProjectRisk, fetchProject, fetchProjects,
   PredictionData, RiskData, ProjectData, UserProfile 
 } from '../lib/api';
+import { DEMO_ADMIN_28_PROJECTS, DEMO_USER_10_PROJECTS } from '../lib/seededProjects';
 import { ProjectPin } from '../components/CeoPinManager';
 import { getRiskCategory } from '../lib/risk';
 import { useTheme } from '../hooks/useTheme';
@@ -168,10 +169,11 @@ export default function ProjectIntelligence({
     let isMounted = true;
     setDirectoryLoading(true);
 
-    fetchProjects(undefined, 100, undefined, undefined, isAdmin ? undefined : currentUser?.username).then(apiProjects => {
+    const isUserAccount = !isAdmin && currentUser?.username && currentUser.username.toLowerCase() !== 'admin';
+    fetchProjects(undefined, 100, undefined, undefined, isUserAccount ? currentUser.username : undefined).then(apiProjects => {
       if (!isMounted) return;
       if (apiProjects && apiProjects.length > 0) {
-        setProjectList(apiProjects);
+        setProjectList(isUserAccount ? apiProjects.slice(0, 10) : apiProjects);
       } else if (allProjects && allProjects.length > 0) {
         // Fallback to pins passed via props
         const mapped = allProjects.map(p => ({
@@ -186,11 +188,16 @@ export default function ProjectIntelligence({
           risk_level: p.risk,
           delay_str: p.delay
         }));
-        setProjectList(mapped);
+        setProjectList(isUserAccount ? mapped.slice(0, 10) : mapped);
+      } else {
+        setProjectList(isUserAccount ? DEMO_USER_10_PROJECTS : DEMO_ADMIN_28_PROJECTS);
       }
       setDirectoryLoading(false);
     }).catch(() => {
-      if (isMounted) setDirectoryLoading(false);
+      if (isMounted) {
+        setProjectList(isUserAccount ? DEMO_USER_10_PROJECTS : DEMO_ADMIN_28_PROJECTS);
+        setDirectoryLoading(false);
+      }
     });
 
     return () => {

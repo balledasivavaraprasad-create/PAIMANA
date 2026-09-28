@@ -1026,6 +1026,8 @@ export const DEMO_SIVA_17_PROJECTS: ProjectData[] = [
   }
 ];
 
+export const DEMO_USER_10_PROJECTS: ProjectData[] = DEMO_SIVA_17_PROJECTS.slice(0, 10);
+
 export const DEMO_ADMIN_28_PROJECTS: ProjectData[] = [
   {
     "project_id": "604795",

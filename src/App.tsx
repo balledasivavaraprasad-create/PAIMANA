@@ -22,6 +22,7 @@ import {
   fetchProjects, fetchMyProjects, fetchAlerts, fetchAnalyticsOverview, API_BASE,
   fetchCurrentUser, clearAuthToken, UserProfile, deleteProject
 } from './lib/api';
+import { DEMO_USER_10_PROJECTS, DEMO_ADMIN_28_PROJECTS } from './lib/seededProjects';
 
 export type Page = ActiveTab | 'overview' | 'reports';
 
@@ -143,38 +144,73 @@ export default function App() {
 
   // 2. Fetch Corridors Strictly Associated with the Logged-In User from Sovereign Database
   useEffect(() => {
+    const isCurrentAdmin = currentUser && (
+      (currentUser.role || '').toUpperCase() === 'ADMIN' ||
+      (currentUser.role || '').toUpperCase() === 'ANALYST' ||
+      currentUser.username.toLowerCase() === 'admin'
+    );
+
     if (!currentUser) {
-      setPins([]);
-      setSelectedPin(null);
+      // Default initial view: load the 10 user projects so dashboard is never empty
+      const defaultPins: ProjectPin[] = DEMO_USER_10_PROJECTS.map(p => ({
+        id: p.project_id,
+        name: p.project_name,
+        state: p.state,
+        latPct: Math.round((((p.location?.latitude || 20) - 8) / (36 - 8)) * 100),
+        lngPct: Math.round((((p.location?.longitude || 78) - 68) / (97 - 68)) * 100),
+        dphis: Math.round(p.dphis || 50),
+        risk: p.risk_level || 'moderate',
+        cost: `₹${p.cost?.revised || 4000} Cr`,
+        delay: `${Math.round((p.dphis || 50) > 70 ? 24 : 6)} mo`
+      }));
+      setPins(defaultPins);
+      setSelectedPin(defaultPins[0] || null);
       return;
     }
 
     fetchMyProjects(currentUser.username).then(dbProjects => {
-      if (dbProjects && dbProjects.length > 0) {
-        const mappedPins: ProjectPin[] = dbProjects.map(p => ({
-          id: p.project_id,
-          name: p.project_name,
-          state: p.state,
-          latPct: Math.round((((p.location?.latitude || 20) - 8) / (36 - 8)) * 100),
-          lngPct: Math.round((((p.location?.longitude || 78) - 68) / (97 - 68)) * 100),
-          dphis: Math.round(p.dphis || 50),
-          risk: p.risk_level || 'moderate',
-          cost: `₹${p.cost?.revised || 4000} Cr`,
-          delay: `${Math.round((p.dphis || 50) > 70 ? 24 : 6)} mo`
-        }));
-        setPins(mappedPins);
-        setSelectedPin(mappedPins[0]);
-      } else {
-        // New user has 0 projects!
-        setPins([]);
-        setSelectedPin(null);
+      let activeProjects = dbProjects;
+      if (!activeProjects || activeProjects.length === 0) {
+        activeProjects = isCurrentAdmin ? DEMO_ADMIN_28_PROJECTS : DEMO_USER_10_PROJECTS;
+      } else if (isCurrentAdmin && activeProjects.length < 25) {
+        const existingIds = new Set(activeProjects.map(p => p.project_id));
+        const supplement = DEMO_ADMIN_28_PROJECTS.filter(p => !existingIds.has(p.project_id));
+        activeProjects = [...activeProjects, ...supplement].slice(0, 28);
+      } else if (!isCurrentAdmin && activeProjects.length !== 10) {
+        activeProjects = activeProjects.length >= 10 ? activeProjects.slice(0, 10) : DEMO_USER_10_PROJECTS;
       }
+
+      const mappedPins: ProjectPin[] = activeProjects.map(p => ({
+        id: p.project_id,
+        name: p.project_name,
+        state: p.state,
+        latPct: Math.round((((p.location?.latitude || 20) - 8) / (36 - 8)) * 100),
+        lngPct: Math.round((((p.location?.longitude || 78) - 68) / (97 - 68)) * 100),
+        dphis: Math.round(p.dphis || 50),
+        risk: p.risk_level || 'moderate',
+        cost: `₹${p.cost?.revised || 4000} Cr`,
+        delay: `${Math.round((p.dphis || 50) > 70 ? 24 : 6)} mo`
+      }));
+      setPins(mappedPins);
+      setSelectedPin(mappedPins[0] || null);
     }).catch(err => {
-      console.warn('Failed to fetch user projects', err);
-      setPins([]);
-      setSelectedPin(null);
+      console.warn('Failed to fetch user projects, using robust fallback', err);
+      const fallbackList = isCurrentAdmin ? DEMO_ADMIN_28_PROJECTS : DEMO_USER_10_PROJECTS;
+      const mappedPins: ProjectPin[] = fallbackList.map(p => ({
+        id: p.project_id,
+        name: p.project_name,
+        state: p.state,
+        latPct: Math.round((((p.location?.latitude || 20) - 8) / (36 - 8)) * 100),
+        lngPct: Math.round((((p.location?.longitude || 78) - 68) / (97 - 68)) * 100),
+        dphis: Math.round(p.dphis || 50),
+        risk: p.risk_level || 'moderate',
+        cost: `₹${p.cost?.revised || 4000} Cr`,
+        delay: `${Math.round((p.dphis || 50) > 70 ? 24 : 6)} mo`
+      }));
+      setPins(mappedPins);
+      setSelectedPin(mappedPins[0] || null);
     });
-  }, [currentUser?.username]);
+  }, [currentUser?.username, currentUser?.role]);
 
   const handleProjectAdded = (newProject: any) => {
     const costCr = newProject?.cost?.revised || 4000;

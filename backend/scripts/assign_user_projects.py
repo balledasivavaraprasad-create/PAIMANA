@@ -14,49 +14,29 @@ def main():
 
     print("=== ASSIGNING USER-PROJECT ASSOCIATIONS IN MONGODB ===")
 
-    # 1. MoRTH projects for Dr. Ramesh Kumar and Pardhu
-    morth_projects = list(db.projects.find(
-        {"ministry": re.compile(r"Road Transport", re.IGNORECASE)},
-        {"project_id": 1, "project_name": 1, "state": 1}
-    ).sort("dphis", -1).limit(30))
-
-    ramesh_ids = [p["project_id"] for p in morth_projects[:12]]
-    pardhu_ids = [p["project_id"] for p in morth_projects[10:20]]
-
-    # 2. Urban Affairs projects for Siva and Siva123 (17 assigned projects for user demo)
-    siva_ids = [
+    # 1. 10 Urban & Infrastructure corridors for User Account (exactly 10 projects)
+    user_10_ids = [
         'N28000157', 'N28000122', 'N28000135', '702639', '701766', 
-        '702958', 'N28000058', '702637', '617225', 'N28000144', 
-        'N28000148', 'N28000086', 'PRJ_1913', '82792908', '617321', 
-        'N22000464', '705237'
+        '702958', 'N28000058', '702637', '617225', 'N28000144'
     ]
-    siva123_ids = siva_ids[:10]
 
-    # 3. National high-risk portfolio for Lead Risk Analyst
-    risk_projects = list(db.projects.find(
-        {"risk_level": {"$in": ["high", "critical"]}},
-        {"project_id": 1, "project_name": 1, "ministry": 1}
-    ).sort("dphis", -1).limit(15))
-    analyst_ids = [p["project_id"] for p in risk_projects]
-
-    # 4. Flagship Sovereign Projects for MoSPI Admin (28 projects, 25+)
-    admin_ids = [
-        '82792908', '617321', 'N22000464', '705237', 'N22000463', 
-        '705728', '701263', 'N16000513', '702668', 'N30000002', 
-        '701415', 'N16000518', '709798', 'N22000406', '705429', 
-        '298178', 'N28000086', '702637', '604795', 'N16000434',
-        'N28000157', 'N28000122', 'N28000135', '617225', 'N28000144', 
-        'N28000148', 'N28000058', 'PRJ_1913'
+    # 2. Flagship Sovereign Projects for MoSPI Admin (28 projects, 25+)
+    admin_28_ids = [
+        '604795', 'N28000157', 'N28000122', 'N28000135', 'N30000002', 'N28000058',
+        'N16000434', '702637', '617225', 'N28000144', 'N28000148', 'N28000086',
+        '701415', 'N22000464', '705237', '82792908', 'PRJ_1913', 'N16000513',
+        '701263', 'N22000463', 'N16000518', '617321', 'N22000406', '705728',
+        '298178', '709798', '705429', '702668'
     ]
 
     user_assignments = {
-        "ramesh.kumar": ramesh_ids,
-        "pardhu.r25": pardhu_ids,
-        "balledasivavaraprasad": siva_ids,
-        "balledasivavaraprasad@gmail.com": siva_ids,
-        "balledasivavaraprasad123": siva123_ids,
-        "analyst": analyst_ids,
-        "admin": admin_ids
+        "ramesh.kumar": user_10_ids,
+        "pardhu.r25": user_10_ids,
+        "balledasivavaraprasad": user_10_ids,
+        "balledasivavaraprasad@gmail.com": user_10_ids,
+        "balledasivavaraprasad123": user_10_ids,
+        "analyst": admin_28_ids,
+        "admin": admin_28_ids
     }
 
     # Reset any existing assigned_users on projects
