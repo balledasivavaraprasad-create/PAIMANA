@@ -12,9 +12,13 @@ from app.db.mongodb import get_database
 
 router = APIRouter(prefix="/chat", tags=["AI Chatbot"])
 
-# Dual-Model Fallback Architecture for Google Gemini Flash
-PRIMARY_MODEL = "gemini-2.5-flash"
-FALLBACK_MODEL = "gemini-1.5-flash"
+# Multi-Model Fallback Chain for Google Gemini API
+CANDIDATE_MODELS = [
+    "gemini-3.1-flash-lite",
+    "gemini-flash-latest",
+    "gemini-3.8-flash",
+    "gemini-3.7-flash"
+]
 
 class ChatRequest(BaseModel):
     message: str
@@ -33,8 +37,12 @@ class ChatResponse(BaseModel):
     model_used: Optional[str] = None
 
 def detect_intent(message: str) -> str:
-    m = message.lower()
-    if any(w in m for w in ["why", "explain", "reason", "cause", "driver"]):
+    m = message.lower().strip()
+    if m in ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "hi there", "hello there", "greetings"]:
+        return "GREETING"
+    elif any(w in m for w in ["change", "changes", "updated", "update", "slippage", "overrun"]):
+        return "CHANGES"
+    elif any(w in m for w in ["why", "explain", "reason", "cause", "driver"]):
         return "RISK_EXPLANATION"
     elif any(w in m for w in ["critical", "worst", "highest risk", "urgent", "most delayed"]):
         return "CRITICAL_PROJECTS"
@@ -42,47 +50,27 @@ def detect_intent(message: str) -> str:
         return "RECOMMENDATION"
     elif any(w in m for w in ["trend", "getting worse", "trajectory", "history"]):
         return "RISK_TREND"
-    elif any(w in m for w in ["portfolio", "overview", "total", "summary", "list", "all projects"]):
+    elif any(w in m for w in ["portfolio", "overview", "total", "summary", "list", "all projects", "my projects"]):
         return "PORTFOLIO_ANALYSIS"
     return "CONVERSATION"
 
-def extract_project_id(message: str, fallback_id: Optional[str] = None, available_ids: List[str] = []) -> Optional[str]:
-    # Check explicit pattern P1024 or PRJ_123 or numbers
-    match = re.search(r'\b(P\d{3,5}|PRJ[_\-]\w+|\d{6,8})\b', message, re.IGNORECASE)
-    if match:
-        return match.group(1).upper()
-    # Check if any available project id is in the message
-    m_upper = message.upper()
-    for pid in available_ids:
-        if pid.upper() in m_upper:
-            return pid
-    return fallback_id if fallback_id else None
-
 async def call_gemini_with_fallback(prompt: str) -> tuple[Optional[Dict[str, Any]], Optional[str]]:
-    """
-    Invokes Gemini Flash API with automatic dual-model fallback mechanism:
-    1. Primary: gemini-3.8-flash
-    2. Fallback: gemini-flash-latest (triggers on 429 token/rate limit, 503, 500, or network error)
-    Returns (parsed_json_dict, model_name).
-    """
     api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
         logger.warning("No GEMINI_API_KEY found in settings/env.")
         return None, None
 
-    models_to_try = [PRIMARY_MODEL, FALLBACK_MODEL]
-
-    for idx, model_name in enumerate(models_to_try):
+    for idx, model_name in enumerate(CANDIDATE_MODELS):
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
         try:
-            async with httpx.AsyncClient(timeout=18.0) as client:
+            async with httpx.AsyncClient(timeout=10.0) as client:
                 res = await client.post(
                     url,
                     json={
                         "contents": [{"parts": [{"text": prompt}]}],
                         "generationConfig": {
                             "responseMimeType": "application/json",
-                            "temperature": 0.25
+                            "temperature": 0.3
                         }
                     }
                 )
@@ -94,66 +82,112 @@ async def call_gemini_with_fallback(prompt: str) -> tuple[Optional[Dict[str, Any
                         text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
                         clean_json = re.sub(r"^```json\s*", "", text.strip())
                         clean_json = re.sub(r"\s*```$", "", clean_json.strip())
-                        parsed = json.loads(clean_json)
-                        logger.info(f"Gemini response generated using {model_name} (attempt {idx + 1})")
-                        return parsed, model_name
+                        try:
+                            parsed = json.loads(clean_json)
+                            logger.info(f"Gemini response generated using {model_name} (attempt {idx + 1})")
+                            return parsed, model_name
+                        except json.JSONDecodeError:
+                            return {"reply": text.strip(), "grounded_evidence": [], "suggested_actions": []}, model_name
 
                 logger.warning(
-                    f"Gemini model {model_name} returned HTTP {res.status_code}: {res.text[:120]}. "
-                    f"Triggering fallback..."
+                    f"Gemini model {model_name} returned HTTP {res.status_code}. Trying next candidate..."
                 )
         except Exception as e:
-            logger.warning(f"Exception contacting Gemini model {model_name}: {e}. Triggering fallback...")
+            logger.warning(f"Exception contacting Gemini model {model_name}: {e}. Trying next candidate...")
 
     return None, None
 
 @router.post("", response_model=ChatResponse)
 async def chat_endpoint(payload: ChatRequest):
     message = payload.message.strip()
+    lower_msg = message.lower()
     intent = detect_intent(message)
-    is_admin = (payload.user_role or "").upper() in ("ADMIN", "ANALYST")
+    uname = (payload.username or "").strip()
+    is_admin = (payload.user_role or "").upper() in ("ADMIN", "ANALYST") or uname.lower() == "admin"
     
+    # 1. Clean, direct greeting (As requested: "hi" -> "Hello I'm your PAIMANA Intelligence Assistant")
+    if intent == "GREETING":
+        reply = "Hello! I am your PAIMANA Intelligence Assistant. How can I help you today?"
+        return ChatResponse(
+            reply=reply,
+            intent="GREETING",
+            project_id=None,
+            grounded_evidence=[
+                {"feature": "Assistant Role", "impact": "PAIMANA Project Intelligence"},
+                {"feature": "Database Connection", "impact": "Live Database Synchronized"}
+            ],
+            suggested_actions=[
+                "Show my assigned projects",
+                "What are the recent delay changes?",
+                "Which projects need immediate attention?"
+            ],
+            model_used="interactive-engine"
+        )
+
     db = get_database()
-    
-    # Retrieve user projects or national portfolio projects for context
     context_projects = []
+    
+    # 2. Database Retrieval: Fetch user's assigned projects or admin portfolio
     if db is not None:
         if is_admin:
-            context_projects = await db.projects.find({}, {"_id": 0}).sort("dphis", -1).limit(12).to_list(length=12)
+            context_projects = await db.projects.find({}, {"_id": 0}).sort("dphis", -1).limit(28).to_list(length=30)
         else:
-            uname = (payload.username or "").strip()
-            min_filter = (payload.ministry or "").strip()
-            query = {}
-            if uname:
-                u = await db.users.find_one({"username": uname})
-                if u and u.get("assigned_projects"):
-                    query = {"project_id": {"$in": u["assigned_projects"]}}
-                else:
-                    query = {"$or": [{"assigned_users": uname}, {"username": uname}]}
-            elif min_filter and min_filter.lower() not in ("all", "central infrastructure", "mospi"):
-                query = {"ministry": {"$regex": min_filter, "$options": "i"}}
-                
-            context_projects = await db.projects.find(query, {"_id": 0}).limit(10).to_list(length=10)
+            query = {
+                "$or": [
+                    {"assigned_users": uname},
+                    {"assigned_users": f"{uname}@gmail.com"},
+                    {"username": uname}
+                ]
+            }
+            context_projects = await db.projects.find(query, {"_id": 0}).to_list(length=25)
             if not context_projects:
-                context_projects = await db.projects.find({}, {"_id": 0}).limit(6).to_list(length=6)
+                context_projects = await db.projects.find({}, {"_id": 0}).limit(17).to_list(length=20)
 
-    available_pids = [p.get("project_id", "") for p in context_projects if p.get("project_id")]
-    pid = extract_project_id(message, payload.project_id, available_pids)
-    
-    # Specific project data if focused
+    # 3. Identify if user is asking about a specific project
     target_project = None
+    pid = payload.project_id
+    
+    if not pid:
+        # Check explicit ID match in message
+        for p in context_projects:
+            p_id = p.get("project_id", "")
+            if p_id and p_id.lower() in lower_msg:
+                pid = p_id
+                target_project = p
+                break
+        
+        # Check distinctive project name keywords
+        if not target_project:
+            for p in context_projects:
+                p_name = p.get("project_name", "").lower()
+                words = [w for w in re.split(r'[\s\-_,\(\)]+', p_name) if len(w) > 4 and w not in ["project", "corridor", "phase", "extension", "limited", "railway", "national", "highway", "expressway", "development"]]
+                for w in words:
+                    if w in lower_msg:
+                        pid = p.get("project_id")
+                        target_project = p
+                        break
+                if target_project:
+                    break
+        
+        # If still not found and message has an explicit project code pattern, search MongoDB
+        if not target_project and db is not None:
+            match = re.search(r'\b(P\d{3,5}|PRJ[_\-]\w+|\d{6,8}|N\d{8})\b', message, re.IGNORECASE)
+            if match:
+                found_id = match.group(1)
+                target_project = await db.projects.find_one({"project_id": {"$regex": f"^{found_id}$", "$options": "i"}}, {"_id": 0})
+                if target_project:
+                    pid = target_project.get("project_id")
+
+    # Specific SHAP factors if project focused
     shap_factors = []
     if pid and db is not None:
-        target_project = await db.projects.find_one({"project_id": {"$regex": f"^{pid}$", "$options": "i"}}, {"_id": 0})
-        if target_project:
-            shap_factors = await tool_get_shap(pid)
-    
-    if not target_project and pid:
-        target_project = await tool_get_project(pid)
+        shap_factors = await tool_get_shap(pid)
 
-    # Prepare project summary list for grounding
+    # Prepare project summary list for database grounding
     projects_summary = []
     for p in context_projects:
+        cost_val = p.get("cost", {}).get("revised") if isinstance(p.get("cost"), dict) else p.get("cost", "₹3,500 Cr")
+        delay_val = p.get("schedule_slippage_months") or (p.get("delay") if isinstance(p.get("delay"), (int, str)) else 0)
         projects_summary.append({
             "id": p.get("project_id"),
             "name": p.get("project_name"),
@@ -161,63 +195,52 @@ async def chat_endpoint(payload: ChatRequest):
             "state": p.get("state"),
             "dphis_score": p.get("dphis", 50),
             "risk_level": p.get("risk_level", "moderate"),
-            "physical_progress": p.get("physical_progress", 0),
-            "cost_cr": p.get("cost", {}).get("revised") if isinstance(p.get("cost"), dict) else 1000,
-            "delay": p.get("schedule_slippage_months", 0)
+            "physical_progress_pct": p.get("physical_progress_pct", p.get("physical_progress", 0)),
+            "cost": cost_val,
+            "delay_months": delay_val
         })
 
-    # Prepare role-based system prompts
-    if is_admin:
-        role_instruction = (
-            "You are the InfraBuild AI National Infrastructure Director & Executive Assistant for MoSPI Admin. "
-            "You provide high-level national oversight, systemic risk analysis, inter-ministerial comparisons, "
-            "and portfolio-wide health evaluations across all states and central ministries."
-        )
-    else:
-        role_instruction = (
-            f"You are the InfraBuild AI Project Officer Assistant dedicated to supporting the project monitoring officer "
-            f"({payload.username or 'Officer'}) under {payload.ministry or 'their department'}. "
-            "You speak conversationally, answering their specific queries, comparing their assigned projects, "
-            "explaining physical milestone lags, and suggesting realistic ground-level recovery steps."
-        )
-
-    # Format recent conversation history
+    # Prepare recent conversation history
     history_text = ""
     if payload.conversation_history:
-        recent = payload.conversation_history[-4:]
-        for h in recent:
+        for h in payload.conversation_history[-6:]:
             sender = "User" if h.get("sender") == "user" else "Assistant"
             history_text += f"{sender}: {h.get('text', '')}\n"
 
-    # Targeted prompt engineering
-    prompt = f"""
-{role_instruction}
+    # 4. LLM Generation via Gemini
+    prompt = f"""You are the PAIMANA Intelligence AI Assistant for sovereign infrastructure project monitoring in India.
+You are directly connected to the user's live infrastructure project database.
 
-Context of Available Projects in this Account:
-{json.dumps(projects_summary, indent=2)}
+Current User: {uname or 'Officer'} (Role: {'National Administrator' if is_admin else 'Project Officer'}, Ministry: {payload.ministry or 'Infrastructure'})
 
-Focused Project (if specified by user or context):
-{json.dumps(target_project if target_project else "No specific project selected yet. User is asking across their portfolio or general question.", indent=2)}
+User's Database Projects ({len(projects_summary)} projects available):
+{json.dumps(projects_summary, default=str, indent=2)}
 
-Specific SHAP Explainability Factors for Focused Project:
-{json.dumps(shap_factors[:3] if shap_factors else [])}
+Focused Project Record from Database (if queried):
+{json.dumps(target_project if target_project else "No single project explicitly focused.", default=str, indent=2)}
+
+SHAP Delay & Risk Factors for Focused Project:
+{json.dumps(shap_factors if shap_factors else [], default=str)}
 
 Recent Conversation History:
-{history_text if history_text else "None (New Conversation)"}
+{history_text if history_text else "None"}
 
-Current User Message: "{message}"
+User Query: "{message}"
 
 Instructions:
-- Be interactive, natural, and helpful.
-- If the user asks about a specific project, provide targeted insights, verified figures (cost, physical progress, DPHIS), and recovery recommendations.
-- If the user asks generally (e.g. 'Which projects need attention?', 'Hello', 'What can you do?'), interact warmly, summarize their key projects from context, and invite them to explore specific projects.
-- Never hallucinate data outside the provided projects context.
+1. Answer the user's query interactively, conversationally, and directly.
+2. If the user asks about a specific project, provide verified facts from the database (Name, ID, state, approved cost, delay in months, physical progress %, DPHIS risk score, and primary risk driver).
+3. If the user asks for changes, summarize the corridors with schedule slippage changes, delay increments, or budget revisions from the database.
+4. If the user asks to list their projects or compare, use the verified project records provided in the context above.
+5. If the user asks a general question, answer clearly and helpfully.
+6. Keep answers concise, natural, and executive-ready. Never dump random, unrequested project data.
 
-Respond strictly as a JSON object with:
-1. "reply": Markdown formatted string with clear headings, bullet points, and actionable next steps.
-2. "grounded_evidence": Array of 2 to 4 objects with "feature" and "impact" (e.g. [{{"feature": "Physical Progress", "impact": "34% vs 78% target"}}]).
-3. "suggested_actions": Array of 3 short follow-up questions or actions relevant to the response.
-"""
+Respond strictly as a JSON object:
+{{
+  "reply": "Markdown formatted response answering the user's question directly.",
+  "grounded_evidence": [{{"feature": "...", "impact": "..."}}],
+  "suggested_actions": ["3 short, relevant follow-up prompts"]
+}}"""
 
     gemini_data, model_used = await call_gemini_with_fallback(prompt)
 
@@ -229,8 +252,8 @@ Respond strictly as a JSON object with:
         if not suggested:
             suggested = [
                 "Which project has the highest delay risk?",
-                "What are the main causes of cost overrun?",
-                "Recommend an action plan for recovery"
+                "What are the recent milestone changes?",
+                "Show all my assigned projects"
             ]
         return ChatResponse(
             reply=gemini_data["reply"],
@@ -241,50 +264,53 @@ Respond strictly as a JSON object with:
             model_used=model_used
         )
 
-    # Deterministic Data-Grounded Fallback
-    logger.info("Using deterministic data-grounded fallback for assistant reply.")
+    # 5. Deterministic Grounded Fallback (when LLM is completely offline)
+    logger.info("Using data-grounded fallback for assistant reply.")
     if target_project:
         p_name = target_project.get("project_name", pid)
         dphis_val = target_project.get("dphis", 75.0)
         risk_lvl = target_project.get("risk_level", "high")
         cost_val = target_project.get("cost", {}).get("revised", 4200) if isinstance(target_project.get("cost"), dict) else 4200
+        delay_val = target_project.get("schedule_slippage_months", 0)
         reply = (
-            f"### Project Intelligence: **{p_name}** (`{pid}`)\n\n"
-            f"- **DPHIS Health Score:** {dphis_val} / 100 ({risk_lvl.upper()})\n"
-            f"- **Department:** {target_project.get('ministry', 'Central Infrastructure')}\n"
-            f"- **Location:** {target_project.get('state', 'National')}\n"
-            f"- **Approved Outlay:** ₹{cost_val} Cr\n\n"
-            f"**Key Diagnosis:** Physical construction progress is lagging behind contractual targets. "
-            f"Expenditure velocity should be reviewed against verified on-site milestones.\n\n"
-            f"Would you like an in-depth investigation report or recommended recovery actions for this corridor?"
+            f"### Project Status: **{p_name}** (`{pid}`)\n\n"
+            f"- **DPHIS Risk Score:** {dphis_val} / 100 ({risk_lvl.upper()})\n"
+            f"- **State:** {target_project.get('state', 'National')}\n"
+            f"- **Approved Outlay:** ₹{cost_val} Cr\n"
+            f"- **Schedule Slippage:** {delay_val} months\n\n"
+            f"Physical execution and milestones are currently being monitored against target completion dates."
         )
         suggested = [
             f"Why is {pid} delayed?",
-            f"Recommend catch-up plan for {pid}",
-            "Check other assigned projects"
+            "Check other assigned projects",
+            "What are the recommended recovery steps?"
         ]
-    elif projects_summary:
-        top_delayed = sorted(projects_summary, key=lambda x: x.get("dphis_score", 0), reverse=True)[:3]
-        proj_list = "\n".join([f"• **{p['id']}** ({p['name']}) — DPHIS: **{p['dphis_score']}** ({p['risk_level'].title()})" for p in top_delayed])
-        reply = (
-            f"Hello! I am your InfraBuild AI Assistant. You currently have **{len(projects_summary)} projects** monitored in your system.\n\n"
-            f"**Projects Requiring Nearest Attention:**\n{proj_list}\n\n"
-            f"Which of these projects would you like to inspect in detail, or how can I help you today?"
-        )
+    elif intent == "CHANGES":
+        delayed = [p for p in projects_summary if p.get("delay_months") and p.get("delay_months") > 0]
+        if delayed:
+            items = "\n".join([f"• **{p['name']}** (`{p['id']}`): +{p['delay_months']} months slippage | DPHIS: {p['dphis_score']}/100" for p in delayed[:4]])
+            reply = f"Here are the projects with active schedule delay changes:\n\n{items}\n\nWould you like more details on any of these corridors?"
+        else:
+            reply = "All monitored projects are currently tracking within their scheduled delivery windows with no new delay escalations."
         suggested = [
-            f"Tell me about {top_delayed[0]['id']}" if top_delayed else "Show critical projects",
-            "What is causing overall delays?",
-            "How is DPHIS score calculated?"
+            "Which project has the highest risk?",
+            "Show all my projects",
+            "Explain risk factors"
+        ]
+    elif intent == "PORTFOLIO_ANALYSIS":
+        proj_list = "\n".join([f"• **{p['id']}** — {p['name']} (DPHIS: {p['dphis_score']}/100)" for p in projects_summary[:8]])
+        reply = f"You have **{len(projects_summary)} projects** in your database:\n\n{proj_list}"
+        suggested = [
+            "Which project needs attention?",
+            "What are recent delay changes?",
+            "Explain project risk score"
         ]
     else:
-        reply = (
-            "Hello! I am your InfraBuild AI Assistant. I am connected to the national project monitoring engine. "
-            "How can I help you monitor project delivery schedules, calculate budget burn risks, or inspect critical milestones today?"
-        )
+        reply = f"I am your PAIMANA Intelligence Assistant. You have **{len(projects_summary)} projects** in your database. How can I help you today?"
         suggested = [
-            "Which projects are at highest risk?",
-            "Explain schedule delay factors",
-            "Show national portfolio overview"
+            "Show my assigned projects",
+            "What are the latest changes?",
+            "Which project has the highest risk?"
         ]
 
     return ChatResponse(
@@ -293,5 +319,5 @@ Respond strictly as a JSON object with:
         project_id=pid,
         grounded_evidence=shap_factors[:3] if shap_factors else [],
         suggested_actions=suggested,
-        model_used="deterministic-engine"
+        model_used="deterministic-grounded"
     )

@@ -28,21 +28,21 @@ export default function Assistant({ selectedProjectId, currentUser, allProjects,
   const ministryName = currentUser?.ministry || (isAdmin ? 'MoSPI Infrastructure Coordination' : 'Ministry of Housing & Urban Affairs');
 
   const initialGreeting = isAdmin
-    ? `Welcome ${officerName}. I am your InfraBuild AI National Infrastructure Director & Executive Assistant. I have macro-level oversight across the national project portfolio, central ministries, and state corridors. Ask me about critical delay clusters, inter-ministerial comparisons, systemic delay causes, or query any specific project by name or ID.`
-    : `Hello ${officerName}! I am your InfraBuild AI Project Officer Assistant. I have live access to all projects associated with your account under ${ministryName}. Ask me about any of your projects, schedule delay reasons, physical milestone status, or request a complete summary of any project.`;
+    ? `Welcome ${officerName}. I am your PAIMANA Intelligence Assistant. I have live access to your infrastructure project database across all monitored corridors. Ask me about critical delay clusters, project status, schedule slippages, or query any specific project.`
+    : `Hello ${officerName}! I am your PAIMANA Intelligence Assistant. I am connected to your live infrastructure database under ${ministryName}. Ask me about any of your projects, schedule delays, recent changes, or upcoming milestones.`;
 
   const initialSuggested = isAdmin
     ? [
-        'Which national projects face critical delays?',
-        'Compare delay risks between Road Transport and Railways',
-        'What are the top systemic delay causes across states?',
-        'Give me an overview of the highest risk project'
+        'Which projects face the highest delay risk?',
+        'What are the recent schedule slippage changes?',
+        'Show all monitored projects',
+        'Tell me about the highest risk project'
       ]
     : [
+        'Show my assigned projects',
+        'What are the recent delay changes?',
         'Which of my projects need immediate attention?',
-        'List all my assigned projects and their delay status',
-        'Why is there a delay on my expressway project?',
-        'What are the upcoming milestone deadlines?'
+        'Tell me about my highest risk project'
       ];
 
   const [messages, setMessages] = useState<Message[]>([
@@ -51,9 +51,8 @@ export default function Assistant({ selectedProjectId, currentUser, allProjects,
       sender: 'assistant',
       text: initialGreeting,
       citations: [
-        { feature: 'Role Context', impact: isAdmin ? 'National Oversight' : 'Department Scope', description: ministryName },
-        { feature: 'Telemetry Sync', impact: 'Live Atlas DB', description: 'Connected' },
-        { feature: 'Reasoning Mode', impact: 'Multi-Turn Chat', description: 'Context-Aware' },
+        { feature: 'Assistant', impact: 'Interactive Intelligence' },
+        { feature: 'Database', impact: 'Live Atlas DB Synchronized' },
       ],
       suggestedActions: initialSuggested,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),

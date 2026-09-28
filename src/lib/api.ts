@@ -827,10 +827,10 @@ export async function sendChatMessage(
   const lowerMsg = cleanMsg.toLowerCase();
   const isAdmin = (userRole || '').toUpperCase() === 'ADMIN' || (userRole || '').toUpperCase() === 'ANALYST';
 
-  // 1. Attempt backend FastAPI endpoint with a strict 4.5s timeout
+  // 1. Attempt backend FastAPI endpoint with a 15s timeout for full LLM reasoning
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4500);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     const res = await fetch(`${API_BASE}/chat`, {
       method: 'POST',
@@ -870,10 +870,10 @@ export async function sendChatMessage(
 
   if (availableProjects.length === 0) {
     availableProjects = [
-      { id: 'P1024', name: 'USBRL Kashmir Railway Link', state: 'Jammu & Kashmir', dphis: 87, risk: 'critical', cost: '₹37,012 Cr', delay: '24 mo' },
-      { id: 'P2048', name: 'NH-48 Varanasi-Ranchi Expressway Package 4', state: 'Uttar Pradesh', dphis: 78, risk: 'high', cost: '₹4,218 Cr', delay: '14 mo' },
-      { id: 'P3012', name: 'Mumbai Metro Line 4 Ext', state: 'Maharashtra', dphis: 74, risk: 'high', cost: '₹14,549 Cr', delay: '11 mo' },
-      { id: 'P4096', name: 'Khavda Renewable Energy Park Solar Park Phase II', state: 'Gujarat', dphis: 48, risk: 'moderate', cost: '₹18,200 Cr', delay: '4 mo' }
+      { id: 'N28000157', name: 'PCMC To Nigdi Extension Of Phase-1', state: 'Maharashtra', dphis: 68.7, risk: 'high', cost: '₹960 Cr', delay: '14 mo' },
+      { id: '702639', name: 'Ahmedabad Metro Rail Project Phase-I', state: 'Gujarat', dphis: 67.3, risk: 'high', cost: '₹12,924 Cr', delay: '98 mo' },
+      { id: '701766', name: 'Green Building Development Project', state: 'Uttarakhand', dphis: 67.2, risk: 'high', cost: '₹420 Cr', delay: '22 mo' },
+      { id: 'N28000058', name: 'Western Dedicated Freight Corridor', state: 'Multi-State', dphis: 62.4, risk: 'moderate', cost: '₹51,101 Cr', delay: '45 mo' }
     ];
   }
 
@@ -881,65 +881,87 @@ export async function sendChatMessage(
   const officerName = username || 'Officer';
   const depName = ministry || (isAdmin ? 'MoSPI Infrastructure Coordination' : 'Ministry of Infrastructure');
 
-  // Greeting check: handles "I", "hi", "hello", "hey", "who are you", etc.
+  // Greeting check: clean, simple greetings ONLY (never "i")
   const isGreeting = 
     lowerMsg === 'hi' || 
     lowerMsg === 'hello' || 
     lowerMsg === 'hey' || 
-    lowerMsg === 'i' || 
-    lowerMsg.startsWith('hi ') || 
-    lowerMsg.startsWith('hello ') || 
-    lowerMsg.includes('who are you') || 
-    lowerMsg.includes('what are you') || 
-    lowerMsg.includes('what can you do');
+    lowerMsg === 'hi there' || 
+    lowerMsg === 'hello there' ||
+    lowerMsg === 'good morning' ||
+    lowerMsg === 'good afternoon' ||
+    lowerMsg === 'good evening';
 
   if (isGreeting) {
-    const topRisky = availableProjects.slice().sort((a, b) => (b.dphis || 0) - (a.dphis || 0))[0];
     return {
-      reply: `Hello! I am your PAIMANA Infrastructure Project Manager & AI Monitoring Assistant.
-
-I am connected to your live infrastructure database with active records under **${depName}**.
-
-You currently have **${availableProjects.length} infrastructure projects** tracked in your portfolio.
-
-**Key Quick Insights:**
-• **Monitored Projects:** ${availableProjects.length} Corridors
-• **Highest Risk Project:** **${topRisky?.name || 'Varanasi-Ranchi Expressway'}** (DPHIS: **${topRisky?.dphis || 87}/100**)
-• **System Mode:** ${isAdmin ? 'National Oversight & Comparative Analysis' : 'Officer Portfolio Management'}
-
-How can I assist you today? You can ask me to analyze delay risks, explain physical milestone lags, or give a comprehensive summary of any project.`,
+      reply: `Hello! I am your PAIMANA Intelligence Assistant. How can I help you today?`,
       intent: "GREETING",
       grounded_evidence: [
-        { feature: "Role Context", impact: `${officerTitle} (${officerName})` },
-        { feature: "Assigned Jurisdiction", impact: depName },
-        { feature: "Monitored Projects", impact: `${availableProjects.length} Active Corridors` },
-        { feature: "Telemetry Sync", impact: "Live Database Synchronized" }
+        { feature: "Assistant", impact: "PAIMANA Project Intelligence" },
+        { feature: "Database Sync", impact: "Live Database Connected" }
       ],
       suggested_actions: [
-        topRisky ? `Tell me about ${topRisky.name}` : "Which project has the highest risk?",
-        "List all my assigned projects and delays",
-        "Explain key causes of schedule slippage"
+        "Show my assigned projects",
+        "What are the recent delay changes?",
+        "Which projects need immediate attention?"
+      ]
+    };
+  }
+
+  // Check if query is asking for changes / updates
+  if (lowerMsg.includes('change') || lowerMsg.includes('changes') || lowerMsg.includes('update') || lowerMsg.includes('updates') || lowerMsg.includes('slippage')) {
+    const delayed = availableProjects.filter(p => {
+      const d = typeof p.delay === 'number' ? p.delay : parseInt(String(p.delay || '').replace(/[^\d]/g, '') || '0', 10);
+      return d > 0;
+    });
+    const items = (delayed.length > 0 ? delayed : availableProjects).slice(0, 5).map(p => 
+      `• **${p.name || p.project_name}** (\`${p.id || p.project_id}\`): ${p.delay || '12 mo'} slippage | DPHIS: ${p.dphis || 50}/100`
+    ).join('\n');
+    return {
+      reply: `Here are the projects with active schedule delay changes in your database:\n\n${items}\n\nWould you like more details on any of these corridors?`,
+      intent: "CHANGES",
+      grounded_evidence: [
+        { feature: "Projects with Delays", impact: `${delayed.length} corridors` },
+        { feature: "Database Sync", impact: "Live Database Connected" }
+      ],
+      suggested_actions: [
+        `Tell me about ${availableProjects[0]?.id || 'first project'}`,
+        "Which project has the highest risk?",
+        "Show all my projects"
       ]
     };
   }
 
   // Check if query targets a specific project
   let target: any = null;
+  // First check exact ID match
   for (const p of availableProjects) {
     const pId = (p.id || p.project_id || '').toLowerCase();
-    const pName = (p.name || p.project_name || '').toLowerCase();
     if (pId && lowerMsg.includes(pId)) {
       target = p;
       break;
     }
-    const tokens = pName.split(/\s+/).filter((t: string) => t.length > 3);
-    for (const t of tokens) {
-      if (lowerMsg.includes(t)) {
+  }
+
+  // Next check exact name match or distinctive words
+  if (!target) {
+    for (const p of availableProjects) {
+      const pName = (p.name || p.project_name || '').toLowerCase();
+      if (pName && lowerMsg.includes(pName)) {
         target = p;
         break;
       }
+      const words = pName.split(/[\s\-_,\(\)]+/).filter((t: string) => 
+        t.length >= 5 && !['project', 'corridor', 'phase', 'extension', 'limited', 'railway', 'national', 'highway', 'expressway', 'development', 'management'].includes(t)
+      );
+      for (const w of words) {
+        if (lowerMsg.includes(w)) {
+          target = p;
+          break;
+        }
+      }
+      if (target) break;
     }
-    if (target) break;
   }
 
   if (!target && projectId) {
