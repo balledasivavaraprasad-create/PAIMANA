@@ -40,28 +40,31 @@ export function HeaderNav({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'ANALYST';
 
-  // Navigation Items (Investigation removed from standalone navbar tabs — now accessible via dedicated pop-up modal)
+  // Navigation Items
   const navItems: Array<{ id: ActiveTab; label: string; badge?: number; icon?: string }> = isAdmin
     ? [
-        { id: 'motion', label: 'Overview' },
-        { id: 'projects', label: 'Portfolio' },
-        { id: 'analytics', label: 'Analytics' },
-        { id: 'alerts', label: 'Alerts & Automation', badge: alertCount },
-        { id: 'assistant', label: 'Assistant' },
-        { id: 'data_models', label: 'Data & Models' },
-        { id: 'users_audit', label: 'Users & Audit' },
+        { id: 'motion', label: 'Overview', icon: '🏛️' },
+        { id: 'projects', label: 'Portfolio', icon: '📁' },
+        { id: 'analytics', label: 'Analytics', icon: '📈' },
+        { id: 'alerts', label: 'Alerts & Automation', badge: alertCount, icon: '🔔' },
+        { id: 'assistant', label: 'Assistant', icon: '🤖' },
+        { id: 'data_models', label: 'Data & Models', icon: '🧠' },
+        { id: 'users_audit', label: 'Users & Audit', icon: '👥' },
       ]
     : [
-        { id: 'motion', label: 'Dashboard' },
-        { id: 'projects', label: 'My Projects' },
-        { id: 'alerts', label: 'Alerts', badge: alertCount },
-        { id: 'assistant', label: 'Assistant' },
+        { id: 'motion', label: 'Overview', icon: '🏛️' },
+        { id: 'projects', label: 'My Projects', icon: '📁' },
+        { id: 'alerts', label: 'Alerts', badge: alertCount, icon: '🔔' },
+        { id: 'assistant', label: 'Assistant', icon: '🤖' },
       ];
 
   const checkScroll = () => {
@@ -84,20 +87,48 @@ export function HeaderNav({
     };
   }, [navItems, currentTab]);
 
-  // Click outside to close profile dropdown
+  // Click outside to close profile dropdown & mobile menu
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setProfileDropdownOpen(false);
       }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+        setMobileMenuOpen(false);
+      }
     };
-    if (profileDropdownOpen) {
+    if (profileDropdownOpen || mobileMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [profileDropdownOpen]);
+  }, [profileDropdownOpen, mobileMenuOpen]);
+
+  // Close menus on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setProfileDropdownOpen(false);
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Close mobile menu if window resizes to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const scrollStride = (direction: 'left' | 'right') => {
     const el = scrollRef.current;
@@ -109,27 +140,215 @@ export function HeaderNav({
     });
   };
 
+  const handleMobileSelectTab = (tab: ActiveTab) => {
+    onTabChange(tab);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 h-11 sm:h-12 px-3 sm:px-6 flex items-center justify-between pointer-events-none shadow-md gap-2 sm:gap-4 transition-colors duration-200 ${
       isDark ? 'bg-[#0B0F17] border-b border-white/10' : 'bg-white/90 backdrop-blur-md border-b border-black/10'
     }`}>
-      {/* Top Left Logo - Clean, economical InfraBuild AI branding */}
-      <div 
-        onClick={() => onTabChange('motion')}
-        className="pointer-events-auto cursor-pointer select-none shrink-0 group flex items-center gap-2"
-      >
-        <div className="flex flex-col">
-          <div className={`text-xs sm:text-sm font-bold tracking-wider font-mono-code uppercase leading-none ${isDark ? 'text-white' : 'text-black'}`}>
-            InfraBuild AI
+      {/* Top Left: InfraBuild AI Branding + Mobile Menu Trigger */}
+      <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto shrink-0">
+        <div 
+          onClick={() => onTabChange('motion')}
+          className="cursor-pointer select-none shrink-0 group flex items-center gap-2"
+        >
+          <div className="flex flex-col">
+            <div className={`text-xs sm:text-sm font-bold tracking-wider font-mono-code uppercase leading-none ${isDark ? 'text-white' : 'text-black'}`}>
+              InfraBuild AI
+            </div>
+            <div className={`text-[8px] tracking-wider font-mono-code uppercase mt-0.5 hidden xs:block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              {isAdmin ? 'ADMIN COMMAND CENTER' : 'PROJECT MONITOR'}
+            </div>
           </div>
-          <div className={`text-[8px] tracking-wider font-mono-code uppercase mt-0.5 hidden xs:block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-            {isAdmin ? 'ADMIN COMMAND CENTER' : 'PROJECT MONITOR'}
-          </div>
+        </div>
+
+        {/* Mobile Phone Menu Trigger Button (Rendered ONLY on phone screens < 768px) */}
+        <div ref={mobileMenuRef} className="relative md:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Open Navigation Menu"
+            aria-expanded={mobileMenuOpen}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border shadow-sm select-none ${
+              mobileMenuOpen
+                ? (isDark ? 'bg-white text-black border-white' : 'bg-slate-900 text-white border-slate-900')
+                : (isDark ? 'bg-[#141A26] hover:bg-[#1E2638] text-white border-white/20' : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300')
+            }`}
+          >
+            <span>Menu</span>
+            <svg 
+              className={`w-3.5 h-3.5 transition-transform duration-200 ${mobileMenuOpen ? 'rotate-180' : ''}`} 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor" 
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {/* Mobile Phone Dropdown Menu */}
+          {mobileMenuOpen && (
+            <div 
+              className={`absolute left-0 top-9 w-64 sm:w-72 max-w-[calc(100vw-24px)] rounded-2xl border shadow-2xl p-2.5 z-50 animate-fade-in font-sans ${
+                isDark 
+                  ? 'bg-[#0B0F17]/98 backdrop-blur-xl border-white/20 text-white shadow-black/90' 
+                  : 'bg-white/98 backdrop-blur-xl border-slate-300 text-slate-900 shadow-2xl'
+              }`}
+            >
+              {/* Dropdown Header */}
+              <div className={`px-2.5 py-1.5 border-b mb-1.5 flex items-center justify-between ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-amber-500 font-bold">
+                  InfraBuild AI Menu
+                </span>
+                <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold ${
+                  isAdmin 
+                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
+                    : (isDark ? 'bg-white/10 text-white/70' : 'bg-slate-100 text-slate-700')
+                }`}>
+                  {isAdmin ? 'ADMIN' : 'OFFICER'}
+                </span>
+              </div>
+
+              {/* Navigation Items (Overview, Portfolio, Analytics, Alerts, Automation, Assistant, etc.) */}
+              <div className="space-y-0.5 text-xs font-mono">
+                {navItems.map(item => {
+                  const active = currentTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleMobileSelectTab(item.id)}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-colors cursor-pointer ${
+                        active
+                          ? (isDark ? 'bg-white/15 text-white font-bold' : 'bg-slate-200 text-black font-bold')
+                          : (isDark ? 'hover:bg-white/10 text-white/80' : 'hover:bg-slate-100 text-slate-700')
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span>{item.icon || '📌'}</span>
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {item.badge !== undefined && item.badge > 0 && (
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+                            {item.badge}
+                          </span>
+                        )}
+                        {active && <span className="text-emerald-400 text-[10px]">●</span>}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Divider */}
+              <div className={`my-2 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`} />
+
+              {/* Utility Section: What, The Dark & Light Switch, Login */}
+              <div className="space-y-1.5 text-xs font-mono">
+                {/* 1. What */}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onTabChange('assistant');
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 transition-colors cursor-pointer ${
+                    isDark ? 'hover:bg-white/10 text-sky-400' : 'hover:bg-sky-50 text-sky-700'
+                  }`}
+                >
+                  <span>💡</span>
+                  <span>What is PAIMANA &amp; DPHIS?</span>
+                </button>
+
+                {/* 2. The Dark and Light Switch */}
+                <div className={`px-2.5 py-1.5 rounded-lg flex items-center justify-between border ${
+                  isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span>{isDark ? '🌙' : '☀️'}</span>
+                    <span className="font-semibold text-[11px]">{isDark ? 'Dark Theme' : 'Light Theme'}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={toggleTheme}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-all cursor-pointer ${
+                      isDark
+                        ? 'bg-white text-black hover:bg-slate-200 border-white'
+                        : 'bg-slate-900 text-white hover:bg-black border-slate-900'
+                    }`}
+                  >
+                    Switch to {isDark ? 'Light' : 'Dark'}
+                  </button>
+                </div>
+
+                {/* 3. Login / User Account */}
+                {user ? (
+                  <div className={`pt-1.5 border-t ${isDark ? 'border-white/10' : 'border-slate-200'} space-y-1`}>
+                    <div className="px-2.5 py-1 flex items-center justify-between text-[11px]">
+                      <span className={`truncate font-semibold ${isDark ? 'text-white/80' : 'text-slate-800'}`}>
+                        👤 {user.full_name || user.username}
+                      </span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                        {isAdmin ? 'ADMIN' : 'OFFICER'}
+                      </span>
+                    </div>
+
+                    {onOpenSettings && (
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          onOpenSettings('profile');
+                        }}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 transition-colors cursor-pointer ${
+                          isDark ? 'hover:bg-white/10 text-white/80' : 'hover:bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        <span>⚙️</span>
+                        <span>Profile &amp; Settings</span>
+                      </button>
+                    )}
+
+                    {onSignOut && (
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          onSignOut();
+                        }}
+                        className="w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 text-rose-400 hover:bg-rose-500/15 cursor-pointer transition-colors"
+                      >
+                        <span>🚪</span>
+                        <span>Sign Out</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className={`pt-1.5 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        onSignInClick ? onSignInClick() : onTabChange('login');
+                      }}
+                      className={`w-full text-center py-2 px-3 rounded-lg font-bold transition-all cursor-pointer shadow-sm ${
+                        isDark
+                          ? 'bg-white text-black hover:bg-slate-200'
+                          : 'bg-slate-900 text-white hover:bg-black'
+                      }`}
+                    >
+                      <span>Login / Sign In</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Navigation Pills Bar with Stride Navigation Arrows */}
-      <div className="relative flex items-center min-w-0 max-w-full overflow-hidden">
+      {/* Navigation Pills Bar with Stride Navigation Arrows (Desktop / Laptop / iPad — Hidden on Mobile Phone) */}
+      <div className="hidden md:flex relative items-center min-w-0 max-w-full overflow-hidden">
         {/* Left Stride Arrow */}
         {canScrollLeft && (
           <button
@@ -202,8 +421,8 @@ export function HeaderNav({
         )}
       </div>
 
-      {/* Top Right Controls - Profile Icon Dropdown & Theme Toggle */}
-      <div className="pointer-events-auto flex items-center gap-2 shrink-0">
+      {/* Top Right Controls - Profile Icon Dropdown & Theme Toggle (Desktop / Laptop / iPad — Hidden on Mobile Phone) */}
+      <div className="hidden md:flex pointer-events-auto items-center gap-2 shrink-0">
         {user ? (
           <div ref={dropdownRef} className="relative">
             {/* Profile Avatar Button */}
