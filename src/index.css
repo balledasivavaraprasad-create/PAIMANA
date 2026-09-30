@@ -386,21 +386,41 @@
 :root[data-theme="light"] .fixed.inset-0 .bg-white h2,
 :root[data-theme="light"] .fixed.inset-0 .bg-white h3,
 :root[data-theme="light"] .fixed.inset-0 .bg-white h4 {
-  color: #0F172A !important;
+  color: #020617 !important;
   font-weight: 700 !important;
 }
 
 :root[data-theme="light"] .modal-surface p,
 :root[data-theme="light"] [role="dialog"] p,
 :root[data-theme="light"] .fixed.inset-0 .bg-white p {
-  color: #334155 !important;
+  color: #1E293B !important;
 }
 
 :root[data-theme="light"] .modal-surface label,
 :root[data-theme="light"] [role="dialog"] label,
 :root[data-theme="light"] .fixed.inset-0 .bg-white label {
-  color: #1E293B !important;
+  color: #0F172A !important;
   font-weight: 600 !important;
+}
+
+:root[data-theme="light"] .modal-surface kbd,
+:root[data-theme="light"] [role="dialog"] kbd {
+  color: #0F172A !important;
+  background-color: #E2E8F0 !important;
+  border-color: #94A3B8 !important;
+}
+
+:root[data-theme="light"] .modal-surface .modal-close-btn,
+:root[data-theme="light"] [role="dialog"] .modal-close-btn {
+  color: #0F172A !important;
+  background-color: #E2E8F0 !important;
+  border-color: #CBD5E1 !important;
+}
+
+:root[data-theme="light"] .modal-surface .modal-close-btn:hover,
+:root[data-theme="light"] [role="dialog"] .modal-close-btn:hover {
+  background-color: #CBD5E1 !important;
+  color: #000000 !important;
 }
 
 /* Force text-white and light-toned utility classes to black in light mode ONLY on light surfaces */
@@ -525,7 +545,7 @@
   color: #000000 !important;
 }
 
-/* Ensure solid dark buttons retain pure white text for high contrast in light mode */
+/* Ensure solid dark buttons and solid dark badges retain pure white text for high contrast in light mode */
 :root[data-theme="light"] button.bg-black,
 :root[data-theme="light"] button.bg-black *,
 :root[data-theme="light"] button.bg-zinc-900,
@@ -534,10 +554,16 @@
 :root[data-theme="light"] button.bg-slate-900 *,
 :root[data-theme="light"] button.bg-slate-800,
 :root[data-theme="light"] button.bg-slate-800 *,
-:root[data-theme="light"] [class*="bg-black"]:not(select):not(option):not(header div),
-:root[data-theme="light"] [class*="bg-black"]:not(select):not(option):not(header div) *,
-:root[data-theme="light"] [class*="bg-slate-900"]:not(select):not(option),
-:root[data-theme="light"] [class*="bg-slate-900"]:not(select):not(option) * {
+:root[data-theme="light"] button[class*="bg-black"],
+:root[data-theme="light"] button[class*="bg-black"] *,
+:root[data-theme="light"] button[class*="bg-slate-900"],
+:root[data-theme="light"] button[class*="bg-slate-900"] *,
+:root[data-theme="light"] a[class*="bg-black"],
+:root[data-theme="light"] a[class*="bg-black"] *,
+:root[data-theme="light"] a[class*="bg-slate-900"],
+:root[data-theme="light"] a[class*="bg-slate-900"] *,
+:root[data-theme="light"] .badge-dark,
+:root[data-theme="light"] .badge-dark * {
   color: #FFFFFF !important;
 }
 

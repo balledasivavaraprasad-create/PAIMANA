@@ -470,17 +470,17 @@ export default function ProjectIntelligence({
 
           {activeTab === 'shap' ? (
             <div className="space-y-4">
-              <p className={`text-sm md:text-base leading-relaxed ${isDark ? 'text-white/85' : 'text-slate-700'}`}>
+              <p className={`text-sm md:text-base leading-relaxed ${isDark ? 'text-white/85' : 'text-slate-800 font-medium'}`}>
                 Our AI analyzed this project's timeline, budget, and construction milestones to identify what is driving the risk level up or down:
               </p>
               <div className="space-y-3">
                 {shapFactors.map(f => (
                   <div key={f.feature} className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                    isDark ? 'bg-white/5 border-white/15' : 'bg-white border-slate-200 shadow-sm'
+                    isDark ? 'bg-white/5 border-white/15' : 'bg-white border-2 border-slate-300 shadow-sm'
                   }`}>
                     <div className="space-y-1 max-w-xl">
-                      <div className={`font-semibold text-sm sm:text-base ${isDark ? 'text-white' : 'text-slate-900'}`}>{f.feature}</div>
-                      <div className={`text-xs sm:text-sm ${isDark ? 'text-white/80' : 'text-slate-600'}`}>{f.description}</div>
+                      <div className={`font-semibold text-sm sm:text-base ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>{f.feature}</div>
+                      <div className={`text-xs sm:text-sm ${isDark ? 'text-white/80' : 'text-slate-800 font-medium'}`}>{f.description}</div>
                     </div>
                     <div className="sm:text-right font-mono-code shrink-0 space-y-1">
                       <TrendBadge 
@@ -489,16 +489,16 @@ export default function ProjectIntelligence({
                         className="text-sm sm:text-base py-1 px-2.5" 
                         iconClassName="w-4 h-4"
                       />
-                      <div className={`text-xs uppercase flex items-center justify-end gap-1 ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+                      <div className={`text-xs uppercase flex items-center justify-end gap-1 ${isDark ? 'text-white/60' : 'text-slate-700 font-bold'}`}>
                         {f.impact > 0 ? (
                           <>
                             <CurvedGrowthArrow className="w-3 h-3 text-amber-400" />
-                            <span className={isDark ? '' : 'text-amber-700 font-bold'}>Increases Risk</span>
+                            <span className={isDark ? '' : 'text-amber-900 font-black'}>Increases Risk</span>
                           </>
                         ) : (
                           <>
                             <CurvedDecreaseArrow className="w-3 h-3 text-emerald-400" />
-                            <span className={isDark ? '' : 'text-emerald-700 font-bold'}>Lowers Risk</span>
+                            <span className={isDark ? '' : 'text-emerald-900 font-black'}>Lowers Risk</span>
                           </>
                         )}
                       </div>
@@ -510,32 +510,32 @@ export default function ProjectIntelligence({
           ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                <div className={`p-5 rounded-xl border space-y-2 ${isDark ? 'bg-white/5 border-white/15' : 'bg-white border-slate-200 shadow-sm'}`}>
-                  <div className={`text-xs font-mono-code uppercase ${isDark ? 'text-white/70' : 'text-slate-500 font-bold'}`}>Predicted Final Cost</div>
-                  <div className={`text-2xl sm:text-3xl font-bold font-mono-code ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <div className={`p-5 rounded-xl border space-y-2 ${isDark ? 'bg-white/5 border-white/15' : 'bg-white border-2 border-slate-300 shadow-sm'}`}>
+                  <div className={`text-xs font-mono-code uppercase ${isDark ? 'text-white/70' : 'text-slate-700 font-bold'}`}>Predicted Final Cost</div>
+                  <div className={`text-2xl sm:text-3xl font-bold font-mono-code ${isDark ? 'text-white' : 'text-slate-950 font-black'}`}>
                     ₹{prediction?.cost.predicted_final_cost || 4520} Cr
                   </div>
-                  <div className={`text-xs sm:text-sm font-semibold flex items-center gap-1.5 ${isDark ? 'text-white/85' : 'text-slate-700'}`}>
+                  <div className={`text-xs sm:text-sm font-semibold flex items-center gap-1.5 ${isDark ? 'text-white/85' : 'text-slate-800 font-bold'}`}>
                     <CurvedGrowthArrow className="w-3.5 h-3.5 text-amber-400" />
                     <span>+{prediction?.cost.predicted_overrun_pct || 7.2}% projected budget overrun</span>
                   </div>
                 </div>
 
-                <div className={`p-5 rounded-xl border space-y-2 ${isDark ? 'bg-white/5 border-white/15' : 'bg-white border-slate-200 shadow-sm'}`}>
-                  <div className={`text-xs font-mono-code uppercase ${isDark ? 'text-white/70' : 'text-slate-500 font-bold'}`}>Timeline Slippage Projection</div>
-                  <div className={`text-2xl sm:text-3xl font-bold font-mono-code flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <div className={`p-5 rounded-xl border space-y-2 ${isDark ? 'bg-white/5 border-white/15' : 'bg-white border-2 border-slate-300 shadow-sm'}`}>
+                  <div className={`text-xs font-mono-code uppercase ${isDark ? 'text-white/70' : 'text-slate-700 font-bold'}`}>Timeline Slippage Projection</div>
+                  <div className={`text-2xl sm:text-3xl font-bold font-mono-code flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-950 font-black'}`}>
                     <CurvedGrowthArrow className="w-6 h-6 text-amber-400" />
                     <span>+{prediction?.delay.expected_delay_months || 24} Months</span>
                   </div>
-                  <div className={`text-xs sm:text-sm ${isDark ? 'text-white/85' : 'text-slate-600'}`}>
+                  <div className={`text-xs sm:text-sm ${isDark ? 'text-white/85' : 'text-slate-800 font-medium'}`}>
                     Predicted Completion: {prediction?.delay.predicted_completion_date || '2027-12-31'}
                   </div>
                 </div>
               </div>
 
-              <div className={`p-5 rounded-xl border space-y-2 ${isDark ? 'bg-white/5 border-white/15' : 'bg-slate-50 border-slate-200'}`}>
-                <div className={`font-semibold text-sm sm:text-base ${isDark ? 'text-white' : 'text-slate-900'}`}>Model Reliability &amp; Verification</div>
-                <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-600'}`}>
+              <div className={`p-5 rounded-xl border space-y-2 ${isDark ? 'bg-white/5 border-white/15' : 'bg-slate-100 border-2 border-slate-300 shadow-xs'}`}>
+                <div className={`font-semibold text-sm sm:text-base ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>Model Reliability &amp; Verification</div>
+                <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-800 font-medium'}`}>
                   Trained and benchmarked on 3,399 major national infrastructure projects. Regularly verified against ground completion records to guarantee dependable early risk alerts.
                 </p>
               </div>

@@ -99,18 +99,18 @@ export default function InvestigationModal({
         }`}>
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className={`font-mono-code font-bold text-xs px-2.5 py-0.5 rounded ${
-              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-950 border border-slate-400 font-bold'
+              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-950 border-2 border-slate-400 font-bold'
             }`}>
               {projectId}
             </span>
             <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${
               isDark 
                 ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' 
-                : 'bg-amber-100 text-amber-900 border-amber-300'
+                : 'bg-amber-100 text-amber-950 border-2 border-amber-500 font-black'
             }`}>
               ⚡ AI ROOT CAUSE INVESTIGATION
             </span>
-            <span className={`text-xs font-mono truncate max-w-xs sm:max-w-md ${isDark ? 'text-white/70' : 'text-slate-700 font-semibold'}`}>
+            <span className={`text-xs font-mono truncate max-w-xs sm:max-w-md ${isDark ? 'text-white/70' : 'text-slate-950 font-bold'}`}>
               {pName}
             </span>
           </div>
@@ -140,7 +140,7 @@ export default function InvestigationModal({
                 <h2 className={`text-xl sm:text-2xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-950'}`}>
                   Issue Investigation & Root Causes
                 </h2>
-                <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-800 font-medium'}`}>
+                <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-900 font-semibold'}`}>
                   {report 
                     ? `Investigation Complete (${report.investigation_id}) · ${report.findings.length} issues identified with quantified evidence`
                     : 'Systematic analysis of milestone schedule slippages, financial cashflows, and contractor muster rolls.'
@@ -180,13 +180,13 @@ export default function InvestigationModal({
 
           {/* Investigation Checklist Pipeline */}
           <div className={`p-4 sm:p-5 rounded-2xl border space-y-3 ${
-            isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'
+            isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-2 border-slate-300 shadow-xs'
           }`}>
             <div className={`text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-between ${
-              isDark ? 'text-white/80' : 'text-slate-700'
+              isDark ? 'text-white/80' : 'text-slate-950 font-black'
             }`}>
               <span>Investigation Diagnostic Sequence</span>
-              <span className={`text-[11px] ${isDark ? 'text-white/60' : 'text-slate-500'}`}>Automated Pipeline</span>
+              <span className={`text-[11px] ${isDark ? 'text-white/60' : 'text-slate-700 font-bold'}`}>Automated Pipeline</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
@@ -204,15 +204,15 @@ export default function InvestigationModal({
                     tool.active
                       ? (isDark 
                           ? 'bg-white/15 border-white/30 text-white' 
-                          : 'bg-emerald-50 border-emerald-300 text-emerald-950')
+                          : 'bg-emerald-100/90 border-2 border-emerald-600 text-emerald-950 shadow-xs')
                       : (isDark 
                           ? 'bg-white/5 border-white/10 text-white/60' 
-                          : 'bg-white border-slate-200 text-slate-500')
+                          : 'bg-white border-2 border-slate-300 text-slate-900')
                   }`}
                 >
-                  <div className={`font-bold text-xs font-mono ${tool.active ? (isDark ? 'text-white' : 'text-emerald-950 font-bold') : (isDark ? 'text-white/80' : 'text-slate-800')}`}>{tool.name}</div>
-                  <div className={`text-[10px] font-mono ${tool.active ? (isDark ? 'text-white/70' : 'text-emerald-800') : (isDark ? 'text-white/60' : 'text-slate-500')}`}>{tool.desc}</div>
-                  <div className={`text-[10px] font-mono font-bold mt-1 ${tool.active ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : (isDark ? 'text-white/40' : 'text-slate-500')}`}>
+                  <div className={`font-bold text-xs font-mono ${tool.active ? (isDark ? 'text-white' : 'text-emerald-950 font-black') : (isDark ? 'text-white/80' : 'text-slate-950 font-bold')}`}>{tool.name}</div>
+                  <div className={`text-[10px] font-mono ${tool.active ? (isDark ? 'text-white/70' : 'text-emerald-900 font-bold') : (isDark ? 'text-white/60' : 'text-slate-700 font-medium')}`}>{tool.desc}</div>
+                  <div className={`text-[10px] font-mono font-bold mt-1 ${tool.active ? (isDark ? 'text-emerald-400' : 'text-emerald-800 font-extrabold') : (isDark ? 'text-white/40' : 'text-slate-600 font-semibold')}`}>
                     {tool.active ? '✓ Complete' : '○ Ready'}
                   </div>
                 </div>
@@ -226,10 +226,10 @@ export default function InvestigationModal({
               {/* Findings & Evidence */}
               <div className="lg:col-span-2 space-y-4">
                 <h3 className={`text-sm sm:text-base font-bold font-display flex items-center gap-2 ${
-                  isDark ? 'text-white' : 'text-slate-900'
+                  isDark ? 'text-white' : 'text-slate-950 font-bold'
                 }`}>
                   <span>Key Findings & Root Causes</span>
-                  <span className={`text-xs font-mono ${isDark ? 'text-white/70' : 'text-slate-500'}`}>
+                  <span className={`text-xs font-mono ${isDark ? 'text-white/70' : 'text-slate-700 font-bold'}`}>
                     ({report.findings.length} Issues Identified)
                   </span>
                 </h3>
@@ -249,23 +249,23 @@ export default function InvestigationModal({
                         <span className={`text-xs font-mono px-2 py-0.5 rounded border shrink-0 self-start sm:self-auto ${
                           isDark 
                             ? 'bg-white/10 text-white border-white/20' 
-                            : 'bg-slate-100 text-slate-900 border-slate-300 font-bold'
+                            : 'bg-slate-100 text-slate-950 border-2 border-slate-300 font-black'
                         }`}>
                           Confidence: {f.confidence ? (f.confidence * 100).toFixed(0) : '85'}%
                         </span>
                       </div>
-                      <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-800 font-medium'}`}>
+                      <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-900 font-medium'}`}>
                         {f.summary || f.detail}
                       </p>
 
-                      <div className={`pt-2 border-t space-y-1.5 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
-                        <div className={`text-[11px] font-mono font-bold uppercase ${isDark ? 'text-white/60' : 'text-slate-700 font-bold'}`}>
+                      <div className={`pt-2 border-t space-y-1.5 ${isDark ? 'border-white/10' : 'border-slate-300'}`}>
+                        <div className={`text-[11px] font-mono font-bold uppercase ${isDark ? 'text-white/60' : 'text-slate-950 font-black'}`}>
                           Evidence Footprint:
                         </div>
                         <div className={`p-2.5 rounded-lg border text-xs font-mono leading-relaxed ${
                           isDark 
                             ? 'bg-black/40 border-white/10 text-white/80' 
-                            : 'bg-slate-100 border border-slate-300 text-slate-900 font-semibold'
+                            : 'bg-slate-100 border-2 border-slate-300 text-slate-950 font-bold'
                         }`}>
                           {evidenceText}
                         </div>
@@ -289,18 +289,18 @@ export default function InvestigationModal({
                   }`}>
                     <div className="flex items-center justify-between">
                       <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
-                        isDark ? 'bg-white/15 text-white' : 'bg-slate-200 text-slate-900 font-bold'
+                        isDark ? 'bg-white/15 text-white' : 'bg-slate-200 text-slate-950 border border-slate-400 font-black'
                       }`}>
                         Priority: {rec.priority}
                       </span>
-                      <span className={`text-[11px] font-mono ${isDark ? 'text-white/70' : 'text-slate-700 font-semibold'}`}>
+                      <span className={`text-[11px] font-mono ${isDark ? 'text-white/70' : 'text-slate-900 font-bold'}`}>
                         {rec.confidence ? (rec.confidence * 100).toFixed(0) : '88'}% Match
                       </span>
                     </div>
                     <div className={`text-xs sm:text-sm font-bold leading-snug ${isDark ? 'text-white' : 'text-slate-950'}`}>{rec.action}</div>
-                    <p className={`text-xs leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-800 font-medium'}`}>{rec.reason}</p>
+                    <p className={`text-xs leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-900 font-medium'}`}>{rec.reason}</p>
                     {rec.target_agency && (
-                      <div className={`pt-1.5 border-t text-[11px] font-mono ${isDark ? 'border-white/10 text-white/90' : 'border-slate-200 text-slate-800 font-semibold'}`}>
+                      <div className={`pt-1.5 border-t text-[11px] font-mono ${isDark ? 'border-white/10 text-white/90' : 'border-slate-300 text-slate-950 font-bold'}`}>
                         Authority: {rec.target_agency}
                       </div>
                     )}
@@ -313,7 +313,7 @@ export default function InvestigationModal({
                   disabled={acknowledged}
                   className={`w-full py-2.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-sm ${
                     acknowledged
-                      ? (isDark ? 'bg-white text-black cursor-default' : 'bg-slate-200 text-slate-700 cursor-default')
+                      ? (isDark ? 'bg-white text-black cursor-default' : 'bg-slate-200 text-slate-950 font-bold cursor-default')
                       : (isDark ? 'bg-black text-white border border-white/30 hover:bg-zinc-900' : 'bg-slate-900 text-white hover:bg-black')
                   }`}
                 >
@@ -323,13 +323,13 @@ export default function InvestigationModal({
             </div>
           ) : (
             <div className={`p-8 sm:p-12 text-center space-y-4 rounded-2xl border ${
-              isDark ? 'border-white/10 bg-white/5' : 'border-slate-200 bg-slate-50 shadow-sm'
+              isDark ? 'border-white/10 bg-white/5' : 'border-2 border-slate-300 bg-slate-100 shadow-sm'
             }`}>
               <div className="text-3xl">🔍</div>
-              <div className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <div className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>
                 Ready to Investigate Project: {projectId}
               </div>
-              <p className={`text-xs sm:text-sm max-w-xl mx-auto leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-600'}`}>
+              <p className={`text-xs sm:text-sm max-w-xl mx-auto leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-800 font-medium'}`}>
                 Click below to analyze why this project is experiencing schedule delays or expenditure variances. The system reviews milestone dates, contractor muster reports, and regional clearances.
               </p>
               <button
@@ -367,8 +367,8 @@ export default function InvestigationModal({
         <div className={`px-5 py-3 border-t flex items-center justify-between shrink-0 ${
           isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-300 bg-slate-100/90'
         }`}>
-          <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-700 font-semibold'}`}>
-            Press <kbd className={`px-1.5 py-0.5 rounded font-mono text-[10px] ${isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900 border border-slate-400 font-bold'}`}>Esc</kbd> or click ✕ to close
+          <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-950 font-bold'}`}>
+            Press <kbd className={`px-1.5 py-0.5 rounded font-mono text-[10px] ${isDark ? 'bg-white/10 text-white' : 'bg-slate-300 text-slate-950 border border-slate-500 font-black'}`}>Esc</kbd> or click ✕ to close
           </span>
           <button
             type="button"
