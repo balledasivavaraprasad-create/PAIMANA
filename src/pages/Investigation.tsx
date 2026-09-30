@@ -24,14 +24,21 @@ export default function Investigation({ projectId, onOpenAddProject }: Props) {
     });
   }, [projectId]);
 
-  const handleRunInvestigation = async () => {
+  const handleRunInvestigation = async (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!projectId) return;
     setLoading(true);
-    const res = await triggerInvestigation(projectId);
-    if (res) {
-      setReport(res);
+    try {
+      const res = await triggerInvestigation(projectId);
+      if (res) {
+        setReport(res);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (!projectId) {
@@ -84,9 +91,13 @@ export default function Investigation({ projectId, onOpenAddProject }: Props) {
 
         <div className="flex items-center gap-3 shrink-0">
           <button
-            onClick={handleRunInvestigation}
+            type="button"
+            onClick={(e) => {
+              handleRunInvestigation(e);
+            }}
             disabled={loading}
-            className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.25)] hover:bg-zinc-900 transition-all cursor-pointer flex items-center justify-center gap-2"
+            style={{ touchAction: 'manipulation' }}
+            className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.25)] hover:bg-zinc-900 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 select-none disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -94,7 +105,7 @@ export default function Investigation({ projectId, onOpenAddProject }: Props) {
                 <span>Analyzing project records...</span>
               </>
             ) : (
-              <span>⚡ Run Root Cause Investigation</span>
+              <span>⚡ {report ? 'Re-run Root Cause Investigation' : 'Run Root Cause Investigation'}</span>
             )}
           </button>
         </div>
@@ -230,10 +241,16 @@ export default function Investigation({ projectId, onOpenAddProject }: Props) {
             Click below to analyze why this project is delayed or over budget. The system will review milestone dates, monthly spending, and contractor progress to find clear solutions.
           </p>
           <button
+            type="button"
             onClick={handleRunInvestigation}
-            className="w-full sm:w-auto px-6 sm:px-7 py-3 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.2)] hover:bg-zinc-900 cursor-pointer"
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+            }}
+            disabled={loading}
+            style={{ touchAction: 'manipulation' }}
+            className="w-full sm:w-auto px-6 sm:px-7 py-3 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.2)] hover:bg-zinc-900 active:scale-95 cursor-pointer select-none"
           >
-            ⚡ Run Root Cause Investigation
+            ⚡ Investigate the Issue
           </button>
         </GlassCard>
       )}

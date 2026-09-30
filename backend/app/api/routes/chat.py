@@ -14,10 +14,10 @@ router = APIRouter(prefix="/chat", tags=["AI Chatbot"])
 
 # Multi-Model Fallback Chain for Google Gemini API
 CANDIDATE_MODELS = [
-    "gemini-3.1-flash-lite",
-    "gemini-flash-latest",
-    "gemini-3.8-flash",
-    "gemini-3.7-flash"
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-pro",
+    "gemini-flash-latest"
 ]
 
 class ChatRequest(BaseModel):
@@ -38,20 +38,37 @@ class ChatResponse(BaseModel):
 
 def detect_intent(message: str) -> str:
     m = message.lower().strip()
-    if m in ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "hi there", "hello there", "greetings"]:
+    clean_m = re.sub(r'[?!.,;:\'"]', '', m)
+    greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "hi there", "hello there", "hey there", "greetings", "namaste", "hola", "sup"]
+    
+    if clean_m in greetings or (any(clean_m.startswith(g + " ") for g in greetings) and len(clean_m.split()) <= 3 and not any(k in clean_m for k in ["project", "dphis", "risk", "what", "how", "delay", "why"])):
         return "GREETING"
+    elif any(w in m for w in ["who are you", "your name", "what is paimana", "what can you do", "what do you do", "about yourself", "help"]):
+        return "IDENTITY"
+    elif "dphis" in m or ("health" in m and ("score" in m or "index" in m or "calculate" in m)):
+        return "DPHIS_EXPLANATION"
+    elif any(w in m for w in ["machine learning", "xgboost", "shap", "algorithm", "ai model"]):
+        return "ML_EXPLANATION"
+    elif any(w in m for w in ["alert", "automation", "webhook", "n8n", "threshold"]):
+        return "ALERTS_EXPLANATION"
+    elif any(w in m for w in ["investigation", "root cause", "deep ai", "console"]):
+        return "INVESTIGATION_EXPLANATION"
     elif any(w in m for w in ["change", "changes", "updated", "update", "slippage", "overrun"]):
         return "CHANGES"
     elif any(w in m for w in ["why", "explain", "reason", "cause", "driver"]):
         return "RISK_EXPLANATION"
-    elif any(w in m for w in ["critical", "worst", "highest risk", "urgent", "most delayed"]):
+    elif any(w in m for w in ["critical", "worst", "highest risk", "urgent", "most delayed", "top risk"]):
         return "CRITICAL_PROJECTS"
     elif any(w in m for w in ["recommend", "action", "solution", "fix", "recover", "steps"]):
         return "RECOMMENDATION"
     elif any(w in m for w in ["trend", "getting worse", "trajectory", "history"]):
         return "RISK_TREND"
-    elif any(w in m for w in ["portfolio", "overview", "total", "summary", "list", "all projects", "my projects"]):
+    elif any(w in m for w in ["portfolio", "overview", "total", "summary", "list", "all projects", "my projects", "show my projects", "show projects"]):
         return "PORTFOLIO_ANALYSIS"
+    elif re.search(r'\b(P\d{3,5}|PRJ[_\-]\w+|\d{6,8}|N\d{8})\b', message, re.IGNORECASE) or any(w in m for w in ["ahmedabad metro", "pcmc", "nigdi", "freight corridor", "green building"]):
+        return "PROJECT_INTELLIGENCE"
+    elif any(w in m for w in ["capital of", "who is", "what time", "tell me a joke", "joke", "capex vs opex", "thank you", "thanks", "bye", "goodbye"]):
+        return "GENERAL_KNOWLEDGE"
     return "CONVERSATION"
 
 async def call_gemini_with_fallback(prompt: str) -> tuple[Optional[Dict[str, Any]], Optional[str]]:
@@ -105,9 +122,9 @@ async def chat_endpoint(payload: ChatRequest):
     uname = (payload.username or "").strip()
     is_admin = (payload.user_role or "").upper() in ("ADMIN", "ANALYST") or uname.lower() == "admin"
     
-    # 1. Clean, direct greeting (As requested: "hi" -> "Hello I'm your PAIMANA Intelligence Assistant")
+    # 1. Clean, direct greeting (As requested: "hi" -> "Hello! My name is PAIMANA Intelligence...")
     if intent == "GREETING":
-        reply = "Hello! I am your PAIMANA Intelligence Assistant. How can I help you today?"
+        reply = "Hello! My name is PAIMANA Intelligence. How can I help you today?"
         return ChatResponse(
             reply=reply,
             intent="GREETING",
@@ -229,11 +246,12 @@ User Query: "{message}"
 
 Instructions:
 1. Answer the user's query interactively, conversationally, and directly.
-2. If the user asks about a specific project, provide verified facts from the database (Name, ID, state, approved cost, delay in months, physical progress %, DPHIS risk score, and primary risk driver).
-3. If the user asks for changes, summarize the corridors with schedule slippage changes, delay increments, or budget revisions from the database.
-4. If the user asks to list their projects or compare, use the verified project records provided in the context above.
-5. If the user asks a general question, answer clearly and helpfully.
-6. Keep answers concise, natural, well-structured, and executive-ready. Use clear section headers (### Header) and bullet points. When grouping projects by State or Category, state the category clearly and list projects underneath with (ID: <id>) and key metrics (Progress: X%, Delay: Y months). Avoid messy or unclosed asterisk patterns.
+2. CRITICAL REQUIREMENT: Whatever question the user asks, respond 100% according to that question and NOT something outside of that question.
+3. If the user asks about a project or infrastructure records, provide verified facts from the database (Name, ID, state, approved cost, delay in months, physical progress %, DPHIS risk score, and primary risk driver).
+4. If the user does NOT ask about a project (for example, if they greet you, ask who you are, ask what DPHIS is, ask how machine learning models work, ask general knowledge, or conversational questions), answer that question directly and DO NOT mention or inject project details or unsolicited project lists.
+5. If the user asks for changes, summarize the corridors with schedule slippage changes, delay increments, or budget revisions from the database.
+6. If the user asks to list their projects or compare, use the verified project records provided in the context above.
+7. Keep answers concise, natural, well-structured, and executive-ready. Use clear section headers (### Header) and bullet points.
 
 Respond strictly as a JSON object:
 {{
@@ -257,7 +275,7 @@ Respond strictly as a JSON object:
             ]
         return ChatResponse(
             reply=gemini_data["reply"],
-            intent=intent,
+            intent=intent if intent != "CONVERSATION" else ("PROJECT_INTELLIGENCE" if (target_project or pid) else "CONVERSATION"),
             project_id=pid,
             grounded_evidence=evidence,
             suggested_actions=suggested,
@@ -305,17 +323,90 @@ Respond strictly as a JSON object:
             "What are recent delay changes?",
             "Explain project risk score"
         ]
+    elif intent == "IDENTITY":
+        reply = (
+            "Hello! My name is **PAIMANA Intelligence**. I am your sovereign AI assistant and decision-support platform designed for sovereign infrastructure project monitoring, risk assessment, and decision intelligence.\n\n"
+            "### What I Can Help You With:\n"
+            "• **Project Health & Delays:** If you ask about a project (by name or ID), I will look up its DPHIS score, approved outlay, completion %, and schedule slippage.\n"
+            "• **Root Cause Analysis (SHAP):** Uncover the drivers behind delay risks—such as contractor execution lag, Right-of-Way (RoW) handovers, forest clearances, or utility shifting.\n"
+            "• **Portfolio Overview:** If you ask to view your projects, I will summarize your monitored corridors ranked by urgency.\n"
+            "• **Platform Guidance:** Ask me how to use the dashboard, configure alert thresholds, run simulations, or trigger n8n automated notifications.\n"
+            "• **General Questions:** You can ask me any question about project management, infrastructure benchmarks, or general inquiries."
+        )
+        suggested = ["What is DPHIS?", "Show my projects", "How do risk thresholds work?"]
+    elif intent == "DPHIS_EXPLANATION":
+        reply = (
+            "### Dynamic Project Health & Integrity Score (DPHIS)\n\n"
+            "**DPHIS** is PAIMANA's predictive index (scaled from **0 to 100**) that assesses the real-time operational vulnerability and delay risk of an infrastructure project.\n\n"
+            "### Core Pillars & Calculation Weights:\n"
+            "1. **Schedule Slippage Velocity (35% Weight):** Quantifies variance between scheduled baseline milestones and actual execution velocity.\n"
+            "2. **Physical-Financial Burn Disparity (25% Weight):** Analyzes the ratio between cumulative capex expenditure and verified on-ground physical completion.\n"
+            "3. **Statutory & RoW Handover Clearances (25% Weight):** Tracks pending Right-of-Way (RoW) acquisition, environmental/forest permits, and utility shifting.\n"
+            "4. **Contractor Capacity & Supply Velocity (15% Weight):** Assesses equipment mobilization rate, active workforce density, and liquidity stability.\n\n"
+            "### Risk Tier Thresholds:\n"
+            "• **Critical Risk (80 – 100):** Immediate escalation required; severe schedule slippage and cost overrun probability.\n"
+            "• **High Risk (65 – 79):** Significant delay indicators present; requires targeted intervention.\n"
+            "• **Moderate Risk (50 – 64):** Monitored variance; manageable within regular review cycles.\n"
+            "• **Low Risk (< 50):** Healthy execution tracking closely with baseline schedule."
+        )
+        suggested = ["What ML models are used?", "Show my projects", "How do risk alerts work?"]
+    elif intent == "ML_EXPLANATION":
+        reply = (
+            "### PAIMANA Predictive ML Architecture & Explainability\n\n"
+            "PAIMANA's risk intelligence engine combines machine learning with transparent explainability:\n\n"
+            "1. **Predictive Models:** Uses **XGBoost & LightGBM** models trained on sovereign infrastructure datasets to forecast delay slippage and cost escalations.\n"
+            "2. **Explainable AI via TreeSHAP:** Decomposes every prediction into exact feature attributions so every risk factor is quantified in real months of delay.\n"
+            "3. **Autonomous Reasoning Agents:** Multi-agent swarm coordinates to produce actionable recovery playbooks."
+        )
+        suggested = ["What is DPHIS?", "How does root cause investigation work?", "Show my projects"]
+    elif intent == "ALERTS_EXPLANATION":
+        reply = (
+            "### Alerts & Automation Command Center\n\n"
+            "PAIMANA provides an automated alerting system to detect project anomalies and notify stakeholders before delays become irreversible.\n\n"
+            "• **Automated Threshold Evaluation:** Runs continuous checks across all projects against configured DPHIS thresholds.\n"
+            "• **Multi-Channel Dispatch:** Dispatches notifications via **n8n automated workflows**, SMTP email delivery, and in-app alerts.\n"
+            "• **Deduplication Cooldown:** Built-in 24-hour cooldown prevents alert fatigue."
+        )
+        suggested = ["How is DPHIS calculated?", "Show my projects", "What is root cause investigation?"]
+    elif intent == "INVESTIGATION_EXPLANATION":
+        reply = (
+            "### Deep AI Root Cause Investigation Console\n\n"
+            "The **Root Cause Investigation Console** is an advanced diagnostic workspace that performs comprehensive automated audits on high-risk corridors.\n\n"
+            "1. **Telemetry & Milestone Ingestion:** Audits physical progress against scheduled target completion dates.\n"
+            "2. **Statutory & Environmental Audit:** Evaluates pending Right-of-Way (RoW), forest clearances, and utility shifting.\n"
+            "3. **SHAP Factor Breakdown:** Quantifies the exact drivers of the project's delay.\n"
+            "4. **Automated Recovery Playbook:** Synthesizes an executive mitigation strategy with timeline impacts."
+        )
+        suggested = ["Show my projects", "What is DPHIS?", "What ML models are used?"]
+    elif "capital of india" in lower_msg:
+        reply = "The capital of India is **New Delhi**."
+        suggested = ["Show my projects", "What is DPHIS?", "What can you do?"]
+    elif "joke" in lower_msg:
+        reply = "Why did the infrastructure project get a standing ovation? Because it actually finished on schedule and within budget! 😄"
+        suggested = ["Show my projects", "What is DPHIS?", "What can you do?"]
+    elif any(w in lower_msg for w in ["thank you", "thanks"]):
+        reply = "You're very welcome! If you have any more questions or need assistance with your projects, I'm always here to help."
+        suggested = ["Show my projects", "What is DPHIS?", "What can you do?"]
+    elif any(w in lower_msg for w in ["bye", "goodbye"]):
+        reply = "Goodbye! Wishing you smooth project execution and on-time milestone delivery."
+        suggested = ["Show my projects", "What is DPHIS?"]
     else:
-        reply = f"I am your PAIMANA Intelligence Assistant. You have **{len(projects_summary)} projects** in your database. How can I help you today?"
+        reply = (
+            f"I understand your question regarding \"{message}\".\n\n"
+            "As your PAIMANA Intelligence Assistant, I can provide domain insights, governance frameworks, and decision-support guidance.\n\n"
+            "If you have a question about a specific project, feel free to mention its name or ID (e.g., \"Tell me about Ahmedabad Metro\" or \"Status of N28000157\"). You can also ask me about DPHIS calculation, risk scoring, or request to view your project portfolio."
+        )
         suggested = [
             "Show my assigned projects",
-            "What are the latest changes?",
-            "Which project has the highest risk?"
+            "What is DPHIS?",
+            "What can you do?"
         ]
+
+    resolved_intent = intent if intent != "CONVERSATION" else ("PROJECT_INTELLIGENCE" if (target_project or pid) else "CONVERSATION")
 
     return ChatResponse(
         reply=reply,
-        intent=intent,
+        intent=resolved_intent,
         project_id=pid,
         grounded_evidence=shap_factors[:3] if shap_factors else [],
         suggested_actions=suggested,

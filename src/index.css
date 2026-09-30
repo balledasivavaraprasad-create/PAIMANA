@@ -2,6 +2,7 @@
 
 @layer base {
   :root[data-theme="dark"], :root {
+    color-scheme: dark;
     --bg-base: #000000;
     --bg-surface: #050507;
     --bg-card: rgba(8, 8, 12, 0.75);
@@ -26,6 +27,7 @@
   }
 
   :root[data-theme="light"] {
+    color-scheme: light;
     --bg-base: transparent;
     --bg-surface: rgba(255, 255, 255, 0.18);
     --bg-card: rgba(255, 255, 255, 0.15);
@@ -358,33 +360,118 @@
   color: #000000 !important;
 }
 
+/* =========================================================================
+   NATIVE SELECT & OPTION STYLING (CROSS-BROWSER & MACOS/CHROME LIGHT/DARK FIX)
+   ========================================================================= */
+:root[data-theme="light"] select {
+  color-scheme: light !important;
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+:root[data-theme="light"] select:focus {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #0F172A !important;
+  outline: 2px solid rgba(15, 23, 42, 0.25) !important;
+  outline-offset: 1px !important;
+}
+
+:root[data-theme="light"] select option {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+}
+
+:root[data-theme="light"] select option:checked {
+  background-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  font-weight: 600 !important;
+}
+
+:root[data-theme="light"] select option:hover,
+:root[data-theme="light"] select option:focus {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+:root[data-theme="dark"] select {
+  color-scheme: dark !important;
+  background-color: #0B0F17 !important;
+  color: #F8FAFC !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+:root[data-theme="dark"] select:focus {
+  background-color: #0B0F17 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+:root[data-theme="dark"] select option {
+  background-color: #0B0F17 !important;
+  color: #F8FAFC !important;
+}
+
+:root[data-theme="dark"] select option:checked {
+  background-color: #1E293B !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+}
+
+:root[data-theme="dark"] select option:hover,
+:root[data-theme="dark"] select option:focus {
+  background-color: #162032 !important;
+  color: #FFFFFF !important;
+}
+
 :root[data-theme="light"] input,
-:root[data-theme="light"] select,
 :root[data-theme="light"] textarea {
-  color: #000000 !important;
-  background-color: rgba(255, 255, 255, 0.90) !important;
-  border-color: rgba(0, 0, 0, 0.25) !important;
+  color-scheme: light !important;
+  color: #0F172A !important;
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+}
+
+:root[data-theme="light"] input:focus,
+:root[data-theme="light"] textarea:focus {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #0F172A !important;
 }
 
 :root[data-theme="light"] input::placeholder,
 :root[data-theme="light"] textarea::placeholder {
-  color: rgba(0, 0, 0, 0.50) !important;
+  color: #94A3B8 !important;
 }
 
 /* Explicit Header Nav Bar styling in Light Mode */
-:root[data-theme="light"] header button,
-:root[data-theme="light"] header button span,
-:root[data-theme="light"] header div {
+:root[data-theme="light"] header button:not(.text-rose-500):not(.text-rose-400),
+:root[data-theme="light"] header button:not(.text-rose-500):not(.text-rose-400) span,
+:root[data-theme="light"] header div:not([class*="bg-black"]) {
   color: #000000 !important;
 }
 
-/* Ensure solid dark buttons retain white text for high contrast */
+/* Ensure solid dark buttons retain pure white text for high contrast in light mode */
 :root[data-theme="light"] button.bg-black,
-:root[data-theme="light"] button.bg-black > *,
+:root[data-theme="light"] button.bg-black *,
 :root[data-theme="light"] button.bg-zinc-900,
-:root[data-theme="light"] button.bg-zinc-900 > *,
+:root[data-theme="light"] button.bg-zinc-900 *,
 :root[data-theme="light"] button.bg-slate-900,
-:root[data-theme="light"] button.bg-slate-900 > * {
+:root[data-theme="light"] button.bg-slate-900 *,
+:root[data-theme="light"] button.bg-slate-800,
+:root[data-theme="light"] button.bg-slate-800 *,
+:root[data-theme="light"] [class*="bg-black"]:not(select):not(option):not(header div),
+:root[data-theme="light"] [class*="bg-black"]:not(select):not(option):not(header div) *,
+:root[data-theme="light"] [class*="bg-slate-900"]:not(select):not(option),
+:root[data-theme="light"] [class*="bg-slate-900"]:not(select):not(option) * {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="light"] button.bg-black:hover,
+:root[data-theme="light"] button.bg-black:hover *,
+:root[data-theme="light"] button.bg-slate-900:hover,
+:root[data-theme="light"] button.bg-slate-900:hover * {
   color: #FFFFFF !important;
 }
 

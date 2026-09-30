@@ -106,7 +106,7 @@ export default function Assistant({ selectedProjectId, currentUser, allProjects,
         {
           id: (Date.now() + 1).toString(),
           sender: 'assistant',
-          text: 'Hello! I am your PAIMANA Project Assistant. I am monitoring your projects. How can I help you today?',
+          text: 'Hello! My name is PAIMANA Intelligence. How can I help you today?',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -122,7 +122,7 @@ export default function Assistant({ selectedProjectId, currentUser, allProjects,
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <h2 className="text-xl sm:text-2xl font-bold font-display tracking-tight text-white">
-              InfraBuild AI Assistant
+              PAIMANA Intelligence Assistant
             </h2>
             <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
               isAdmin ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'

@@ -203,10 +203,10 @@ export default function MyProjects({
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search by project name, ID, sector, or state..."
-              className={`w-full rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none transition-all border ${
+              className={`w-full rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none transition-all border focus:ring-2 ${
                 isDark
-                  ? 'bg-[#0B0F17]/85 border-white/20 text-white placeholder:text-white/40 focus:border-white/50 shadow-sm'
-                  : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-500 shadow-sm'
+                  ? 'bg-[#0B0F17]/85 border-white/20 text-white placeholder:text-white/40 focus:border-white/50 focus:ring-white/20 shadow-sm'
+                  : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:ring-slate-400/40 shadow-sm'
               }`}
             />
           </div>
@@ -216,22 +216,24 @@ export default function MyProjects({
             isDark ? 'bg-white/5 border-white/15' : 'bg-slate-100 border-slate-300'
           }`}>
             <button
+              type="button"
               onClick={() => setViewMode('cards')}
               title="Card view"
               className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                 viewMode === 'cards' 
-                  ? (isDark ? 'bg-white text-black shadow-sm' : 'bg-black text-white shadow-sm')
+                  ? (isDark ? 'bg-white text-black shadow-sm' : 'bg-white text-slate-900 border border-slate-300 shadow-sm')
                   : (isDark ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900')
               }`}
             >
               Cards
             </button>
             <button
+              type="button"
               onClick={() => setViewMode('table')}
               title="Table view"
               className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                 viewMode === 'table' 
-                  ? (isDark ? 'bg-white text-black shadow-sm' : 'bg-black text-white shadow-sm')
+                  ? (isDark ? 'bg-white text-black shadow-sm' : 'bg-white text-slate-900 border border-slate-300 shadow-sm')
                   : (isDark ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900')
               }`}
             >
@@ -254,11 +256,18 @@ export default function MyProjects({
             return (
               <button
                 key={st}
+                type="button"
                 onClick={() => setStatusFilter(st)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer whitespace-nowrap border ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer whitespace-nowrap border focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                   active
-                    ? (isDark ? 'bg-white text-black font-bold border-white shadow-md' : 'bg-black text-white font-bold border-black shadow-md')
-                    : (isDark ? 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-sm')
+                    ? (isDark 
+                        ? 'bg-white text-black font-bold border-white shadow-md focus:ring-white/40' 
+                        : 'bg-slate-900 text-white font-bold border-slate-900 shadow-md hover:bg-slate-800 focus:ring-slate-400'
+                      )
+                    : (isDark 
+                        ? 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15 focus:ring-white/20' 
+                        : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-300 shadow-sm focus:ring-slate-300'
+                      )
                 }`}
               >
                 {labelMap[st]}
@@ -271,59 +280,67 @@ export default function MyProjects({
         <div className="flex flex-wrap items-center gap-3 pt-0.5">
           {/* Sector Filter */}
           <div className="flex items-center gap-1.5">
-            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-600'}`}>Sector:</span>
+            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-700 font-semibold'}`}>Sector:</span>
             <select
               value={sectorFilter}
               onChange={e => setSectorFilter(e.target.value)}
-              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm ${
+              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
                 isDark 
-                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50' 
-                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500'
+                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50 focus:ring-white/20' 
+                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 focus:ring-slate-400/30'
               }`}
             >
-              <option value="ALL">All Sectors ({inferredSectors.length})</option>
+              <option value="ALL" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>
+                All Sectors ({inferredSectors.length})
+              </option>
               {inferredSectors.map(s => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s} className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>
+                  {s}
+                </option>
               ))}
             </select>
           </div>
 
           {/* State Filter */}
           <div className="flex items-center gap-1.5">
-            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-600'}`}>State:</span>
+            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-700 font-semibold'}`}>State:</span>
             <select
               value={stateFilter}
               onChange={e => setStateFilter(e.target.value)}
-              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm ${
+              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
                 isDark 
-                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50' 
-                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500'
+                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50 focus:ring-white/20' 
+                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 focus:ring-slate-400/30'
               }`}
             >
-              <option value="ALL">All States ({inferredStates.length})</option>
+              <option value="ALL" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>
+                All States ({inferredStates.length})
+              </option>
               {inferredStates.map(st => (
-                <option key={st} value={st}>{st}</option>
+                <option key={st} value={st} className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>
+                  {st}
+                </option>
               ))}
             </select>
           </div>
 
           {/* Sort By */}
           <div className="flex items-center gap-1.5 sm:ml-auto">
-            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-600'}`}>Sort:</span>
+            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-700 font-semibold'}`}>Sort:</span>
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as any)}
-              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm ${
+              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
                 isDark 
-                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50' 
-                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500'
+                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50 focus:ring-white/20' 
+                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 focus:ring-slate-400/30'
               }`}
             >
-              <option value="dphis_desc">Highest Risk (Score)</option>
-              <option value="dphis_asc">Lowest Risk (Score)</option>
-              <option value="cost_desc">Approved Budget (High to Low)</option>
-              <option value="delay_desc">Project Delay (Longest First)</option>
-              <option value="name_asc">Project Name (A–Z)</option>
+              <option value="dphis_desc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Highest Risk (Score)</option>
+              <option value="dphis_asc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Lowest Risk (Score)</option>
+              <option value="cost_desc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Approved Budget (High to Low)</option>
+              <option value="delay_desc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Project Delay (Longest First)</option>
+              <option value="name_asc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Project Name (A–Z)</option>
             </select>
           </div>
         </div>
@@ -332,8 +349,8 @@ export default function MyProjects({
       {/* Projects List: Cards or Table */}
       {filteredPins.length === 0 ? (
         <GlassCard variant="medium" padding={32} className="text-center space-y-4">
-          <div className="text-base font-bold text-white">No Matching Projects Found</div>
-          <p className="text-xs sm:text-sm text-white/70 max-w-md mx-auto">
+          <div className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>No Matching Projects Found</div>
+          <p className={`text-xs sm:text-sm max-w-md mx-auto ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
             {searchQuery || statusFilter !== 'ALL' || sectorFilter !== 'ALL' || stateFilter !== 'ALL'
               ? 'No projects match your current filter criteria. Try clearing filters or search query.'
               : !isAdmin 
@@ -343,13 +360,18 @@ export default function MyProjects({
           </p>
           {(searchQuery || statusFilter !== 'ALL' || sectorFilter !== 'ALL' || stateFilter !== 'ALL') && (
             <button
+              type="button"
               onClick={() => { 
                 setSearchQuery(''); 
                 setStatusFilter('ALL'); 
                 setSectorFilter('ALL'); 
                 setStateFilter('ALL'); 
               }}
-              className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer"
+              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer shadow-sm ${
+                isDark
+                  ? 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                  : 'bg-slate-900 hover:bg-black text-white border-slate-900'
+              }`}
             >
               Clear Filters
             </button>
@@ -482,8 +504,9 @@ export default function MyProjects({
                 </div>
 
                 {/* Actions: View Project Insights + Risk Intelligence (side-by-side) */}
-                <div className="pt-3 border-t border-white/10 flex items-center gap-2">
+                <div className={`pt-3 border-t flex items-center gap-2 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onSelectProject(pin.id);
@@ -493,13 +516,18 @@ export default function MyProjects({
                         setInsightsModalProjectId(pin.id);
                       }
                     }}
-                    className="flex-1 py-2 px-3 rounded-xl bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer text-center shadow-md flex items-center justify-center gap-1 whitespace-nowrap"
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer text-center shadow-md flex items-center justify-center gap-1 whitespace-nowrap ${
+                      isDark
+                        ? 'bg-white text-black hover:bg-slate-200'
+                        : 'bg-slate-900 text-white hover:bg-black shadow-sm'
+                    }`}
                   >
                     <span>View Project Insights</span>
                     <span>→</span>
                   </button>
 
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onSelectProject(pin.id);
@@ -508,7 +536,11 @@ export default function MyProjects({
                       }
                     }}
                     title="Deep Risk Intelligence & Model Forecasts"
-                    className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap shadow-sm"
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap shadow-sm ${
+                      isDark
+                        ? 'bg-white/10 hover:bg-white hover:text-black text-white border-white/20'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-800 hover:text-black border-slate-300'
+                    }`}
                   >
                     <span>Risk Intelligence</span>
                     <span>⚡</span>
@@ -520,20 +552,22 @@ export default function MyProjects({
         </div>
       ) : (
         /* Table View */
-        <div className="overflow-x-auto rounded-xl border border-white/15 bg-black/40 backdrop-blur-md">
+        <div className={`overflow-x-auto rounded-xl border backdrop-blur-md ${
+          isDark ? 'border-white/15 bg-black/40' : 'border-slate-300 bg-white shadow-sm'
+        }`}>
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-white/15 bg-[#0B0F17]">
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Project ID</th>
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Project Name</th>
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Sector</th>
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Location</th>
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">DPHIS Score</th>
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Risk Tier</th>
-                <th className="p-4 text-white/80 font-mono text-[10px] uppercase">Action</th>
+              <tr className={`border-b ${isDark ? 'border-white/15 bg-[#0B0F17]' : 'border-slate-200 bg-slate-100'}`}>
+                <th className={`p-4 font-mono text-[10px] uppercase font-bold ${isDark ? 'text-white/80' : 'text-slate-700'}`}>Project ID</th>
+                <th className={`p-4 font-mono text-[10px] uppercase font-bold ${isDark ? 'text-white/80' : 'text-slate-700'}`}>Project Name</th>
+                <th className={`p-4 font-mono text-[10px] uppercase font-bold ${isDark ? 'text-white/80' : 'text-slate-700'}`}>Sector</th>
+                <th className={`p-4 font-mono text-[10px] uppercase font-bold ${isDark ? 'text-white/80' : 'text-slate-700'}`}>Location</th>
+                <th className={`p-4 font-mono text-[10px] uppercase font-bold ${isDark ? 'text-white/80' : 'text-slate-700'}`}>DPHIS Score</th>
+                <th className={`p-4 font-mono text-[10px] uppercase font-bold ${isDark ? 'text-white/80' : 'text-slate-700'}`}>Risk Tier</th>
+                <th className={`p-4 font-mono text-[10px] uppercase font-bold ${isDark ? 'text-white/80' : 'text-slate-700'}`}>Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className={`divide-y ${isDark ? 'divide-white/5' : 'divide-slate-200'}`}>
               {filteredPins.map(pin => {
                 const cat = getRiskCategory(pin.dphis);
                 const pinSector = getPinSector(pin);
@@ -544,16 +578,16 @@ export default function MyProjects({
                       onSelectProject(pin.id);
                       setInsightsModalProjectId(pin.id);
                     }}
-                    className="hover:bg-white/5 transition-colors cursor-pointer"
+                    className={`transition-colors cursor-pointer ${isDark ? 'hover:bg-white/5' : 'hover:bg-slate-50'}`}
                   >
-                    <td className="p-4 font-mono font-bold text-white">{pin.id}</td>
-                    <td className="p-4 font-semibold text-white">{pin.name}</td>
-                    <td className="p-4 text-white/70 font-mono text-xs">{pinSector}</td>
-                    <td className="p-4 text-white/80">{pin.state}</td>
-                    <td className="p-4 font-mono font-bold text-white">
+                    <td className={`p-4 font-mono font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{pin.id}</td>
+                    <td className={`p-4 font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{pin.name}</td>
+                    <td className={`p-4 font-mono text-xs ${isDark ? 'text-white/70' : 'text-slate-600'}`}>{pinSector}</td>
+                    <td className={`p-4 ${isDark ? 'text-white/80' : 'text-slate-700'}`}>{pin.state}</td>
+                    <td className={`p-4 font-mono font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       <div className="flex items-center gap-2">
                         <span className="text-sm">{pin.dphis}</span>
-                        <div className="w-16 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                        <div className={`w-16 h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-slate-200'}`}>
                           <div
                             className="h-full rounded-full"
                             style={{
@@ -577,6 +611,7 @@ export default function MyProjects({
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             onSelectProject(pin.id);
@@ -586,11 +621,16 @@ export default function MyProjects({
                               setInsightsModalProjectId(pin.id);
                             }
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap"
+                          className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
+                            isDark
+                              ? 'bg-white text-black hover:bg-slate-200'
+                              : 'bg-slate-900 text-white hover:bg-black shadow-sm'
+                          }`}
                         >
                           View Project Insights →
                         </button>
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             onSelectProject(pin.id);
@@ -598,19 +638,28 @@ export default function MyProjects({
                               onNavigateToRiskIntelligence(pin.id);
                             }
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer whitespace-nowrap"
+                          className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer whitespace-nowrap shadow-sm ${
+                            isDark
+                              ? 'bg-white/10 hover:bg-white hover:text-black text-white border-white/20'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-800 hover:text-black border-slate-300'
+                          }`}
                         >
                           Risk Intelligence ⚡
                         </button>
                         {onNavigateToInvestigation && (
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               onSelectProject(pin.id);
                               onNavigateToInvestigation(pin.id);
                             }}
                             title="Launch AI Root Cause Investigation Console"
-                            className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-mono font-bold border border-amber-500/40 transition-all cursor-pointer whitespace-nowrap"
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer whitespace-nowrap ${
+                              isDark
+                                ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/40'
+                                : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
+                            }`}
                           >
                             Investigate 🔍
                           </button>

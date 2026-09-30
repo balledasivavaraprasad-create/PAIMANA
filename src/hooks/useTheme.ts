@@ -17,6 +17,7 @@ const listeners = new Set<() => void>();
 function emitChange() {
   if (typeof window !== 'undefined') {
     document.documentElement.setAttribute('data-theme', currentTheme);
+    document.documentElement.style.colorScheme = currentTheme;
     try {
       localStorage.setItem('paimana-theme', currentTheme);
     } catch {
@@ -31,6 +32,7 @@ function emitChange() {
 // Apply initial data-theme attribute to <html> root immediately
 if (typeof window !== 'undefined') {
   document.documentElement.setAttribute('data-theme', currentTheme);
+  document.documentElement.style.colorScheme = currentTheme;
 }
 
 export function useTheme() {

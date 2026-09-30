@@ -373,8 +373,10 @@ export default function ProjectIntelligence({
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
           <button
+            type="button"
             onClick={() => onNavigateToInvestigation(resolvedProjectId)}
-            className="px-5 sm:px-6 py-2.5 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.22)] hover:bg-zinc-900 transition-all cursor-pointer flex items-center justify-center gap-2"
+            style={{ touchAction: 'manipulation' }}
+            className="px-5 sm:px-6 py-2.5 rounded-xl bg-black text-white text-xs sm:text-sm font-mono-code font-bold border border-white/30 shadow-[0_0_16px_rgba(255,255,255,0.22)] hover:bg-zinc-900 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 select-none"
           >
             <span>Launch Deep AI Investigation Console →</span>
           </button>
