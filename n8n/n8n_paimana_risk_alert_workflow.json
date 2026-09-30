@@ -1,0 +1,284 @@
+{
+  "name": "01 — PAIMANA Risk Alert Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paimana-risk-alert",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-01-webhook",
+      "name": "01 — PAIMANA Risk Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        180,
+        300
+      ],
+      "webhookId": "paimana-risk-alert"
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const crypto = require('crypto');\nconst headers = $input.first().json.headers || {};\nconst body = $input.first().json.body || $input.first().json;\n\nconst signatureHeader = headers['x-paimana-signature'] || headers['X-PAIMANA-Signature'];\nconst eventIdHeader = headers['x-paimana-event-id'] || headers['X-PAIMANA-Event-ID'];\nconst secret = $env.N8N_WEBHOOK_SECRET || 'paimana-n8n-alert-secret-key-2026';\n\nlet isValid = false;\nif (signatureHeader && secret) {\n  const expectedSig = 'sha256=' + crypto.createHmac('sha256', secret).update(JSON.stringify(body)).digest('hex');\n  // Constant time comparison if lengths match\n  if (signatureHeader.length === expectedSig.length) {\n    isValid = crypto.timingSafeEqual(Buffer.from(signatureHeader), Buffer.from(expectedSig));\n  }\n} else {\n  // If secret not configured in local dev, allow with warning flag\n  isValid = !process.env.STRICT_HMAC_REQUIRED;\n}\n\nreturn [{\n  json: {\n    raw_payload: body,\n    headers: headers,\n    signature_valid: isValid,\n    event_id: body.event_id || eventIdHeader,\n    received_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "node-02-verify-sig",
+      "name": "02 — Verify Signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const item = $input.first().json;\nconst p = item.raw_payload || {};\n\nif (!item.signature_valid && process.env.STRICT_HMAC_REQUIRED) {\n  return [{\n    json: {\n      ok: false,\n      error: 'invalid_signature',\n      event_id: item.event_id,\n      status: 'rejected'\n    }\n  }];\n}\n\n// Mandatory field validation\nconst eventId = p.event_id || item.event_id;\nconst eventType = p.event_type || 'THRESHOLD_CROSSED';\nconst projectCode = p.project?.project_code || p.project?.project_id || p.project_id;\nconst currentDphis = p.risk?.current_dphis !== undefined ? p.risk.current_dphis : p.current_dphis;\nconst recipientEmail = p.recipient?.email || p.user?.email;\n\nif (!eventId || !projectCode || currentDphis === undefined || !recipientEmail) {\n  return [{\n    json: {\n      ok: false,\n      error: 'malformed_payload',\n      details: 'Missing mandatory fields: event_id, project_code, current_dphis, or recipient.email',\n      event_id: eventId,\n      status: 'rejected'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    ok: true,\n    validated: true,\n    event_id: eventId,\n    event_type: eventType,\n    project: p.project || { project_code: projectCode, project_name: p.project_name || projectCode },\n    risk: p.risk || { current_dphis: currentDphis, previous_dphis: p.previous_dphis, threshold: p.threshold || 70.0 },\n    recipient: p.recipient || { email: recipientEmail, name: p.user?.name || 'Project Officer' },\n    predictions: p.predictions || {},\n    progress: p.progress || {},\n    events: p.events || [eventType],\n    explanations: p.explanations || {},\n    peer_intelligence: p.peer_intelligence || { available: false },\n    investigation: p.investigation || {},\n    links: p.links || { project_url: p.project_url },\n    metadata: p.metadata || {}\n  }\n}];"
+      },
+      "id": "node-03-validate-payload",
+      "name": "03 — Validate Alert Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const item = $input.first().json;\nif (!item.ok) {\n  return [{ json: item }];\n}\n\n// Static data idempotency store\nconst staticData = $getWorkflowStaticData('global');\nstaticData.processedEvents = staticData.processedEvents || {};\n\nconst eventId = item.event_id;\nconst now = Date.now();\n\n// Prune events older than 48 hours\nfor (const id in staticData.processedEvents) {\n  if (now - staticData.processedEvents[id] > 48 * 3600 * 1000) {\n    delete staticData.processedEvents[id];\n  }\n}\n\nif (staticData.processedEvents[eventId]) {\n  return [{\n    json: {\n      ok: true,\n      event_id: eventId,\n      status: 'duplicate',\n      is_duplicate: true,\n      message: 'Duplicate event_id detected and suppressed.'\n    }\n  }];\n}\n\n// Register event ID\nstaticData.processedEvents[eventId] = now;\nitem.is_duplicate = false;\nreturn [{ json: item }];"
+      },
+      "id": "node-04-idempotency",
+      "name": "04 — Idempotency Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        840,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const item = $input.first().json;\nif (!item.ok || item.is_duplicate) {\n  return [{ json: item }];\n}\n\nconst p = item.project || {};\nconst r = item.risk || {};\nconst pred = item.predictions || {};\nconst prog = item.progress || {};\nconst peer = item.peer_intelligence || {};\nconst links = item.links || {};\nconst expl = item.explanations || {};\n\nconst projectName = p.project_name || p.project_code || 'Infrastructure Project';\nconst recipientName = item.recipient?.name || 'Project Stakeholder';\nconst currD = r.current_dphis ?? 75.0;\nconst prevD = r.previous_dphis ?? 60.0;\nconst thresh = r.threshold ?? 70.0;\nconst tier = r.risk_tier || 'High';\n\n// Build deterministic fallback email\nconst subject = `[PAIMANA ALERT] ${projectName} — DPHIS threshold crossed`;\n\nlet peerBlock = '';\nif (peer.available) {\n  peerBlock = `\\nPeer context:\\n- Comparable projects: ${peer.peer_count || 0}\\n- Peer median DPHIS: ${peer.peer_median_dphis || 'N/A'}\\n- Relative deviation: +${peer.peer_deviation || 0} pts`;\n} else {\n  peerBlock = '\\nPeer context:\\n- Peer comparison was not used because insufficient comparable projects were available.';\n}\n\nconst invUrl = links.investigation_url || `https://paimana-seven.vercel.app?investigation=${p.project_code}`;\nconst projUrl = links.project_url || `https://paimana-seven.vercel.app?project=${p.project_code}`;\n\nconst fallbackText = `Dear ${recipientName},\n\nInfraBuild-AI's continuous monitoring system has detected a significant change in the following project:\n\nProject:\n${projectName}\n\nProject Code:\n${p.project_code}\n\nCurrent DPHIS:\n${currD} / 100\n\nPrevious DPHIS:\n${prevD} / 100\n\nConfigured Threshold:\n${thresh} / 100\n\nRisk Tier:\n${tier}\n\nTrigger:\n${item.event_type || 'THRESHOLD_CROSSED'}\n\nKey observed signals:\n- Observed expenditure vs physical progress gap: ${prog.expenditure_pct || 0}% vs ${prog.physical_progress_pct || 0}%\n- Milestone timeline deviation: +${pred.predicted_schedule_slippage_months || 0} months\n\nPredictive indicators:\n- Predicted cost overrun: ${pred.predicted_cost_overrun_pct || 0}%\n- Predicted schedule slippage: +${pred.predicted_schedule_slippage_months || 0} months\n- Physical progress: ${prog.physical_progress_pct || 0}%\n- Expenditure: ${prog.expenditure_pct || 0}%\n${peerBlock}\n\nRoot-cause drivers:\n${expl.summary || 'Detailed risk drivers identified in project dossier.'}\n\nAn investigation can be reviewed here:\n${invUrl}\n\nProject details:\n${projUrl}\n\nRegards,\nInfraBuild-AI Monitoring System`;\n\nconst systemPrompt = `You are writing an infrastructure project monitoring alert for an authorized project stakeholder.\n\nUse only the structured facts supplied in the input.\nDo not invent facts.\nDo not claim causal certainty unless the evidence explicitly supports it.\nClearly distinguish observed facts from possible explanations.\nBe concise and professional.\nThe purpose of the email is to inform the recipient that a monitoring condition has been detected and direct them to the relevant project/investigation page.`;\n\nreturn [{\n  json: {\n    ...item,\n    system_prompt: systemPrompt,\n    prompt_input: JSON.stringify(item, null, 2),\n    fallback_subject: subject,\n    fallback_body: fallbackText\n  }\n}];"
+      },
+      "id": "node-05-build-ai-ctx",
+      "name": "05 — Build AI Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.OPENAI_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"temperature\": 0.2,\n  \"response_format\": { \"type\": \"json_object\" },\n  \"messages\": [\n    { \"role\": \"system\", \"content\": {{ JSON.stringify($json.system_prompt) }} },\n    { \"role\": \"user\", \"content\": \"Transform these structured monitoring facts into a professional alert email. Return JSON with 'subject' and 'text_content':\\n\\n\" + {{ JSON.stringify($json.prompt_input) }} }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "node-06-generate-email",
+      "name": "06 — Generate Alert Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        300
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const item = $('05 — Build AI Context').first().json;\nif (!item.ok || item.is_duplicate) {\n  return [{ json: item }];\n}\n\nlet subject = item.fallback_subject;\nlet body = item.fallback_body;\nlet generator = 'deterministic_fallback';\n\ntry {\n  const aiResponse = $input.first().json;\n  if (aiResponse && aiResponse.choices && aiResponse.choices.length > 0) {\n    const parsed = JSON.parse(aiResponse.choices[0].message.content);\n    if (parsed.subject && parsed.text_content) {\n      subject = parsed.subject;\n      body = parsed.text_content;\n      generator = 'openai_chatgpt';\n    }\n  }\n} catch (e) {\n  generator = 'fallback_due_to_parse_error';\n}\n\n// Convert body to clean responsive HTML email\nconst htmlBody = `\n<div style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; color: #0f172a;\">\n  <div style=\"border-bottom: 2px solid #ef4444; padding-bottom: 12px; margin-bottom: 18px;\">\n    <h2 style=\"margin: 0; color: #0f172a; font-size: 18px; font-weight: 700;\">InfraBuild-AI <span style=\"font-size: 11px; background: #fee2e2; color: #dc2626; padding: 3px 8px; border-radius: 999px; margin-left: 6px;\">ALERT</span></h2>\n  </div>\n  <div style=\"white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #334155;\">${body}</div>\n  <div style=\"margin-top: 24px; padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8;\">\n    Generated via ${generator} · InfraBuild-AI Sovereign Continuous Monitoring Engine · Human review required for consequential actions\n  </div>\n</div>`;\n\nreturn [{\n  json: {\n    ...item,\n    email_subject: subject,\n    email_text: body,\n    email_html: htmlBody,\n    email_generator: generator\n  }\n}];"
+      },
+      "id": "node-07-validate-email",
+      "name": "07 — Validate Email Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.EMAIL_FROM || 'infrabuild-ai@paimana.gov.in' }}",
+        "toEmail": "={{ $json.recipient.email }}",
+        "subject": "={{ $json.email_subject }}",
+        "text": "={{ $json.email_text }}",
+        "html": "={{ $json.email_html }}",
+        "options": {}
+      },
+      "id": "node-08-send-email",
+      "name": "08 — Send Infrastructure Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1720,
+        300
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const item = $('07 — Validate Email Content').first().json;\nif (!item.ok || item.is_duplicate) {\n  return [{ json: item }];\n}\n\nconst sendResult = $input.first().json;\nconst sendFailed = sendResult && sendResult.error;\nconst emailStatus = sendFailed ? 'failed' : 'sent';\n\nreturn [{\n  json: {\n    event_id: item.event_id,\n    project_code: item.project?.project_code,\n    recipient: item.recipient?.email,\n    event_type: item.event_type,\n    generated_at: new Date().toISOString(),\n    email_status: emailStatus,\n    email_generator: item.email_generator,\n    provider_reference: sendResult?.messageId || sendResult?.id || (sendFailed ? sendResult.error.message : 'SENT-SUCCESS')\n  }\n}];"
+      },
+      "id": "node-09-record-delivery",
+      "name": "09 — Record Delivery",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1940,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"ok\": {{ $json.ok !== false }},\n  \"event_id\": \"{{ $json.event_id }}\",\n  \"status\": \"{{ $json.status || ($json.is_duplicate ? 'duplicate' : 'accepted') }}\",\n  \"delivery_status\": \"{{ $json.email_status || ($json.is_duplicate ? 'duplicate' : 'dispatched') }}\"\n}",
+        "options": {}
+      },
+      "id": "node-10-respond",
+      "name": "10 — Respond to PAIMANA",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2160,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "01 — PAIMANA Risk Webhook": {
+      "main": [
+        [
+          {
+            "node": "02 — Verify Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 — Verify Signature": {
+      "main": [
+        [
+          {
+            "node": "03 — Validate Alert Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 — Validate Alert Payload": {
+      "main": [
+        [
+          {
+            "node": "04 — Idempotency Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 — Idempotency Check": {
+      "main": [
+        [
+          {
+            "node": "05 — Build AI Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 — Build AI Context": {
+      "main": [
+        [
+          {
+            "node": "06 — Generate Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 — Generate Alert Email": {
+      "main": [
+        [
+          {
+            "node": "07 — Validate Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07 — Validate Email Content": {
+      "main": [
+        [
+          {
+            "node": "08 — Send Infrastructure Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "08 — Send Infrastructure Alert": {
+      "main": [
+        [
+          {
+            "node": "09 — Record Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "09 — Record Delivery": {
+      "main": [
+        [
+          {
+            "node": "10 — Respond to PAIMANA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

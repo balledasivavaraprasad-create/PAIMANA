@@ -6,6 +6,7 @@ from app.db.mongodb import get_database
 from app.models.alert import Alert
 from app.config.settings import settings
 from app.config.logging import logger
+from app.services.notification_automation_service import notification_automation_service
 
 def get_centralized_severity(dphis: float) -> str:
     """
@@ -250,57 +251,31 @@ async def evaluate_project_threshold_crossing(
         }}
     )
 
-    # STEP 3: PREPARE AND SEND STRUCTURED PAYLOAD TO N8N WEBHOOK
-    target_webhook = settings.N8N_THRESHOLD_WEBHOOK_URL or "https://hrishikesh1.app.n8n.cloud/webhook/project-risk-threshold"
-    n8n_payload = {
-        "event_type": "DPHIS_THRESHOLD_CROSSED",
+    # STEP 3: DISPATCH RISK ALERT VIA NOTIFICATION AUTOMATION SERVICE & DURABLE OUTBOX
+    automation_result = await notification_automation_service.trigger_risk_alert({
         "event_id": event_id,
         "alert_id": alert_id,
-        "timestamp": now_utc.isoformat(),
-        "project": {
-            "project_id": project_id,
-            "project_name": project_name,
-            "department": dept,
-            "location": loc
-        },
-        "risk": {
-            "previous_dphis": previous_dphis,
-            "current_dphis": current_dphis,
-            "threshold": threshold,
-            "crossed_by": round(current_dphis - threshold, 1),
-            "severity": severity
-        },
-        "user": {
-            "user_id": user_id,
-            "name": user_name,
-            "email": user_email
-        },
-        "admin": {
-            "email": admin_email
-        },
-        "top_risk_reasons": top_reasons,
-        "project_url": f"https://paimana-seven.vercel.app?project={project_id}"
-    }
+        "event_type": "DPHIS_THRESHOLD_CROSSED",
+        "project_id": project_id,
+        "project_name": project_name,
+        "department": dept,
+        "location": loc,
+        "previous_dphis": previous_dphis,
+        "current_dphis": current_dphis,
+        "threshold": threshold,
+        "severity": severity,
+        "user_id": user_id,
+        "recipient_name": user_name,
+        "recipient_email": user_email,
+        "admin_email": admin_email,
+        "top_risk_reasons": top_reasons
+    })
 
-    webhook_ok = False
-    exec_ref = None
-
-    try:
-        async with httpx.AsyncClient(timeout=8.0) as client:
-            resp = await client.post(target_webhook, json=n8n_payload)
-            if resp.status_code in (200, 201, 202):
-                webhook_ok = True
-                exec_ref = resp.headers.get("x-execution-id") or resp.text[:120] or "SUCCESS"
-                logger.info(f"Dispatched threshold event {event_id} to n8n ({resp.status_code})")
-            else:
-                exec_ref = f"HTTP {resp.status_code}: {resp.text[:100]}"
-                logger.warning(f"n8n webhook responded with non-200: {resp.status_code}")
-    except Exception as e:
-        exec_ref = f"Webhook error: {str(e)[:100]}"
-        logger.warning(f"Could not reach n8n webhook: {e}")
+    webhook_ok = automation_result.get("webhook_dispatched", False)
+    exec_ref = automation_result.get("n8n_execution_reference") or ("SUCCESS" if webhook_ok else "FAILED")
+    new_notif_status = "sent" if webhook_ok else "failed"
 
     # STEP 4: UPDATE ALERT NOTIFICATION STATUS
-    new_notif_status = "sent" if webhook_ok else "failed"
     await db.alerts.update_one(
         {"alert_id": alert_id},
         {"$set": {
@@ -308,11 +283,18 @@ async def evaluate_project_threshold_crossing(
             "user_notified": webhook_ok,
             "admin_notified": webhook_ok,
             "webhook_dispatched": webhook_ok,
-            "n8n_execution_reference": str(exec_ref)
+            "n8n_execution_reference": str(exec_ref),
+            "outbox_status": automation_result.get("delivery_status", "pending")
         }}
     )
 
+    alert_doc["notification_status"] = new_notif_status
+    alert_doc["user_notified"] = webhook_ok
+    alert_doc["admin_notified"] = webhook_ok
+    alert_doc["webhook_dispatched"] = webhook_ok
+    alert_doc["n8n_execution_reference"] = str(exec_ref)
     alert_doc.pop("_id", None)
+
     return {
         "success": True,
         "triggered": True,
@@ -326,7 +308,8 @@ async def evaluate_project_threshold_crossing(
         "notification_status": new_notif_status,
         "webhook_dispatched": webhook_ok,
         "n8n_execution_reference": exec_ref,
-        "alert": alert_doc
+        "alert": alert_doc,
+        "outbox_id": automation_result.get("outbox_id")
     }
 
 async def evaluate_and_trigger_alert(
