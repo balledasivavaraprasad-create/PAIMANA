@@ -67,6 +67,17 @@ export function HeaderNav({
         { id: 'assistant', label: 'Assistant', icon: '🤖' },
       ];
 
+  // Mobile Phone Menu Navigation Items (ONLY the 7 specific items requested)
+  const mobileNavItems: Array<{ id: ActiveTab; label: string; badge?: number; icon: string }> = [
+    { id: 'motion', label: 'Overview', icon: '🏛️' },
+    { id: 'projects', label: 'Portfolio', icon: '📁' },
+    { id: 'analytics', label: 'Analytics', icon: '📈' },
+    { id: 'alerts', label: 'Alerts and Automation', badge: alertCount, icon: '🔔' },
+    { id: 'assistant', label: 'Assistant', icon: '🤖' },
+    { id: 'data_models', label: 'Data and Models', icon: '🧠' },
+    { id: 'users_audit', label: 'Users and Audit', icon: '👥' },
+  ];
+
   const checkScroll = () => {
     const el = scrollRef.current;
     if (!el) return;
@@ -149,8 +160,8 @@ export function HeaderNav({
     <header className={`fixed top-0 left-0 right-0 z-50 h-11 sm:h-12 px-3 sm:px-6 flex items-center justify-between pointer-events-none shadow-md gap-2 sm:gap-4 transition-colors duration-200 ${
       isDark ? 'bg-[#0B0F17] border-b border-white/10' : 'bg-white/90 backdrop-blur-md border-b border-black/10'
     }`}>
-      {/* Top Left: InfraBuild AI Branding + Mobile Menu Trigger */}
-      <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto shrink-0">
+      {/* Left: InfraBuild AI Logo Branding */}
+      <div className="flex items-center shrink-0 pointer-events-auto">
         <div 
           onClick={() => onTabChange('motion')}
           className="cursor-pointer select-none shrink-0 group flex items-center gap-2"
@@ -164,15 +175,17 @@ export function HeaderNav({
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Phone Menu Trigger Button (Rendered ONLY on phone screens < 768px) */}
-        <div ref={mobileMenuRef} className="relative md:hidden">
+      {/* Middle Section: Mobile Menu Trigger (Rendered in center ONLY on mobile phone < 768px) */}
+      <div className="md:hidden flex-1 flex justify-center items-center pointer-events-auto">
+        <div ref={mobileMenuRef} className="relative">
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Open Navigation Menu"
             aria-expanded={mobileMenuOpen}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border shadow-sm select-none ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border shadow-sm select-none ${
               mobileMenuOpen
                 ? (isDark ? 'bg-white text-black border-white' : 'bg-slate-900 text-white border-slate-900')
                 : (isDark ? 'bg-[#141A26] hover:bg-[#1E2638] text-white border-white/20' : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300')
@@ -190,32 +203,17 @@ export function HeaderNav({
             </svg>
           </button>
 
-          {/* Mobile Phone Dropdown Menu */}
+          {/* Mobile Phone Dropdown Menu - ONLY the 7 navigation items */}
           {mobileMenuOpen && (
             <div 
-              className={`absolute left-0 top-9 w-64 sm:w-72 max-w-[calc(100vw-24px)] rounded-2xl border shadow-2xl p-2.5 z-50 animate-fade-in font-sans ${
+              className={`absolute left-1/2 -translate-x-1/2 top-9 w-60 sm:w-64 max-w-[calc(100vw-24px)] rounded-xl border shadow-2xl p-1.5 z-50 animate-fade-in font-sans ${
                 isDark 
                   ? 'bg-[#0B0F17]/98 backdrop-blur-xl border-white/20 text-white shadow-black/90' 
                   : 'bg-white/98 backdrop-blur-xl border-slate-300 text-slate-900 shadow-2xl'
               }`}
             >
-              {/* Dropdown Header */}
-              <div className={`px-2.5 py-1.5 border-b mb-1.5 flex items-center justify-between ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-amber-500 font-bold">
-                  InfraBuild AI Menu
-                </span>
-                <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold ${
-                  isAdmin 
-                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
-                    : (isDark ? 'bg-white/10 text-white/70' : 'bg-slate-100 text-slate-700')
-                }`}>
-                  {isAdmin ? 'ADMIN' : 'OFFICER'}
-                </span>
-              </div>
-
-              {/* Navigation Items (Overview, Portfolio, Analytics, Alerts, Automation, Assistant, etc.) */}
               <div className="space-y-0.5 text-xs font-mono">
-                {navItems.map(item => {
+                {mobileNavItems.map(item => {
                   const active = currentTab === item.id;
                   return (
                     <button
@@ -228,7 +226,7 @@ export function HeaderNav({
                       }`}
                     >
                       <div className="flex items-center gap-2 truncate">
-                        <span>{item.icon || '📌'}</span>
+                        <span>{item.icon}</span>
                         <span className="truncate">{item.label}</span>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
@@ -243,111 +241,12 @@ export function HeaderNav({
                   );
                 })}
               </div>
-
-              {/* Divider */}
-              <div className={`my-2 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`} />
-
-              {/* Utility Section: What, The Dark & Light Switch, Login */}
-              <div className="space-y-1.5 text-xs font-mono">
-                {/* 1. What */}
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onTabChange('assistant');
-                  }}
-                  className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 transition-colors cursor-pointer ${
-                    isDark ? 'hover:bg-white/10 text-sky-400' : 'hover:bg-sky-50 text-sky-700'
-                  }`}
-                >
-                  <span>💡</span>
-                  <span>What is PAIMANA &amp; DPHIS?</span>
-                </button>
-
-                {/* 2. The Dark and Light Switch */}
-                <div className={`px-2.5 py-1.5 rounded-lg flex items-center justify-between border ${
-                  isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    <span>{isDark ? '🌙' : '☀️'}</span>
-                    <span className="font-semibold text-[11px]">{isDark ? 'Dark Theme' : 'Light Theme'}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={toggleTheme}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-all cursor-pointer ${
-                      isDark
-                        ? 'bg-white text-black hover:bg-slate-200 border-white'
-                        : 'bg-slate-900 text-white hover:bg-black border-slate-900'
-                    }`}
-                  >
-                    Switch to {isDark ? 'Light' : 'Dark'}
-                  </button>
-                </div>
-
-                {/* 3. Login / User Account */}
-                {user ? (
-                  <div className={`pt-1.5 border-t ${isDark ? 'border-white/10' : 'border-slate-200'} space-y-1`}>
-                    <div className="px-2.5 py-1 flex items-center justify-between text-[11px]">
-                      <span className={`truncate font-semibold ${isDark ? 'text-white/80' : 'text-slate-800'}`}>
-                        👤 {user.full_name || user.username}
-                      </span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                        {isAdmin ? 'ADMIN' : 'OFFICER'}
-                      </span>
-                    </div>
-
-                    {onOpenSettings && (
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          onOpenSettings('profile');
-                        }}
-                        className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 transition-colors cursor-pointer ${
-                          isDark ? 'hover:bg-white/10 text-white/80' : 'hover:bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        <span>⚙️</span>
-                        <span>Profile &amp; Settings</span>
-                      </button>
-                    )}
-
-                    {onSignOut && (
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          onSignOut();
-                        }}
-                        className="w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 text-rose-400 hover:bg-rose-500/15 cursor-pointer transition-colors"
-                      >
-                        <span>🚪</span>
-                        <span>Sign Out</span>
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className={`pt-1.5 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
-                    <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        onSignInClick ? onSignInClick() : onTabChange('login');
-                      }}
-                      className={`w-full text-center py-2 px-3 rounded-lg font-bold transition-all cursor-pointer shadow-sm ${
-                        isDark
-                          ? 'bg-white text-black hover:bg-slate-200'
-                          : 'bg-slate-900 text-white hover:bg-black'
-                      }`}
-                    >
-                      <span>Login / Sign In</span>
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Navigation Pills Bar with Stride Navigation Arrows (Desktop / Laptop / iPad — Hidden on Mobile Phone) */}
+      {/* Middle Section: Navigation Pills Bar with Stride Navigation Arrows (Desktop / Laptop / iPad — Hidden on Mobile Phone) */}
       <div className="hidden md:flex relative items-center min-w-0 max-w-full overflow-hidden">
         {/* Left Stride Arrow */}
         {canScrollLeft && (
@@ -421,8 +320,8 @@ export function HeaderNav({
         )}
       </div>
 
-      {/* Top Right Controls - Profile Icon Dropdown & Theme Toggle (Desktop / Laptop / iPad — Hidden on Mobile Phone) */}
-      <div className="hidden md:flex pointer-events-auto items-center gap-2 shrink-0">
+      {/* Top Right Controls - Profile Icon Dropdown & Theme Toggle (Visible on Mobile & Desktop) */}
+      <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
         {user ? (
           <div ref={dropdownRef} className="relative">
             {/* Profile Avatar Button */}
@@ -444,7 +343,7 @@ export function HeaderNav({
             {/* Dropdown Menu */}
             {profileDropdownOpen && (
               <div 
-                className={`absolute right-0 top-10 sm:top-11 w-64 rounded-xl border shadow-2xl p-1.5 z-50 animate-fade-in ${
+                className={`absolute right-0 top-10 sm:top-11 w-60 sm:w-64 max-w-[calc(100vw-24px)] rounded-xl border shadow-2xl p-1.5 z-50 animate-fade-in ${
                   isDark
                     ? 'bg-[#0E1422] border-white/20 text-white shadow-black/90'
                     : 'bg-white border-slate-300 text-slate-900 shadow-xl'
@@ -556,7 +455,7 @@ export function HeaderNav({
         ) : (
           <button
             onClick={() => onSignInClick ? onSignInClick() : onTabChange('login')}
-            className={`px-2.5 py-1 rounded-md border text-[11px] sm:text-xs font-mono-code font-bold transition-all cursor-pointer flex items-center gap-1 shadow-sm ${
+            className={`px-2 sm:px-2.5 py-1 rounded-md border text-[11px] sm:text-xs font-mono-code font-bold transition-all cursor-pointer flex items-center gap-1 shadow-sm ${
               isDark
                 ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white'
                 : 'bg-black/10 hover:bg-black/20 border-black/20 text-black'
@@ -569,7 +468,7 @@ export function HeaderNav({
         <button
           onClick={toggleTheme}
           aria-label="Toggle Theme"
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] sm:text-xs font-mono-code transition-colors duration-150 cursor-pointer ${
+          className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-md border text-[11px] sm:text-xs font-mono-code transition-colors duration-150 cursor-pointer ${
             isDark
               ? 'bg-[#141A26] hover:bg-[#1E2536] border-white/10 text-slate-200 hover:text-white'
               : 'bg-slate-200/90 hover:bg-slate-300 border-black/10 text-slate-900 font-semibold'
