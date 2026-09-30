@@ -51,20 +51,28 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className={`w-full max-w-md p-6 space-y-4 rounded-2xl border shadow-2xl transition-all ${
-        isDark ? 'bg-[#0B0F17] border-white/20 text-white' : 'bg-white border-slate-300 text-slate-900'
-      }`}>
+    <div className={`fixed inset-0 z-50 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in ${
+      isDark ? 'bg-black/80' : 'bg-slate-900/60'
+    }`}>
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-label="Add New Project"
+        className={`modal-surface w-full max-w-md p-6 space-y-4 rounded-2xl border-2 shadow-2xl transition-all ${
+          isDark ? 'bg-[#0B0F17] border-white/20 text-white' : 'bg-white border-slate-300 text-slate-950'
+        }`}
+      >
         <div className={`flex items-center justify-between border-b pb-3 ${
           isDark ? 'border-white/10' : 'border-slate-200'
         }`}>
-          <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-950'}`}>
             Add New Project
           </h3>
           <button 
             onClick={onClose} 
-            className={`text-lg cursor-pointer transition-colors ${
-              isDark ? 'text-white/60 hover:text-white' : 'text-slate-400 hover:text-black'
+            aria-label="Close"
+            className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-sm cursor-pointer transition-colors modal-close-btn ${
+              isDark ? 'text-white/60 hover:text-white bg-white/5' : 'text-slate-800 hover:text-black bg-slate-200 hover:bg-slate-300 border border-slate-300'
             }`}
           >
             ✕

@@ -158,32 +158,37 @@ export default function ProjectInsightsModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 backdrop-blur-md animate-fade-in ${
+        isDark ? 'bg-black/80' : 'bg-slate-900/60'
+      }`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div 
-        className={`relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden transition-colors ${
+        role="dialog"
+        aria-modal="true"
+        aria-label="Project Insights"
+        className={`modal-surface relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden transition-colors ${
           isDark 
             ? 'bg-[#0B0F17] border-white/20 text-white shadow-[0_25px_80px_rgba(0,0,0,0.95)]' 
-            : 'bg-white border-slate-300 text-slate-900 shadow-2xl'
+            : 'bg-white border-2 border-slate-300 text-slate-950 shadow-2xl'
         }`}
       >
         {/* Sticky Header with Close Button */}
         <div className={`px-5 py-4 border-b flex items-center justify-between gap-3 shrink-0 ${
-          isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-200 bg-slate-50'
+          isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-200 bg-slate-100/90'
         }`}>
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className={`font-mono-code font-bold text-xs px-2.5 py-0.5 rounded ${
-              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900 border border-slate-300'
+              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-950 border border-slate-400 font-bold'
             }`}>
               {projectId}
             </span>
             <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${riskCat.badgeBg}`}>
               {riskCat.label}
             </span>
-            <span className={`text-xs font-mono hidden sm:inline ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
+            <span className={`text-xs font-mono hidden sm:inline ${isDark ? 'text-white/70' : 'text-slate-700 font-semibold'}`}>
               {project?.ministry || 'Assigned Infrastructure Project'}
             </span>
           </div>
@@ -191,10 +196,10 @@ export default function ProjectInsightsModal({
           <button
             onClick={onClose}
             aria-label="Close Project Insights"
-            className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-sm transition-all cursor-pointer ${
+            className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-sm transition-all cursor-pointer modal-close-btn ${
               isDark 
                 ? 'bg-white/10 hover:bg-white/20 text-white' 
-                : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+                : 'bg-slate-200 hover:bg-slate-300 text-slate-950 border border-slate-400 font-bold'
             }`}
           >
             ✕
@@ -208,7 +213,7 @@ export default function ProjectInsightsModal({
               <div className={`w-10 h-10 rounded-full border-2 animate-spin ${
                 isDark ? 'border-white/20 border-t-white' : 'border-slate-300 border-t-slate-900'
               }`} />
-              <div className={`space-y-1 font-mono text-xs ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
+              <div className={`space-y-1 font-mono text-xs ${isDark ? 'text-white/70' : 'text-slate-800 font-medium'}`}>
                 <p>Loading project details & risk predictions...</p>
               </div>
             </div>
@@ -216,28 +221,28 @@ export default function ProjectInsightsModal({
             <>
               {/* Project Hero Header */}
               <div className={`p-5 rounded-2xl border ${
-                isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'
+                isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-300 shadow-xs'
               }`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1.5">
                     <div className={`text-[11px] font-mono uppercase tracking-wider ${
-                      isDark ? 'text-white/60' : 'text-slate-500 font-bold'
+                      isDark ? 'text-white/60' : 'text-slate-700 font-bold'
                     }`}>
                       Project Health & Overview
                     </div>
                     <h2 className={`text-xl sm:text-2xl font-bold font-display leading-snug ${
-                      isDark ? 'text-white' : 'text-slate-900'
+                      isDark ? 'text-white' : 'text-slate-950'
                     }`}>
                       {pName}
                     </h2>
                     <div className={`flex flex-wrap items-center gap-3 text-xs pt-1 ${
-                      isDark ? 'text-white/80' : 'text-slate-600 font-medium'
+                      isDark ? 'text-white/80' : 'text-slate-800 font-semibold'
                     }`}>
                       <span>📍 {pState}</span>
                       <span>•</span>
                       <span>Sector: {pSector}</span>
                       <span>•</span>
-                      <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-950 font-black'}`}>
                         Sanctioned Budget: ₹{pCostCr} Cr
                       </span>
                     </div>
@@ -248,34 +253,34 @@ export default function ProjectInsightsModal({
               {/* Project Health & DPHIS Alert Threshold Banner */}
               <div className={`p-4 sm:p-5 rounded-2xl border transition-all ${
                 isThresholdCrossed 
-                  ? (isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-300')
-                  : (isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200')
+                  ? (isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-2 border-amber-400 shadow-sm')
+                  : (isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-300')
               }`}>
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className={`text-[11px] font-mono uppercase tracking-wider flex items-center gap-2 ${
-                      isDark ? 'text-white/60' : 'text-slate-600 font-bold'
+                      isDark ? 'text-white/60' : 'text-amber-950 font-black'
                     }`}>
                       <span>PROJECT HEALTH</span>
                       <span>•</span>
-                      <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>DPHIS {score} / 100</span>
+                      <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-950'}`}>DPHIS {score} / 100</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
                       <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${riskCat.badgeBg}`}>
                         {riskCat.label}
                       </span>
-                      <span className={`text-xs sm:text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        Alert Threshold: <strong className={`font-mono ${isDark ? 'text-amber-400' : 'text-amber-700 font-bold'}`}>{threshold}</strong> / 100
+                      <span className={`text-xs sm:text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>
+                        Alert Threshold: <strong className={`font-mono ${isDark ? 'text-amber-400' : 'text-amber-900 font-black'}`}>{threshold}</strong> / 100
                       </span>
                       <span className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
                         isThresholdCrossed 
-                          ? (isDark ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse' : 'bg-red-100 text-red-700 border border-red-300') 
-                          : (isDark ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-emerald-100 text-emerald-800 border border-emerald-300')
+                          ? (isDark ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse' : 'bg-red-100 text-red-900 border-2 border-red-400 font-extrabold') 
+                          : (isDark ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold')
                       }`}>
                         {isThresholdCrossed ? '🔔 THRESHOLD CROSSED' : '✓ BELOW THRESHOLD'}
                       </span>
                     </div>
-                    <p className={`text-xs pt-1 ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
+                    <p className={`text-xs pt-1 ${isDark ? 'text-white/70' : 'text-slate-800 font-medium'}`}>
                       {isThresholdCrossed 
                         ? 'Project risk score has reached or crossed its configured threshold. An alert event was automatically dispatched to you and the administrator.' 
                         : 'Current DPHIS score is within acceptable risk boundaries for this project. Automated monitoring continues.'}
@@ -379,70 +384,70 @@ export default function ProjectInsightsModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   {/* Status Card */}
                   <div className={`p-4 space-y-1.5 rounded-xl border ${
-                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                    isDark ? 'oled-solid-card' : 'bg-white border-2 border-slate-300 shadow-sm'
                   }`}>
-                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-500 font-semibold'}`}>Overall Status</div>
+                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-700 font-bold'}`}>Overall Status</div>
                     <div className={`text-lg font-bold font-mono ${riskCat.colorClass}`}>
                       {riskCat.label}
                     </div>
-                    <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
+                    <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/75' : 'text-slate-800 font-medium'}`}>
                       {riskCat.description}
                     </p>
                   </div>
 
                   {/* Physical Progress */}
                   <div className={`p-4 space-y-2 rounded-xl border ${
-                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                    isDark ? 'oled-solid-card' : 'bg-white border-2 border-slate-300 shadow-sm'
                   }`}>
-                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-500 font-semibold'}`}>Physical Progress</div>
+                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-700 font-bold'}`}>Physical Progress</div>
                     <div className="flex items-baseline justify-between font-mono text-sm">
-                      <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Actual: {actualPhysical}%</span>
-                      <span className={`text-xs ${isDark ? 'text-white/60' : 'text-slate-500'}`}>Target: {targetPhysical}%</span>
+                      <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-950 font-black'}`}>Actual: {actualPhysical}%</span>
+                      <span className={`text-xs ${isDark ? 'text-white/60' : 'text-slate-700 font-semibold'}`}>Target: {targetPhysical}%</span>
                     </div>
-                    <div className={`h-2 rounded-full overflow-hidden border ${
+                    <div className={`h-2.5 rounded-full overflow-hidden border ${
                       isDark ? 'bg-white/10 border-white/15' : 'bg-slate-200 border-slate-300'
                     }`}>
                       <div className={`h-full rounded-full transition-all duration-700 ${
                         isDark ? 'bg-white' : 'bg-slate-900'
                       }`} style={{ width: `${actualPhysical}%` }} />
                     </div>
-                    <div className={`text-[10px] ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+                    <div className={`text-[10px] ${isDark ? 'text-white/60' : 'text-slate-700 font-medium'}`}>
                       {progressBehind > 0 ? `${progressBehind}% behind planned progress` : 'On track with planned schedule'}
                     </div>
                   </div>
 
                   {/* Budget Spent */}
                   <div className={`p-4 space-y-2 rounded-xl border ${
-                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                    isDark ? 'oled-solid-card' : 'bg-white border-2 border-slate-300 shadow-sm'
                   }`}>
-                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-500 font-semibold'}`}>Budget Utilization</div>
+                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-700 font-bold'}`}>Budget Utilization</div>
                     <div className="flex items-baseline justify-between font-mono text-sm">
-                      <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Spent: {spentPct}%</span>
-                      <span className={`text-xs font-semibold ${score >= 65 ? (isDark ? 'text-amber-400' : 'text-amber-700 font-bold') : (isDark ? 'text-emerald-400' : 'text-emerald-700 font-bold')}`}>
+                      <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-950 font-black'}`}>Spent: {spentPct}%</span>
+                      <span className={`text-xs font-semibold ${score >= 65 ? (isDark ? 'text-amber-400' : 'text-amber-900 font-black') : (isDark ? 'text-emerald-400' : 'text-emerald-900 font-bold')}`}>
                         {score >= 65 ? 'At Risk' : 'Normal'}
                       </span>
                     </div>
-                    <div className={`h-2 rounded-full overflow-hidden border ${
+                    <div className={`h-2.5 rounded-full overflow-hidden border ${
                       isDark ? 'bg-white/10 border-white/15' : 'bg-slate-200 border-slate-300'
                     }`}>
                       <div className={`h-full rounded-full transition-all duration-700 ${
                         isDark ? 'bg-white/80' : 'bg-slate-900'
                       }`} style={{ width: `${spentPct}%` }} />
                     </div>
-                    <div className={`text-[10px] ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+                    <div className={`text-[10px] ${isDark ? 'text-white/60' : 'text-slate-700 font-medium'}`}>
                       {spentPct > actualPhysical ? `${spentPct - actualPhysical}% ahead of physical work` : 'Disbursement matches physical pace'}
                     </div>
                   </div>
 
                   {/* Delay Status */}
                   <div className={`p-4 space-y-1.5 rounded-xl border ${
-                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                    isDark ? 'oled-solid-card' : 'bg-white border-2 border-slate-300 shadow-sm'
                   }`}>
-                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-500 font-semibold'}`}>Estimated Delay</div>
-                    <div className={`text-lg font-bold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-700 font-bold'}`}>Estimated Delay</div>
+                    <div className={`text-lg font-bold font-mono ${isDark ? 'text-white' : 'text-slate-950 font-black'}`}>
                       {delayMonths > 0 ? `+${delayMonths} Months` : 'On Time'}
                     </div>
-                    <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
+                    <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/75' : 'text-slate-800 font-medium'}`}>
                       Target completion: {completionDate}
                     </p>
                   </div>
@@ -453,38 +458,38 @@ export default function ProjectInsightsModal({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className={`text-xs font-mono font-bold uppercase tracking-wider ${
-                    isDark ? 'text-white/70' : 'text-slate-700'
+                    isDark ? 'text-white/70' : 'text-slate-950 font-bold'
                   }`}>
                     2. Why is this project at risk? (Key Risk Factors)
                   </h3>
-                  <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-500'}`}>Live Telemetry Analysis</span>
+                  <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-700 font-semibold'}`}>Live Telemetry Analysis</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {shapFactors.map(f => (
                     <div key={f.feature} className={`p-3.5 space-y-1.5 flex flex-col justify-between rounded-xl border ${
-                      isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                      isDark ? 'oled-solid-card' : 'bg-white border-2 border-slate-300 shadow-sm'
                     }`}>
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className={`font-semibold text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>{f.feature}</span>
+                          <span className={`font-semibold text-xs ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>{f.feature}</span>
                           <TrendBadge value={`${f.impact > 0 ? '+' : ''}${f.impact} pts`} mode="risk" iconClassName="w-3 h-3" />
                         </div>
-                        <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
+                        <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/75' : 'text-slate-800 font-medium'}`}>
                           {f.description}
                         </p>
                       </div>
                       <div className={`text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 pt-1.5 border-t ${
-                        isDark ? 'border-white/5' : 'border-slate-100'
+                        isDark ? 'border-white/5' : 'border-slate-200'
                       }`}>
                         {f.impact > 0 ? (
-                          <span className={`flex items-center gap-1 ${isDark ? 'text-amber-400' : 'text-amber-700 font-bold'}`}>
-                            <CurvedGrowthArrow className={`w-3 h-3 ${isDark ? 'text-amber-400' : 'text-amber-700'}`} />
+                          <span className={`flex items-center gap-1 ${isDark ? 'text-amber-400' : 'text-amber-900 font-bold'}`}>
+                            <CurvedGrowthArrow className={`w-3 h-3 ${isDark ? 'text-amber-400' : 'text-amber-900'}`} />
                             <span>Increases Project Risk</span>
                           </span>
                         ) : (
-                          <span className={`flex items-center gap-1 ${isDark ? 'text-emerald-400' : 'text-emerald-700 font-bold'}`}>
-                            <CurvedDecreaseArrow className={`w-3 h-3 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
+                          <span className={`flex items-center gap-1 ${isDark ? 'text-emerald-400' : 'text-emerald-900 font-bold'}`}>
+                            <CurvedDecreaseArrow className={`w-3 h-3 ${isDark ? 'text-emerald-400' : 'text-emerald-900'}`} />
                             <span>Reduces Risk / Supports On-Time</span>
                           </span>
                         )}
@@ -497,14 +502,14 @@ export default function ProjectInsightsModal({
               {/* 3. Recommended Actions */}
               <div className="space-y-3">
                 <h3 className={`text-xs font-mono font-bold uppercase tracking-wider ${
-                  isDark ? 'text-white/70' : 'text-slate-700'
+                  isDark ? 'text-white/70' : 'text-slate-950 font-bold'
                 }`}>
                   3. Recommended Actions
                 </h3>
 
                 <div className="space-y-2.5">
                   <div className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border ${
-                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                    isDark ? 'oled-solid-card' : 'bg-white border-2 border-slate-300 shadow-sm'
                   }`}>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -513,51 +518,51 @@ export default function ProjectInsightsModal({
                         }`}>
                           HIGH PRIORITY
                         </span>
-                        <h4 className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        <h4 className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>
                           Review Contractor Schedule & Mobilization
                         </h4>
                       </div>
-                      <p className={`text-xs ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
+                      <p className={`text-xs ${isDark ? 'text-white/75' : 'text-slate-800 font-medium'}`}>
                         Issue a directive to the EPC contractor to ramp up pier construction machinery and provide an accelerated catch-up schedule.
                       </p>
                     </div>
                   </div>
 
                   <div className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border ${
-                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                    isDark ? 'oled-solid-card' : 'bg-white border-2 border-slate-300 shadow-sm'
                   }`}>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
-                          isDark ? 'bg-white/20 text-white border-transparent' : 'bg-slate-200 text-slate-800 border-slate-300'
+                          isDark ? 'bg-white/20 text-white border-transparent' : 'bg-slate-200 text-slate-900 border-slate-400 font-bold'
                         }`}>
                           MEDIUM PRIORITY
                         </span>
-                        <h4 className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        <h4 className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>
                           Audit Financial Disbursements vs Ground Progress
                         </h4>
                       </div>
-                      <p className={`text-xs ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
+                      <p className={`text-xs ${isDark ? 'text-white/75' : 'text-slate-800 font-medium'}`}>
                         Verify on-site measurement books (MB) before passing the next interim running invoice to ensure funds correspond to verified physical progress.
                       </p>
                     </div>
                   </div>
 
                   <div className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border ${
-                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                    isDark ? 'oled-solid-card' : 'bg-white border-2 border-slate-300 shadow-sm'
                   }`}>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
-                          isDark ? 'bg-white/10 text-white/80 border-transparent' : 'bg-slate-100 text-slate-700 border-slate-200'
+                          isDark ? 'bg-white/10 text-white/80 border-transparent' : 'bg-slate-200 text-slate-900 border-slate-400 font-bold'
                         }`}>
                           MEDIUM PRIORITY
                         </span>
-                        <h4 className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        <h4 className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>
                           Track Upcoming Milestone Review (Next 45 Days)
                         </h4>
                       </div>
-                      <p className={`text-xs ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
+                      <p className={`text-xs ${isDark ? 'text-white/75' : 'text-slate-800 font-medium'}`}>
                         Schedule a review with the state executing agency to ensure utility shifting clearances on corridor km 42–68 are resolved.
                       </p>
                     </div>
@@ -570,11 +575,11 @@ export default function ProjectInsightsModal({
 
         {/* Footer Actions */}
         <div className={`px-5 py-3 border-t flex items-center justify-between shrink-0 ${
-          isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-200 bg-slate-50'
+          isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-300 bg-slate-100/90'
         }`}>
-          <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
+          <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-700 font-semibold'}`}>
             Press <kbd className={`px-1.5 py-0.5 rounded font-mono text-[10px] ${
-              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-800'
+              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900 border border-slate-400 font-bold'
             }`}>Esc</kbd> or click ✕ to close
           </span>
           <div className="flex items-center gap-2">

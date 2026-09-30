@@ -330,24 +330,24 @@
 :root[data-theme="light"] button[class*="bg-black"] *,
 :root[data-theme="light"] button[class*="bg-zinc-900"],
 :root[data-theme="light"] button[class*="bg-zinc-900"] *,
-:root[data-theme="light"] [class*="bg-slate-900"]:not(select):not(option),
-:root[data-theme="light"] [class*="bg-slate-900"]:not(select):not(option) *,
-:root[data-theme="light"] [class*="bg-slate-800"]:not(select):not(option),
-:root[data-theme="light"] [class*="bg-slate-800"]:not(select):not(option) *,
-:root[data-theme="light"] [class*="bg-black"]:not(select):not(option):not(header div),
-:root[data-theme="light"] [class*="bg-black"]:not(select):not(option):not(header div) *,
-:root[data-theme="light"] [class*="bg-zinc-900"]:not(select):not(option),
-:root[data-theme="light"] [class*="bg-zinc-900"]:not(select):not(option) *,
-:root[data-theme="light"] [class*="bg-indigo-600"],
-:root[data-theme="light"] [class*="bg-indigo-600"] *,
-:root[data-theme="light"] [class*="bg-blue-600"],
-:root[data-theme="light"] [class*="bg-blue-600"] *,
-:root[data-theme="light"] [class*="bg-emerald-600"],
-:root[data-theme="light"] [class*="bg-emerald-600"] *,
-:root[data-theme="light"] [class*="bg-red-600"],
-:root[data-theme="light"] [class*="bg-red-600"] *,
-:root[data-theme="light"] [class*="bg-rose-600"],
-:root[data-theme="light"] [class*="bg-rose-600"] *,
+:root[data-theme="light"] a[class*="bg-slate-900"],
+:root[data-theme="light"] a[class*="bg-slate-900"] *,
+:root[data-theme="light"] a[class*="bg-black"],
+:root[data-theme="light"] a[class*="bg-black"] *,
+:root[data-theme="light"] span[class*="bg-slate-900"]:not([class*="fixed"]),
+:root[data-theme="light"] span[class*="bg-slate-900"]:not([class*="fixed"]) *,
+:root[data-theme="light"] span[class*="bg-black"]:not([class*="fixed"]):not([class*="/"]):not([class*="overlay"]),
+:root[data-theme="light"] span[class*="bg-black"]:not([class*="fixed"]):not([class*="/"]):not([class*="overlay"]) *,
+:root[data-theme="light"] button[class*="bg-indigo-600"],
+:root[data-theme="light"] button[class*="bg-indigo-600"] *,
+:root[data-theme="light"] button[class*="bg-blue-600"],
+:root[data-theme="light"] button[class*="bg-blue-600"] *,
+:root[data-theme="light"] button[class*="bg-emerald-600"],
+:root[data-theme="light"] button[class*="bg-emerald-600"] *,
+:root[data-theme="light"] button[class*="bg-red-600"],
+:root[data-theme="light"] button[class*="bg-red-600"] *,
+:root[data-theme="light"] button[class*="bg-rose-600"],
+:root[data-theme="light"] button[class*="bg-rose-600"] *,
 :root[data-theme="light"] .user-bubble-light,
 :root[data-theme="light"] .user-bubble-light *,
 :root[data-theme="light"] .header-avatar-light,
@@ -355,28 +355,72 @@
   color: #FFFFFF !important;
 }
 
+/* =========================================================================
+   MODAL & POPUP DIALOGS HIGH CONTRAST (LIGHT MODE)
+   All modal overlays, popups, and dialogs must have crisp high-contrast black/slate text.
+   Modal overlays (bg-black/80 etc.) must NEVER force white text into dialog contents.
+   ========================================================================= */
+:root[data-theme="light"] .modal-surface,
+:root[data-theme="light"] [role="dialog"],
+:root[data-theme="light"] .fixed.inset-0 .bg-white,
+:root[data-theme="light"] .fixed.inset-0 [class*="bg-white"],
+:root[data-theme="light"] .fixed.inset-0 [class*="bg-slate-50"],
+:root[data-theme="light"] .fixed.inset-0 [class*="bg-slate-100"],
+:root[data-theme="light"] .fixed.inset-0 [class*="bg-amber-50"] {
+  color: #0F172A !important;
+}
+
+:root[data-theme="light"] .modal-surface h1,
+:root[data-theme="light"] .modal-surface h2,
+:root[data-theme="light"] .modal-surface h3,
+:root[data-theme="light"] .modal-surface h4,
+:root[data-theme="light"] .modal-surface h5,
+:root[data-theme="light"] .modal-surface h6,
+:root[data-theme="light"] [role="dialog"] h1,
+:root[data-theme="light"] [role="dialog"] h2,
+:root[data-theme="light"] [role="dialog"] h3,
+:root[data-theme="light"] [role="dialog"] h4,
+:root[data-theme="light"] [role="dialog"] h5,
+:root[data-theme="light"] [role="dialog"] h6,
+:root[data-theme="light"] .fixed.inset-0 .bg-white h1,
+:root[data-theme="light"] .fixed.inset-0 .bg-white h2,
+:root[data-theme="light"] .fixed.inset-0 .bg-white h3,
+:root[data-theme="light"] .fixed.inset-0 .bg-white h4 {
+  color: #0F172A !important;
+  font-weight: 700 !important;
+}
+
+:root[data-theme="light"] .modal-surface p,
+:root[data-theme="light"] [role="dialog"] p,
+:root[data-theme="light"] .fixed.inset-0 .bg-white p {
+  color: #334155 !important;
+}
+
+:root[data-theme="light"] .modal-surface label,
+:root[data-theme="light"] [role="dialog"] label,
+:root[data-theme="light"] .fixed.inset-0 .bg-white label {
+  color: #1E293B !important;
+  font-weight: 600 !important;
+}
+
 /* Force text-white and light-toned utility classes to black in light mode ONLY on light surfaces */
-:root[data-theme="light"] .text-white:not([class*="bg-slate-900"]):not([class*="bg-slate-900"] *):not([class*="bg-black"]):not([class*="bg-black"] *):not([class*="bg-zinc-900"]):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"]):not([class*="bg-slate-800"] *):not([class*="bg-indigo-600"]):not([class*="bg-indigo-600"] *):not([class*="bg-blue-600"]):not([class*="bg-blue-600"] *):not([class*="bg-emerald-600"]):not([class*="bg-emerald-600"] *):not([class*="bg-red-600"]):not([class*="bg-red-600"] *):not([class*="bg-rose-600"]):not([class*="bg-rose-600"] *):not(.user-bubble-light):not(.user-bubble-light *):not(.header-avatar-light):not(.header-avatar-light *),
-:root[data-theme="light"] [class*="text-white"]:not([class*="bg-slate-900"]):not([class*="bg-slate-900"] *):not([class*="bg-black"]):not([class*="bg-black"] *):not([class*="bg-zinc-900"]):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"]):not([class*="bg-slate-800"] *):not([class*="bg-indigo-600"]):not([class*="bg-indigo-600"] *):not([class*="bg-blue-600"]):not([class*="bg-blue-600"] *):not([class*="bg-emerald-600"]):not([class*="bg-emerald-600"] *):not([class*="bg-red-600"]):not([class*="bg-red-600"] *):not([class*="bg-rose-600"]):not([class*="bg-rose-600"] *):not(.user-bubble-light):not(.user-bubble-light *):not(.header-avatar-light):not(.header-avatar-light *) {
-  color: #000000 !important;
+:root[data-theme="light"] .text-white:not(button):not(button *):not(a[class*="bg-slate"]):not(a[class*="bg-slate"] *):not(a[class*="bg-black"]):not(a[class*="bg-black"] *):not(span[class*="bg-slate-900"]):not(span[class*="bg-slate-900"] *):not(.user-bubble-light):not(.user-bubble-light *):not(.header-avatar-light):not(.header-avatar-light *),
+:root[data-theme="light"] [class*="text-white"]:not(button):not(button *):not(a[class*="bg-slate"]):not(a[class*="bg-slate"] *):not(a[class*="bg-black"]):not(a[class*="bg-black"] *):not(span[class*="bg-slate-900"]):not(span[class*="bg-slate-900"] *):not(.user-bubble-light):not(.user-bubble-light *):not(.header-avatar-light):not(.header-avatar-light *) {
+  color: #0F172A !important;
 }
 
-:root[data-theme="light"] [class*="text-white/90"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *),
-:root[data-theme="light"] [class*="text-white/80"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *),
-:root[data-theme="light"] [class*="text-slate-100"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *),
-:root[data-theme="light"] [class*="text-slate-200"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *),
-:root[data-theme="light"] [class*="text-zinc-100"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *),
-:root[data-theme="light"] [class*="text-zinc-200"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *) {
-  color: rgba(0, 0, 0, 0.90) !important;
+:root[data-theme="light"] [class*="text-white/90"]:not(button):not(button *):not(span[class*="bg-slate-900"] *),
+:root[data-theme="light"] [class*="text-white/80"]:not(button):not(button *):not(span[class*="bg-slate-900"] *),
+:root[data-theme="light"] [class*="text-slate-100"]:not(button):not(button *):not(span[class*="bg-slate-900"] *),
+:root[data-theme="light"] [class*="text-slate-200"]:not(button):not(button *):not(span[class*="bg-slate-900"] *) {
+  color: #1E293B !important;
 }
 
-:root[data-theme="light"] [class*="text-white/70"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *),
-:root[data-theme="light"] [class*="text-white/60"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *),
-:root[data-theme="light"] [class*="text-slate-300"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *),
-:root[data-theme="light"] [class*="text-slate-400"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *),
-:root[data-theme="light"] [class*="text-zinc-300"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *),
-:root[data-theme="light"] [class*="text-zinc-400"]:not([class*="bg-slate-900"] *):not([class*="bg-black"] *):not([class*="bg-zinc-900"] *):not([class*="bg-slate-800"] *) {
-  color: rgba(0, 0, 0, 0.72) !important;
+:root[data-theme="light"] [class*="text-white/70"]:not(button):not(button *):not(span[class*="bg-slate-900"] *),
+:root[data-theme="light"] [class*="text-white/60"]:not(button):not(button *):not(span[class*="bg-slate-900"] *),
+:root[data-theme="light"] [class*="text-slate-300"]:not(button):not(button *):not(span[class*="bg-slate-900"] *),
+:root[data-theme="light"] [class*="text-slate-400"]:not(button):not(button *):not(span[class*="bg-slate-900"] *) {
+  color: #475569 !important;
 }
 
 :root[data-theme="light"] thead th {

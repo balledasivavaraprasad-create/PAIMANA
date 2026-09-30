@@ -60,32 +60,38 @@ export default function SettingsModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 backdrop-blur-md animate-fade-in ${
+        isDark ? 'bg-black/80' : 'bg-slate-900/60'
+      }`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div 
-        className={`relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden transition-colors ${
+        role="dialog"
+        aria-modal="true"
+        aria-label="Account & Profile Settings"
+        className={`modal-surface relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl border-2 shadow-2xl overflow-hidden transition-colors ${
           isDark 
             ? 'bg-[#0B0F17] border-white/20 text-white shadow-[0_25px_80px_rgba(0,0,0,0.95)]' 
-            : 'bg-white border-slate-300 text-slate-900 shadow-2xl'
+            : 'bg-white border-slate-300 text-slate-950 shadow-2xl'
         }`}
       >
         {/* Header */}
         <div className={`px-5 py-4 border-b flex items-center justify-between gap-3 shrink-0 ${
-          isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-200 bg-slate-50'
+          isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-200 bg-slate-100/90'
         }`}>
           <div className="flex items-center gap-2">
             <span className="text-base">⚙️</span>
-            <h2 className="text-base sm:text-lg font-bold font-display">
+            <h2 className={`text-base sm:text-lg font-bold font-display ${isDark ? 'text-white' : 'text-slate-950'}`}>
               Account & Profile Settings
             </h2>
           </div>
           <button
             onClick={onClose}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-sm transition-all cursor-pointer ${
-              isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+            aria-label="Close"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-sm transition-all cursor-pointer modal-close-btn ${
+              isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-950 border border-slate-400 font-bold'
             }`}
           >
             ✕

@@ -851,19 +851,29 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
       {/* ---------------- Terms & Privacy Policy Modal ---------------- */}
       {showPolicyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className={`w-full max-w-lg rounded-2xl border p-6 backdrop-blur-xl shadow-2xl ${
-            isDark ? 'bg-[#0A1222] border-white/20 text-slate-200' : 'bg-white border-slate-300 text-slate-800'
-          }`}>
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm ${
+          isDark ? 'bg-black/70' : 'bg-slate-900/60'
+        }`}>
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-label="Governance & Privacy Policy"
+            className={`modal-surface w-full max-w-lg rounded-2xl border-2 p-6 backdrop-blur-xl shadow-2xl ${
+              isDark ? 'bg-[#0A1222] border-white/20 text-slate-200' : 'bg-white border-slate-300 text-slate-950'
+            }`}
+          >
             <div className={`flex justify-between items-center pb-3 border-b mb-4 ${
               isDark ? 'border-white/10' : 'border-slate-200'
             }`}>
-              <h3 className={`font-serif text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <h3 className={`font-serif text-lg font-bold ${isDark ? 'text-white' : 'text-slate-950'}`}>
                 Governance &amp; Privacy Policy
               </h3>
               <button
                 onClick={() => setShowPolicyModal(false)}
-                className={`text-xl cursor-pointer ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
+                aria-label="Close"
+                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xl font-bold cursor-pointer modal-close-btn ${
+                  isDark ? 'text-slate-400 hover:text-white bg-white/5' : 'text-slate-800 hover:text-black bg-slate-200 hover:bg-slate-300 border border-slate-300'
+                }`}
               >
                 ×
               </button>

@@ -76,25 +76,30 @@ export default function InvestigationModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[75] flex items-center justify-center p-2.5 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in"
+      className={`fixed inset-0 z-[75] flex items-center justify-center p-2.5 sm:p-6 backdrop-blur-md animate-fade-in ${
+        isDark ? 'bg-black/80' : 'bg-slate-900/60'
+      }`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div 
-        className={`relative w-full max-w-5xl max-h-[94vh] sm:max-h-[92vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden transition-colors ${
+        role="dialog"
+        aria-modal="true"
+        aria-label="Issue Investigation & Root Causes"
+        className={`modal-surface relative w-full max-w-5xl max-h-[94vh] sm:max-h-[92vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden transition-colors ${
           isDark 
             ? 'bg-[#0B0F17] border-white/20 text-white shadow-[0_25px_80px_rgba(0,0,0,0.95)]' 
-            : 'bg-white border-slate-300 text-slate-900 shadow-2xl'
+            : 'bg-white border-2 border-slate-300 text-slate-950 shadow-2xl'
         }`}
       >
         {/* Sticky Header with Close Button */}
         <div className={`px-5 py-4 border-b flex items-center justify-between gap-3 shrink-0 ${
-          isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-200 bg-slate-50'
+          isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-200 bg-slate-100/90'
         }`}>
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className={`font-mono-code font-bold text-xs px-2.5 py-0.5 rounded ${
-              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900 border border-slate-300 font-bold'
+              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-950 border border-slate-400 font-bold'
             }`}>
               {projectId}
             </span>
@@ -105,7 +110,7 @@ export default function InvestigationModal({
             }`}>
               ⚡ AI ROOT CAUSE INVESTIGATION
             </span>
-            <span className={`text-xs font-mono truncate max-w-xs sm:max-w-md ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
+            <span className={`text-xs font-mono truncate max-w-xs sm:max-w-md ${isDark ? 'text-white/70' : 'text-slate-700 font-semibold'}`}>
               {pName}
             </span>
           </div>
@@ -114,10 +119,10 @@ export default function InvestigationModal({
             type="button"
             onClick={onClose}
             aria-label="Close Investigation Modal"
-            className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-sm transition-all cursor-pointer ${
+            className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-sm transition-all cursor-pointer modal-close-btn ${
               isDark 
                 ? 'bg-white/10 hover:bg-white/20 text-white' 
-                : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+                : 'bg-slate-200 hover:bg-slate-300 text-slate-950 border border-slate-400 font-bold'
             }`}
           >
             ✕
@@ -128,14 +133,14 @@ export default function InvestigationModal({
         <div className="overflow-y-auto p-5 sm:p-8 space-y-6">
           {/* Hero Banner */}
           <div className={`p-5 rounded-2xl border ${
-            isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'
+            isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-2 border-slate-300 shadow-xs'
           }`}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1.5">
-                <h2 className={`text-xl sm:text-2xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h2 className={`text-xl sm:text-2xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-950'}`}>
                   Issue Investigation & Root Causes
                 </h2>
-                <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-600'}`}>
+                <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-800 font-medium'}`}>
                   {report 
                     ? `Investigation Complete (${report.investigation_id}) · ${report.findings.length} issues identified with quantified evidence`
                     : 'Systematic analysis of milestone schedule slippages, financial cashflows, and contractor muster rolls.'
@@ -237,30 +242,30 @@ export default function InvestigationModal({
                       : 'Verified via project milestone ledger';
                   return (
                     <div key={i} className={`p-4 sm:p-5 rounded-2xl border space-y-3 ${
-                      isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-sm'
+                      isDark ? 'bg-white/5 border-white/10' : 'bg-white border-2 border-slate-300 shadow-sm'
                     }`}>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <h4 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{f.title}</h4>
+                        <h4 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>{f.title}</h4>
                         <span className={`text-xs font-mono px-2 py-0.5 rounded border shrink-0 self-start sm:self-auto ${
                           isDark 
                             ? 'bg-white/10 text-white border-white/20' 
-                            : 'bg-slate-100 text-slate-800 border-slate-300'
+                            : 'bg-slate-100 text-slate-900 border-slate-300 font-bold'
                         }`}>
                           Confidence: {f.confidence ? (f.confidence * 100).toFixed(0) : '85'}%
                         </span>
                       </div>
-                      <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-700'}`}>
+                      <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-800 font-medium'}`}>
                         {f.summary || f.detail}
                       </p>
 
                       <div className={`pt-2 border-t space-y-1.5 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
-                        <div className={`text-[11px] font-mono font-bold uppercase ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+                        <div className={`text-[11px] font-mono font-bold uppercase ${isDark ? 'text-white/60' : 'text-slate-700 font-bold'}`}>
                           Evidence Footprint:
                         </div>
                         <div className={`p-2.5 rounded-lg border text-xs font-mono leading-relaxed ${
                           isDark 
                             ? 'bg-black/40 border-white/10 text-white/80' 
-                            : 'bg-slate-100 border-slate-200 text-slate-800'
+                            : 'bg-slate-100 border border-slate-300 text-slate-900 font-semibold'
                         }`}>
                           {evidenceText}
                         </div>
@@ -272,7 +277,7 @@ export default function InvestigationModal({
 
               {/* Targeted Recommendations */}
               <div className="space-y-4">
-                <h3 className={`text-sm sm:text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`text-sm sm:text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>
                   Recommended Actions
                 </h3>
 
@@ -280,22 +285,22 @@ export default function InvestigationModal({
                   <div key={i} className={`p-4 rounded-xl border space-y-2 border-l-4 ${
                     isDark 
                       ? 'border-white/15 bg-white/5 border-l-white text-white' 
-                      : 'border-slate-200 bg-white border-l-slate-900 text-slate-900 shadow-sm'
+                      : 'border-2 border-slate-300 bg-white border-l-4 border-l-slate-950 text-slate-950 shadow-sm'
                   }`}>
                     <div className="flex items-center justify-between">
                       <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
-                        isDark ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-800'
+                        isDark ? 'bg-white/15 text-white' : 'bg-slate-200 text-slate-900 font-bold'
                       }`}>
                         Priority: {rec.priority}
                       </span>
-                      <span className={`text-[11px] font-mono ${isDark ? 'text-white/70' : 'text-slate-500'}`}>
+                      <span className={`text-[11px] font-mono ${isDark ? 'text-white/70' : 'text-slate-700 font-semibold'}`}>
                         {rec.confidence ? (rec.confidence * 100).toFixed(0) : '88'}% Match
                       </span>
                     </div>
-                    <div className={`text-xs sm:text-sm font-bold leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>{rec.action}</div>
-                    <p className={`text-xs leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-600'}`}>{rec.reason}</p>
+                    <div className={`text-xs sm:text-sm font-bold leading-snug ${isDark ? 'text-white' : 'text-slate-950'}`}>{rec.action}</div>
+                    <p className={`text-xs leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-800 font-medium'}`}>{rec.reason}</p>
                     {rec.target_agency && (
-                      <div className={`pt-1.5 border-t text-[11px] font-mono ${isDark ? 'border-white/10 text-white/90' : 'border-slate-200 text-slate-700'}`}>
+                      <div className={`pt-1.5 border-t text-[11px] font-mono ${isDark ? 'border-white/10 text-white/90' : 'border-slate-200 text-slate-800 font-semibold'}`}>
                         Authority: {rec.target_agency}
                       </div>
                     )}
@@ -360,10 +365,10 @@ export default function InvestigationModal({
 
         {/* Footer Actions */}
         <div className={`px-5 py-3 border-t flex items-center justify-between shrink-0 ${
-          isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-200 bg-slate-50'
+          isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-300 bg-slate-100/90'
         }`}>
-          <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
-            Press <kbd className={`px-1.5 py-0.5 rounded font-mono text-[10px] ${isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-800'}`}>Esc</kbd> or click ✕ to close
+          <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-700 font-semibold'}`}>
+            Press <kbd className={`px-1.5 py-0.5 rounded font-mono text-[10px] ${isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900 border border-slate-400 font-bold'}`}>Esc</kbd> or click ✕ to close
           </span>
           <button
             type="button"

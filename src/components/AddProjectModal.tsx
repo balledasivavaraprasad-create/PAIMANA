@@ -169,10 +169,17 @@ export default function AddProjectModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className={`w-full max-w-2xl rounded-2xl border p-6 sm:p-8 backdrop-blur-2xl shadow-2xl transition-all max-h-[92vh] overflow-y-auto ${
-        isDark ? 'bg-[#0A1222]/95 border-white/20 text-white shadow-black/80' : 'bg-white border-slate-300 text-slate-900 shadow-2xl'
-      }`}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn ${
+      isDark ? 'bg-black/80' : 'bg-slate-900/60'
+    }`}>
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-label="Add New Project"
+        className={`modal-surface w-full max-w-2xl rounded-2xl border p-6 sm:p-8 backdrop-blur-2xl shadow-2xl transition-all max-h-[92vh] overflow-y-auto ${
+          isDark ? 'bg-[#0A1222]/95 border-white/20 text-white shadow-black/80' : 'bg-white border-2 border-slate-300 text-slate-950 shadow-2xl'
+        }`}
+      >
         {/* Header */}
         <div className={`flex items-center justify-between pb-4 border-b mb-5 ${
           isDark ? 'border-white/10' : 'border-slate-200'
@@ -180,11 +187,11 @@ export default function AddProjectModal({
           <div>
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isDark ? 'bg-white' : 'bg-black'}`} />
-              <h2 className="text-xl font-serif font-bold tracking-wide">
+              <h2 className={`text-xl font-serif font-bold tracking-wide ${isDark ? 'text-white' : 'text-slate-950'}`}>
                 Add New Project
               </h2>
             </div>
-            <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+            <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-700 font-medium'}`}>
               Enter core project metrics to compute risk scores, SHAP explanations, and delay forecasts.
             </p>
           </div>
@@ -192,8 +199,9 @@ export default function AddProjectModal({
             type="button"
             onClick={onClose}
             disabled={loading}
-            className={`text-2xl font-mono cursor-pointer transition-colors ${
-              isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-black'
+            aria-label="Close"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center text-xl font-bold cursor-pointer transition-colors modal-close-btn ${
+              isDark ? 'text-slate-400 hover:text-white bg-white/5' : 'text-slate-800 hover:text-black bg-slate-200 hover:bg-slate-300 border border-slate-300'
             }`}
           >
             ×
@@ -219,10 +227,10 @@ export default function AddProjectModal({
               </div>
             </div>
             <div className="space-y-1">
-              <h4 className={`font-mono font-bold text-sm ${isDark ? 'text-white' : 'text-black'}`}>
+              <h4 className={`font-mono font-bold text-sm ${isDark ? 'text-white' : 'text-slate-950'}`}>
                 {statusStep || 'Saving project & analyzing...'}
               </h4>
-              <p className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              <p className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-700 font-medium'}`}>
                 Calculating cost trends, delay projections, and risk scores.
               </p>
             </div>
@@ -230,15 +238,15 @@ export default function AddProjectModal({
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Autofill helper */}
-            <div className={`flex justify-between items-center p-2.5 rounded-lg text-xs font-mono border ${
-              isDark ? 'bg-white/5 border-white/15 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+            <div className={`flex justify-between items-center p-3 rounded-xl text-xs font-mono border ${
+              isDark ? 'bg-white/5 border-white/15 text-white' : 'bg-slate-100 border-2 border-slate-300 text-slate-950'
             }`}>
-              <span className={isDark ? 'text-white/80' : 'text-slate-700 font-medium'}>Prefill sample values from Flash Report:</span>
+              <span className={isDark ? 'text-white/80' : 'text-slate-800 font-bold'}>Prefill sample values from Flash Report:</span>
               <button
                 type="button"
                 onClick={handleAutofillSample}
-                className={`px-2.5 py-1 rounded border text-[11px] font-bold cursor-pointer transition-colors ${
-                  isDark ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' : 'bg-white hover:bg-slate-200 text-slate-900 border-slate-300 shadow-sm'
+                className={`px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition-colors ${
+                  isDark ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' : 'bg-white hover:bg-slate-200 text-slate-950 border-2 border-slate-400 shadow-sm'
                 }`}
               >
                 ⚡ Populate Sample Corridor
@@ -414,12 +422,12 @@ export default function AddProjectModal({
             </div>
 
             {/* Project-Specific DPHIS Alert Threshold */}
-            <div className={`p-4 rounded-xl border ${
-              isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-300'
+            <div className={`p-4 rounded-xl border transition-all ${
+              isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-2 border-amber-400 text-amber-950 shadow-sm'
             }`}>
               <div className="flex items-center justify-between mb-2">
                 <label className={`text-xs font-bold tracking-wider flex items-center gap-1.5 font-display ${
-                  isDark ? 'text-amber-400' : 'text-amber-800'
+                  isDark ? 'text-amber-400' : 'text-amber-950 font-black'
                 }`}>
                   <span>🔔</span> RISK ALERT THRESHOLD *
                 </label>
@@ -434,13 +442,13 @@ export default function AddProjectModal({
                     className={`w-16 px-2 py-1 rounded text-xs font-mono font-bold text-center outline-none ${
                       isDark 
                         ? 'bg-black/60 border border-amber-500/50 text-amber-300' 
-                        : 'bg-white border-2 border-amber-500 text-amber-900 shadow-sm'
+                        : 'bg-white border-2 border-amber-500 text-amber-950 font-bold shadow-sm'
                     }`}
                   />
-                  <span className={`text-xs font-mono font-bold ${isDark ? 'text-amber-400/80' : 'text-amber-800'}`}>/ 100</span>
+                  <span className={`text-xs font-mono font-bold ${isDark ? 'text-amber-400/80' : 'text-amber-900 font-bold'}`}>/ 100</span>
                 </div>
               </div>
-              <p className={`text-[11px] leading-relaxed font-sans ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              <p className={`text-[11px] leading-relaxed font-sans ${isDark ? 'text-slate-400' : 'text-slate-800 font-medium'}`}>
                 Set the independent health risk threshold (DPHIS 1–100) for this specific asset. When risk score reaches or exceeds this value, an instant alert will be dispatched to you and logged to the audit history.
               </p>
             </div>
