@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import GlassCard from '../components/GlassCard';
 import { useTheme } from '../hooks/useTheme';
-import { fetchAlerts, acknowledgeAlert, UserProfile, AlertItem } from '../lib/api';
+import { fetchAlerts, acknowledgeAlert, triggerRiskAlertEvaluation, UserProfile, AlertItem } from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
 import { CurvedGrowthArrow } from '../components/CurvedTrendArrow';
 
@@ -28,7 +28,7 @@ export default function Alerts({
 
   // Admin test trigger state
   const [simulatedProjectId, setSimulatedProjectId] = useState<string>('P1024');
-  const [simulatedDphis, setSimulatedDphis] = useState<number>(74.0);
+  const [simulatedDphis, setSimulatedDphis] = useState<number>(77.2);
   const [simulatedThreshold, setSimulatedThreshold] = useState<number>(70.0);
   const [isTriggering, setIsTriggering] = useState<boolean>(false);
   const [simulationResult, setSimulationResult] = useState<any | null>(null);
@@ -59,19 +59,14 @@ export default function Alerts({
     setIsTriggering(true);
     setSimulationResult(null);
     try {
-      const res = await fetch(`http://localhost:8001/api/v1/project-risk-events`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          project_id: simulatedProjectId,
-          current_dphis: simulatedDphis,
-          threshold: simulatedThreshold
-        })
-      });
-      const data = await res.json();
+      const data = await triggerRiskAlertEvaluation(
+        simulatedProjectId,
+        simulatedDphis,
+        simulatedThreshold
+      );
       setSimulationResult(data);
       if (data.triggered) {
-        setTimeout(loadAlerts, 1000);
+        setTimeout(loadAlerts, 800);
       }
     } catch (err: any) {
       setSimulationResult({
@@ -85,6 +80,7 @@ export default function Alerts({
   };
 
   const pendingCount = alerts.filter(a => a.status === 'PENDING').length;
+  const sentCount = alerts.filter(a => a.notification_status === 'sent' || a.user_notified).length;
 
   /* =========================================================================
      NORMAL USER VIEW — "My Project Alerts"
@@ -109,6 +105,9 @@ export default function Alerts({
                   : 'bg-slate-200 text-slate-800 border-slate-300'
               }`}>
                 {pendingCount} Pending Review
+              </span>
+              <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/25">
+                {sentCount} Notifications Sent
               </span>
             </div>
             <p className={`text-xs sm:text-sm md:text-base leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-600'}`}>
@@ -175,6 +174,13 @@ export default function Alerts({
                       }`}>
                         {a.project_id}
                       </span>
+                      {a.event_id && (
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                          isDark ? 'text-white/50 bg-white/5' : 'text-slate-500 bg-slate-100'
+                        }`}>
+                          {a.event_id}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2 font-mono text-xs">
@@ -221,6 +227,45 @@ export default function Alerts({
                     </div>
                   </div>
 
+                  {/* Notification Delivery & Stakeholder Metadata */}
+                  <div className={`p-3 rounded-xl border flex flex-wrap items-center justify-between gap-3 text-xs font-mono ${
+                    isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'
+                  }`}>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className={isDark ? 'text-white/60' : 'text-slate-500'}>Email Notification:</span>
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                          a.notification_status === 'sent' || a.user_notified
+                            ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'
+                            : a.notification_status === 'retrying' || a.outbox_status === 'failed_retryable'
+                            ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30'
+                            : a.notification_status === 'failed'
+                            ? 'bg-red-500/20 text-red-500 border border-red-500/30'
+                            : 'bg-blue-500/20 text-blue-500 border border-blue-500/30'
+                        }`}>
+                          {a.notification_status === 'sent' || a.user_notified
+                            ? '✓ Dispatched via n8n'
+                            : a.notification_status === 'retrying' || a.outbox_status === 'failed_retryable'
+                            ? '⏳ Retrying Delivery'
+                            : a.notification_status === 'failed'
+                            ? '✗ Delivery Failed'
+                            : 'Pending Dispatch'}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <span className={isDark ? 'text-white/60' : 'text-slate-500'}>Recipient:</span>
+                        <span className={`font-semibold ${isDark ? 'text-white/90' : 'text-slate-800'}`}>
+                          {a.recipient_email || currentUser?.email || 'Project Stakeholder'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={`text-[11px] ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
+                      Dispatched: {a.created_at ? new Date(a.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'Recent'}
+                    </div>
+                  </div>
+
                   {/* Recommended Action Box */}
                   <div className={`p-3 rounded-xl border space-y-1 text-xs ${
                     isDark ? 'bg-white/5 border-white/10 text-white/85' : 'bg-slate-50 border-slate-200 text-slate-700'
@@ -236,7 +281,7 @@ export default function Alerts({
                     isDark ? 'border-white/10' : 'border-slate-200'
                   }`}>
                     <div className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
-                      Dispatched: {a.created_at ? new Date(a.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'Recent'}
+                      {a.alert_id} · Sovereign Decision Support
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -258,13 +303,13 @@ export default function Alerts({
                         <button
                           type="button"
                           onClick={() => onNavigateToInvestigation(a.project_id)}
-                          className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer ${
+                          className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer shadow-sm ${
                             isDark 
-                              ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' 
-                              : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
+                              ? 'bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border-sky-500/40' 
+                              : 'bg-sky-50 hover:bg-sky-100 text-sky-800 border-sky-300'
                           }`}
                         >
-                          Investigate ⚡
+                          Launch Investigation ⚡
                         </button>
                       )}
 
@@ -313,11 +358,14 @@ export default function Alerts({
                 ? 'bg-white/10 text-white/90 border-white/20' 
                 : 'bg-slate-200 text-slate-800 border-slate-300'
             }`}>
-              {alerts.length} {alerts.length === 1 ? 'Event' : 'Events'} Logged
+              {alerts.length} Events Logged
+            </span>
+            <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/25">
+              {sentCount} Dispatched via n8n
             </span>
           </div>
           <p className={`text-xs sm:text-sm md:text-base leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-600'}`}>
-            Multi-ministry risk threshold evaluation, automated n8n webhook pipelines, email dispatch telemetry, and crossing event audit logs.
+            Multi-ministry risk threshold evaluation, automated n8n webhook outbox pipelines, email dispatch telemetry, and crossing event audit logs.
           </p>
         </div>
 
@@ -337,7 +385,6 @@ export default function Alerts({
         </div>
       </GlassCard>
 
-
       {/* n8n Webhook & Event Trigger Panel */}
       <div className="oled-solid-card p-5 sm:p-6 space-y-4">
         <div className={`flex flex-col md:flex-row md:items-center justify-between gap-3 border-b pb-3 ${
@@ -347,17 +394,17 @@ export default function Alerts({
             <h3 className={`text-sm sm:text-base font-bold flex items-center gap-2 ${
               isDark ? 'text-white' : 'text-slate-900'
             }`}>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              Automated n8n Webhook Pipeline
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              Production n8n Webhook &amp; Alert Outbox Pipeline
             </h3>
-            <p className={`text-xs mt-0.5 font-mono ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
-              Target: <code className="text-amber-500 font-bold">https://hrishikesh1.app.n8n.cloud/webhook/project-risk-threshold</code>
+            <p className={`text-xs mt-0.5 font-mono ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
+              Backend Source-of-Truth → Durable MongoDB Outbox → HMAC-SHA256 Signed Webhook → OpenAI Factual Email Generation
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-500 text-xs font-mono font-bold border border-emerald-500/30">
-              Active · Connected
+              Active · HMAC-SHA256 Signed
             </span>
           </div>
         </div>
@@ -423,23 +470,52 @@ export default function Alerts({
           </div>
         </div>
 
-        {/* Simulation Feedback */}
+        {/* Simulation Feedback Telemetry */}
         {simulationResult && (
-          <div className={`p-3 rounded-xl border text-xs font-mono ${
+          <div className={`p-4 rounded-xl border text-xs font-mono space-y-2.5 ${
             simulationResult.triggered
-              ? 'bg-red-500/15 border-red-500/30 text-red-500 font-semibold'
-              : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-600 font-semibold'
+              ? 'bg-red-500/10 border-red-500/30 text-red-400'
+              : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
           }`}>
-            <div className="font-bold">
-              {simulationResult.triggered
-                ? `🚨 THRESHOLD CROSSED: Alert ${simulationResult.alert_id} generated & dispatched to n8n!`
-                : `✓ NO ALERT: ${simulationResult.message}`}
+            <div className="flex flex-wrap items-center justify-between gap-2 font-bold text-sm">
+              <span>{simulationResult.triggered ? '🚨 THRESHOLD CROSSED & WEBHOOK DISPATCHED' : '✓ THRESHOLD EVALUATION COMPLETE'}</span>
+              <span className="text-[11px] font-normal px-2.5 py-0.5 rounded bg-black/40 border border-white/10 text-white/80">
+                Status: {simulationResult.threshold_status || (simulationResult.triggered ? 'triggered' : 'suppressed')}
+              </span>
             </div>
-            {simulationResult.notification_status && (
-              <div className="text-[11px] opacity-80 mt-1">
-                Notification Status: <strong>{simulationResult.notification_status}</strong> (Ref: {simulationResult.n8n_execution_reference || 'N/A'})
-              </div>
-            )}
+            
+            <p className="text-xs text-white/90 font-sans leading-relaxed">
+              {simulationResult.message || (simulationResult.triggered ? `Project crossed DPHIS threshold ${simulationResult.threshold} (Current: ${simulationResult.current_dphis}). Alert was persisted to MongoDB and dispatched to the n8n webhook.` : '')}
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px]">
+              {simulationResult.event_id && (
+                <div className="bg-black/40 p-2.5 rounded border border-white/10">
+                  <div className="text-white/50 text-[10px]">EVENT ID</div>
+                  <div className="font-bold text-white truncate">{simulationResult.event_id}</div>
+                </div>
+              )}
+              {simulationResult.alert_id && (
+                <div className="bg-black/40 p-2.5 rounded border border-white/10">
+                  <div className="text-white/50 text-[10px]">ALERT ID</div>
+                  <div className="font-bold text-white truncate">{simulationResult.alert_id}</div>
+                </div>
+              )}
+              {simulationResult.notification_status && (
+                <div className="bg-black/40 p-2.5 rounded border border-white/10">
+                  <div className="text-white/50 text-[10px]">NOTIFICATION STATUS</div>
+                  <div className={`font-bold ${simulationResult.notification_status === 'sent' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {simulationResult.notification_status.toUpperCase()}
+                  </div>
+                </div>
+              )}
+              {simulationResult.outbox_id && (
+                <div className="bg-black/40 p-2.5 rounded border border-white/10">
+                  <div className="text-white/50 text-[10px]">DURABLE OUTBOX ID</div>
+                  <div className="font-bold text-emerald-400 truncate">{simulationResult.outbox_id}</div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -466,14 +542,15 @@ export default function Alerts({
                 <tr className={`border-b font-mono text-[10px] uppercase font-bold ${
                   isDark ? 'border-white/15 bg-[#0B0F17] text-white/70' : 'border-slate-200 bg-slate-100 text-slate-700'
                 }`}>
-                  <th className="p-3.5">Alert ID</th>
+                  <th className="p-3.5">Alert / Event ID</th>
                   <th className="p-3.5">Project</th>
                   <th className="p-3.5">DPHIS / Threshold</th>
                   <th className="p-3.5">Severity</th>
                   <th className="p-3.5">Notification</th>
+                  <th className="p-3.5">Recipient</th>
                   <th className="p-3.5">Status</th>
                   <th className="p-3.5">Timestamp</th>
-                  <th className="p-3.5">Action</th>
+                  <th className="p-3.5">Actions</th>
                 </tr>
               </thead>
               <tbody className={`divide-y font-mono text-xs ${isDark ? 'divide-white/5' : 'divide-slate-200'}`}>
@@ -485,7 +562,12 @@ export default function Alerts({
 
                   return (
                     <tr key={a.alert_id} className={`transition-colors ${isDark ? 'hover:bg-white/5' : 'hover:bg-slate-50'}`}>
-                      <td className={`p-3.5 font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{a.alert_id}</td>
+                      <td className="p-3.5">
+                        <div className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{a.alert_id}</div>
+                        {a.event_id && (
+                          <div className={`text-[10px] font-mono ${isDark ? 'text-white/40' : 'text-slate-400'}`}>{a.event_id}</div>
+                        )}
+                      </td>
                       <td className="p-3.5 font-sans">
                         <div className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{a.project_name || a.project_id}</div>
                         <div className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-500'}`}>{a.project_id}</div>
@@ -501,13 +583,20 @@ export default function Alerts({
                       </td>
                       <td className="p-3.5">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          a.notification_status === 'sent'
+                          a.notification_status === 'sent' || a.user_notified
                             ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'
+                            : a.notification_status === 'retrying' || a.outbox_status === 'failed_retryable'
+                            ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30'
                             : a.notification_status === 'failed'
                             ? 'bg-red-500/20 text-red-500 border border-red-500/30'
-                            : 'bg-amber-500/20 text-amber-500 border border-amber-500/30'
+                            : 'bg-blue-500/20 text-blue-500 border border-blue-500/30'
                         }`}>
                           {a.notification_status || 'sent'}
+                        </span>
+                      </td>
+                      <td className="p-3.5 font-mono text-[11px]">
+                        <span className={isDark ? 'text-white/80' : 'text-slate-700'}>
+                          {a.recipient_email || 'official@example.gov.in'}
                         </span>
                       </td>
                       <td className="p-3.5">
@@ -516,7 +605,7 @@ export default function Alerts({
                         </span>
                       </td>
                       <td className={`p-3.5 text-[11px] ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
-                        {a.created_at ? new Date(a.created_at).toLocaleDateString() : 'Recent'}
+                        {a.created_at ? new Date(a.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent'}
                       </td>
                       <td className="p-3.5">
                         <div className="flex items-center gap-1.5">
@@ -531,6 +620,19 @@ export default function Alerts({
                               }`}
                             >
                               ✓ Ack
+                            </button>
+                          )}
+                          {onNavigateToInvestigation && (
+                            <button
+                              type="button"
+                              onClick={() => onNavigateToInvestigation(a.project_id)}
+                              className={`px-2 py-1 rounded text-[11px] font-bold transition-all cursor-pointer shadow-sm ${
+                                isDark 
+                                  ? 'bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40' 
+                                  : 'bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300'
+                              }`}
+                            >
+                              Investigate ⚡
                             </button>
                           )}
                           {onNavigateToProject && (

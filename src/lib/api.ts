@@ -181,10 +181,16 @@ export interface AlertItem {
   dphis: number;
   message: string;
   status: string;
-  notification_status?: 'pending' | 'sent' | 'failed';
+  notification_status?: 'pending' | 'sent' | 'failed' | 'retrying';
   user_notified?: boolean;
   admin_notified?: boolean;
+  recipient_name?: string;
+  recipient_email?: string;
+  admin_email?: string;
   n8n_execution_reference?: string;
+  outbox_status?: 'pending' | 'dispatched' | 'duplicate' | 'failed_retryable' | 'dead_letter';
+  outbox_id?: string;
+  delivery_latency_ms?: number;
   created_at: string;
 }
 
@@ -1052,6 +1058,25 @@ export async function acknowledgeAlert(alertId: string): Promise<boolean> {
   } catch (err) {
     return false;
   }
+}
+
+export async function triggerRiskAlertEvaluation(
+  projectId: string,
+  currentDphis: number,
+  customThreshold?: number,
+  previousDphis?: number
+): Promise<any> {
+  const res = await fetch(`${API_BASE}/project-risk-events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      project_id: projectId,
+      current_dphis: currentDphis,
+      previous_dphis: previousDphis,
+      threshold: customThreshold
+    })
+  });
+  return await res.json();
 }
 
 export async function sendChatMessage(
