@@ -105,7 +105,7 @@ export default function MyProjectOverview({
               <span className="text-[11px] font-mono uppercase tracking-wider text-amber-500 font-bold">
                 Project Officer Command Dashboard
               </span>
-              <span className="text-xs text-white/40">•</span>
+              <span className={`text-xs ${isDark ? 'text-white/40' : 'text-slate-400'}`}>•</span>
               <span className="text-xs font-mono text-[var(--text-muted)]">
                 {currentUser?.ministry || 'Ministry of Infrastructure'}
               </span>
@@ -121,7 +121,11 @@ export default function MyProjectOverview({
           <div className="flex items-center gap-2.5 shrink-0">
             <button
               onClick={onOpenAddProject}
-              className="px-4 py-2.5 rounded-xl bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer shadow-md flex items-center gap-1.5"
+              className={`px-4 py-2.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-md flex items-center gap-1.5 ${
+                isDark 
+                  ? 'bg-white text-black hover:bg-slate-200' 
+                  : 'bg-slate-900 text-white hover:bg-black shadow-slate-300'
+              }`}
             >
               <span>+</span>
               <span>Add New Project</span>
@@ -227,12 +231,18 @@ export default function MyProjectOverview({
               >
                 <div className="space-y-3.5">
                   {/* Top Bar: ID & Location */}
-                  <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
+                  <div className={`flex items-center justify-between gap-2 border-b pb-3 ${
+                    isDark ? 'border-white/10' : 'border-slate-200'
+                  }`}>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono-code font-bold text-xs text-white px-2.5 py-0.5 rounded bg-white/10">
+                      <span className={`font-mono-code font-bold text-xs px-2.5 py-0.5 rounded ${
+                        isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900 border border-slate-300'
+                      }`}>
                         {pin.id}
                       </span>
-                      <span className="text-xs text-white/70 flex items-center gap-1 font-medium">
+                      <span className={`text-xs flex items-center gap-1 font-medium ${
+                        isDark ? 'text-white/70' : 'text-slate-600'
+                      }`}>
                         <span>📍</span>
                         <span>{pin.state}</span>
                       </span>
@@ -331,10 +341,14 @@ export default function MyProjectOverview({
                 </div>
 
                 {/* Actions: View Project Insights + Risk Intelligence (side-by-side) */}
-                <div className="pt-3 border-t border-white/10 flex items-center gap-2">
+                <div className={`pt-3 border-t flex items-center gap-2 ${
+                  isDark ? 'border-white/10' : 'border-slate-200'
+                }`}>
                   <button
                     onClick={() => onViewProject(pin.id)}
-                    className="flex-1 py-2 px-3 rounded-xl bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer text-center shadow-md flex items-center justify-center gap-1 whitespace-nowrap"
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer text-center shadow-md flex items-center justify-center gap-1 whitespace-nowrap ${
+                      isDark ? 'bg-white text-black hover:bg-slate-200' : 'bg-slate-900 text-white hover:bg-black shadow-sm'
+                    }`}
                   >
                     <span>View Project Insights</span>
                     <span>→</span>
@@ -347,7 +361,11 @@ export default function MyProjectOverview({
                       }
                     }}
                     title="Deep Risk Intelligence & Model Forecasts"
-                    className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono font-bold border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap shadow-sm"
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap shadow-sm ${
+                      isDark 
+                        ? 'bg-white/10 hover:bg-white hover:text-black text-white border-white/20' 
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-800 hover:text-black border-slate-300'
+                    }`}
                   >
                     <span>Risk Intelligence</span>
                     <span>⚡</span>

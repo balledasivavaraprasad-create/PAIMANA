@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTheme } from '../hooks/useTheme';
 
 export interface ProjectPin {
   id: string;
@@ -20,6 +21,9 @@ interface CeoPinManagerProps {
 }
 
 export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const [id, setId] = useState(`P${Math.floor(1000 + Math.random() * 9000)}`);
   const [name, setName] = useState('');
   const [state, setState] = useState('Uttar Pradesh');
@@ -48,33 +52,50 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="oled-solid-card w-full max-w-md p-6 space-y-4 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-3">
-          <h3 className="text-base font-bold font-display text-[var(--text-primary)]">
+      <div className={`w-full max-w-md p-6 space-y-4 rounded-2xl border shadow-2xl transition-all ${
+        isDark ? 'bg-[#0B0F17] border-white/20 text-white' : 'bg-white border-slate-300 text-slate-900'
+      }`}>
+        <div className={`flex items-center justify-between border-b pb-3 ${
+          isDark ? 'border-white/10' : 'border-slate-200'
+        }`}>
+          <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
             Add New Project
           </h3>
-          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-lg cursor-pointer">
+          <button 
+            onClick={onClose} 
+            className={`text-lg cursor-pointer transition-colors ${
+              isDark ? 'text-white/60 hover:text-white' : 'text-slate-400 hover:text-black'
+            }`}
+          >
             ✕
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs text-[var(--text-secondary)]">
+        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Project ID</label>
+              <label className={`block mb-1 font-mono-code text-[10px] uppercase font-bold ${
+                isDark ? 'text-white/60' : 'text-slate-600'
+              }`}>Project ID</label>
               <input
                 type="text"
                 value={id}
                 onChange={e => setId(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--surface-sunken)] border border-[var(--border-hairline)] text-[var(--text-primary)] font-mono-code outline-none focus:border-[var(--accent)]"
+                className={`w-full px-3 py-2 rounded-lg border font-mono-code outline-none ${
+                  isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-slate-900 focus:border-slate-900'
+                }`}
               />
             </div>
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">State / Location</label>
+              <label className={`block mb-1 font-mono-code text-[10px] uppercase font-bold ${
+                isDark ? 'text-white/60' : 'text-slate-600'
+              }`}>State / Location</label>
               <select
                 value={state}
                 onChange={e => setState(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--surface-sunken)] border border-[var(--border-hairline)] text-[var(--text-primary)] outline-none"
+                className={`w-full px-3 py-2 rounded-lg border outline-none cursor-pointer ${
+                  isDark ? 'bg-[#0E1524] border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-slate-900 focus:border-slate-900'
+                }`}
               >
                 <option value="Uttar Pradesh">Uttar Pradesh</option>
                 <option value="Maharashtra">Maharashtra</option>
@@ -89,24 +110,32 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
           </div>
 
           <div>
-            <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Project Name</label>
+            <label className={`block mb-1 font-mono-code text-[10px] uppercase font-bold ${
+              isDark ? 'text-white/60' : 'text-slate-600'
+            }`}>Project Name</label>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. Western Dedicated Freight Corridor Package 4"
-              className="w-full px-3 py-2 rounded-lg bg-[var(--surface-sunken)] border border-[var(--border-hairline)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              className={`w-full px-3 py-2 rounded-lg border outline-none ${
+                isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-slate-900 focus:border-slate-900'
+              }`}
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Risk Level</label>
+              <label className={`block mb-1 font-mono-code text-[10px] uppercase font-bold ${
+                isDark ? 'text-white/60' : 'text-slate-600'
+              }`}>Risk Level</label>
               <select
                 value={risk}
                 onChange={e => setRisk(e.target.value as any)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--surface-sunken)] border border-[var(--border-hairline)] text-[var(--text-primary)] outline-none"
+                className={`w-full px-3 py-2 rounded-lg border outline-none cursor-pointer ${
+                  isDark ? 'bg-[#0E1524] border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-slate-900 focus:border-slate-900'
+                }`}
               >
                 <option value="critical">Critical Risk (75–100)</option>
                 <option value="high">High Risk (50–74)</option>
@@ -116,51 +145,67 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
             </div>
 
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Risk Score ({dphis} / 100)</label>
+              <label className={`block mb-1 font-mono-code text-[10px] uppercase font-bold ${
+                isDark ? 'text-white/60' : 'text-slate-600'
+              }`}>Risk Score ({dphis} / 100)</label>
               <input
                 type="range"
                 min="1"
                 max="99"
                 value={dphis}
                 onChange={e => setDphis(Number(e.target.value))}
-                className="w-full mt-2"
+                className="w-full mt-2 accent-amber-500"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Approved Cost</label>
+              <label className={`block mb-1 font-mono-code text-[10px] uppercase font-bold ${
+                isDark ? 'text-white/60' : 'text-slate-600'
+              }`}>Approved Cost</label>
               <input
                 type="text"
                 value={cost}
                 onChange={e => setCost(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--surface-sunken)] border border-[var(--border-hairline)] text-[var(--text-primary)] font-mono-code outline-none"
+                className={`w-full px-3 py-2 rounded-lg border font-mono-code outline-none ${
+                  isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-slate-900 focus:border-slate-900'
+                }`}
               />
             </div>
 
             <div>
-              <label className="block mb-1 font-mono-code text-[10px] uppercase text-[var(--text-muted)]">Estimated Delay</label>
+              <label className={`block mb-1 font-mono-code text-[10px] uppercase font-bold ${
+                isDark ? 'text-white/60' : 'text-slate-600'
+              }`}>Estimated Delay</label>
               <input
                 type="text"
                 value={delay}
                 onChange={e => setDelay(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--surface-sunken)] border border-[var(--border-hairline)] text-[var(--text-primary)] font-mono-code outline-none"
+                className={`w-full px-3 py-2 rounded-lg border font-mono-code outline-none ${
+                  isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-slate-900 focus:border-slate-900'
+                }`}
               />
             </div>
           </div>
 
-          <div className="pt-3 flex items-center gap-3">
+          <div className={`pt-3 border-t flex items-center gap-3 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-[var(--border-hairline)] text-[var(--text-secondary)] font-semibold text-xs hover:bg-[var(--surface-sunken)] cursor-pointer"
+              className={`flex-1 py-2.5 rounded-xl border font-semibold text-xs transition-colors cursor-pointer ${
+                isDark ? 'border-white/20 text-white/80 hover:bg-white/10' : 'border-slate-300 text-slate-700 hover:bg-slate-100'
+              }`}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 py-2.5 rounded-xl bg-black text-white font-semibold text-xs border border-white/30 shadow-[0_0_12px_rgba(255,255,255,0.22)] hover:bg-zinc-900 hover:border-white/60 cursor-pointer transition-all duration-200"
+              className={`flex-1 py-2.5 rounded-xl font-semibold text-xs transition-all duration-200 cursor-pointer shadow-md ${
+                isDark 
+                  ? 'bg-white text-black hover:bg-slate-200' 
+                  : 'bg-slate-900 text-white hover:bg-black shadow-slate-300'
+              }`}
             >
               Save Project
             </button>

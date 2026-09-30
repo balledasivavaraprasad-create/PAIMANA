@@ -855,23 +855,29 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <div className={`w-full max-w-lg rounded-2xl border p-6 backdrop-blur-xl shadow-2xl ${
             isDark ? 'bg-[#0A1222] border-white/20 text-slate-200' : 'bg-white border-slate-300 text-slate-800'
           }`}>
-            <div className="flex justify-between items-center pb-3 border-b border-white/10 mb-4">
-              <h3 className="font-serif text-lg font-bold">
+            <div className={`flex justify-between items-center pb-3 border-b mb-4 ${
+              isDark ? 'border-white/10' : 'border-slate-200'
+            }`}>
+              <h3 className={`font-serif text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Governance &amp; Privacy Policy
               </h3>
               <button
                 onClick={() => setShowPolicyModal(false)}
-                className="text-slate-400 hover:text-white text-xl cursor-pointer"
+                className={`text-xl cursor-pointer ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
               >
                 ×
               </button>
             </div>
 
-            <div className="flex gap-2 mb-4 border-b border-white/10 pb-2 text-xs font-mono">
+            <div className={`flex gap-2 mb-4 border-b pb-2 text-xs font-mono ${
+              isDark ? 'border-white/10' : 'border-slate-200'
+            }`}>
               <button
                 onClick={() => setPolicyTab('terms')}
                 className={`pb-1 border-b-2 transition-colors ${
-                  policyTab === 'terms' ? 'border-sky-400 text-sky-400 font-bold' : 'border-transparent text-slate-400'
+                  policyTab === 'terms'
+                    ? (isDark ? 'border-sky-400 text-sky-400 font-bold' : 'border-slate-900 text-slate-900 font-bold')
+                    : (isDark ? 'border-transparent text-slate-400' : 'border-transparent text-slate-500 hover:text-slate-800')
                 }`}
               >
                 Terms &amp; Conditions
@@ -879,14 +885,18 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               <button
                 onClick={() => setPolicyTab('privacy')}
                 className={`pb-1 border-b-2 transition-colors ${
-                  policyTab === 'privacy' ? 'border-sky-400 text-sky-400 font-bold' : 'border-transparent text-slate-400'
+                  policyTab === 'privacy'
+                    ? (isDark ? 'border-sky-400 text-sky-400 font-bold' : 'border-slate-900 text-slate-900 font-bold')
+                    : (isDark ? 'border-transparent text-slate-400' : 'border-transparent text-slate-500 hover:text-slate-800')
                 }`}
               >
                 AI/ML Privacy Policy
               </button>
             </div>
 
-            <div className="max-h-64 overflow-y-auto text-xs space-y-3 text-slate-400 pr-2">
+            <div className={`max-h-64 overflow-y-auto text-xs space-y-3 pr-2 ${
+              isDark ? 'text-slate-400' : 'text-slate-700'
+            }`}>
               {policyTab === 'terms' ? (
                 <>
                   <p><strong>1. Acceptance of Terms:</strong> By logging into the InfraBuild AI platform, you affirm authorization as an accredited officer or analyst of the Government of India or affiliated implementing authority.</p>
@@ -901,10 +911,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               )}
             </div>
 
-            <div className="mt-5 pt-3 border-t border-white/10 flex justify-end">
+            <div className={`mt-5 pt-3 border-t flex justify-end ${
+              isDark ? 'border-white/10' : 'border-slate-200'
+            }`}>
               <button
                 onClick={() => setShowPolicyModal(false)}
-                className="px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono font-medium cursor-pointer"
+                className={`px-4 py-1.5 rounded-lg text-xs font-mono font-medium cursor-pointer transition-colors ${
+                  isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'
+                }`}
               >
                 Close
               </button>

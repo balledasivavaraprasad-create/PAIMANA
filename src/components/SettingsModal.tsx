@@ -108,8 +108,8 @@ export default function SettingsModal({
               onClick={() => setActiveTab(tab.id as SettingsTab)}
               className={`px-3 py-2 text-xs font-mono font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'border-white text-white'
-                  : 'border-transparent text-white/50 hover:text-white/80'
+                  ? (isDark ? 'border-white text-white' : 'border-slate-900 text-slate-900')
+                  : (isDark ? 'border-transparent text-white/50 hover:text-white/80' : 'border-transparent text-slate-500 hover:text-slate-900')
               }`}
             >
               {tab.label}
@@ -120,7 +120,9 @@ export default function SettingsModal({
         {/* Tab Content */}
         <div className="overflow-y-auto p-5 sm:p-7 space-y-5 flex-1">
           {saveMessage && (
-            <div className="p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
+            <div className={`p-3 rounded-lg border text-xs font-mono ${
+              isDark ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' : 'bg-emerald-50 border-emerald-300 text-emerald-800'
+            }`}>
               ✓ {saveMessage}
             </div>
           )}
@@ -128,14 +130,14 @@ export default function SettingsModal({
           {/* TAB 1: PROFILE DETAILS */}
           {activeTab === 'profile' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="flex items-center gap-4 pb-4 border-b border-white/10">
+              <div className={`flex items-center gap-4 pb-4 border-b ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-sky-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg border-2 border-white/20">
                   {fullName.charAt(0).toUpperCase()}
                 </div>
                 <div className="space-y-1">
-                  <div className="font-bold text-sm text-white">{fullName}</div>
-                  <div className="text-xs text-white/60 font-mono">{currentUser?.ministry || 'Infrastructure Administration'}</div>
-                  <button className="text-xs text-sky-400 hover:underline font-mono">
+                  <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{fullName}</div>
+                  <div className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-slate-600'}`}>{currentUser?.ministry || 'Infrastructure Administration'}</div>
+                  <button className={`text-xs font-mono ${isDark ? 'text-sky-400 hover:underline' : 'text-sky-600 hover:underline'}`}>
                     Change profile photo
                   </button>
                 </div>
@@ -143,62 +145,72 @@ export default function SettingsModal({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-mono font-semibold text-white/70 mb-1">
+                  <label className={`block text-xs font-mono font-semibold mb-1 ${isDark ? 'text-white/70' : 'text-slate-700'}`}>
                     Full Name
                   </label>
                   <input
                     type="text"
                     value={fullName}
                     onChange={e => setFullName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/20 text-xs text-white outline-none focus:border-white"
+                    className={`w-full px-3 py-2 rounded-lg text-xs outline-none transition-colors ${
+                      isDark ? 'bg-white/5 border border-white/20 text-white focus:border-white' : 'bg-white border border-slate-300 text-slate-900 focus:border-slate-900'
+                    }`}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono font-semibold text-white/70 mb-1">
+                  <label className={`block text-xs font-mono font-semibold mb-1 ${isDark ? 'text-white/70' : 'text-slate-700'}`}>
                     Display Name
                   </label>
                   <input
                     type="text"
                     value={displayName}
                     onChange={e => setDisplayName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/20 text-xs text-white outline-none focus:border-white"
+                    className={`w-full px-3 py-2 rounded-lg text-xs outline-none transition-colors ${
+                      isDark ? 'bg-white/5 border border-white/20 text-white focus:border-white' : 'bg-white border border-slate-300 text-slate-900 focus:border-slate-900'
+                    }`}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-mono font-semibold text-white/70 mb-1">
+                <label className={`block text-xs font-mono font-semibold mb-1 ${isDark ? 'text-white/70' : 'text-slate-700'}`}>
                   Headline / Bio Description
                 </label>
                 <textarea
                   rows={2}
                   value={bio}
                   onChange={e => setBio(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/20 text-xs text-white outline-none focus:border-white"
+                  className={`w-full px-3 py-2 rounded-lg text-xs outline-none transition-colors ${
+                    isDark ? 'bg-white/5 border border-white/20 text-white focus:border-white' : 'bg-white border border-slate-300 text-slate-900 focus:border-slate-900'
+                  }`}
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div>
-                  <label className="block text-xs font-mono font-semibold text-white/70 mb-1">
+                  <label className={`block text-xs font-mono font-semibold mb-1 ${isDark ? 'text-white/70' : 'text-slate-700'}`}>
                     Contact Email
                   </label>
                   <input
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/20 text-xs text-white outline-none focus:border-white"
+                    className={`w-full px-3 py-2 rounded-lg text-xs outline-none transition-colors ${
+                      isDark ? 'bg-white/5 border border-white/20 text-white focus:border-white' : 'bg-white border border-slate-300 text-slate-900 focus:border-slate-900'
+                    }`}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono font-semibold text-white/70 mb-1">
+                  <label className={`block text-xs font-mono font-semibold mb-1 ${isDark ? 'text-white/70' : 'text-slate-700'}`}>
                     Phone Number
                   </label>
                   <input
                     type="text"
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/20 text-xs text-white outline-none focus:border-white"
+                    className={`w-full px-3 py-2 rounded-lg text-xs outline-none transition-colors ${
+                      isDark ? 'bg-white/5 border border-white/20 text-white focus:border-white' : 'bg-white border border-slate-300 text-slate-900 focus:border-slate-900'
+                    }`}
                   />
                 </div>
               </div>
@@ -208,37 +220,45 @@ export default function SettingsModal({
           {/* TAB 2: LOGIN & SECURITY */}
           {activeTab === 'security' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="p-4 rounded-xl border bg-white/5 border-white/10 space-y-3">
-                <h4 className="text-xs font-mono font-bold uppercase text-white/80">Change Password</h4>
+              <div className={`p-4 rounded-xl border space-y-3 ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                <h4 className={`text-xs font-mono font-bold uppercase ${isDark ? 'text-white/80' : 'text-slate-900'}`}>Change Password</h4>
                 <div className="space-y-2.5 max-w-md">
                   <input
                     type="password"
                     placeholder="Current Password"
-                    className="w-full px-3 py-2 rounded-lg bg-black/40 border border-white/15 text-xs text-white outline-none focus:border-white"
+                    className={`w-full px-3 py-2 rounded-lg text-xs outline-none ${
+                      isDark ? 'bg-black/40 border border-white/15 text-white focus:border-white' : 'bg-white border border-slate-300 text-slate-900 focus:border-slate-900'
+                    }`}
                   />
                   <input
                     type="password"
                     placeholder="New Password (min 8 characters)"
-                    className="w-full px-3 py-2 rounded-lg bg-black/40 border border-white/15 text-xs text-white outline-none focus:border-white"
+                    className={`w-full px-3 py-2 rounded-lg text-xs outline-none ${
+                      isDark ? 'bg-black/40 border border-white/15 text-white focus:border-white' : 'bg-white border border-slate-300 text-slate-900 focus:border-slate-900'
+                    }`}
                   />
                   <input
                     type="password"
                     placeholder="Confirm New Password"
-                    className="w-full px-3 py-2 rounded-lg bg-black/40 border border-white/15 text-xs text-white outline-none focus:border-white"
+                    className={`w-full px-3 py-2 rounded-lg text-xs outline-none ${
+                      isDark ? 'bg-black/40 border border-white/15 text-white focus:border-white' : 'bg-white border border-slate-300 text-slate-900 focus:border-slate-900'
+                    }`}
                   />
                   <button
                     onClick={handleSave}
-                    className="px-4 py-2 rounded-lg bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer"
+                    className={`px-4 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                      isDark ? 'bg-white text-black hover:bg-slate-200' : 'bg-slate-900 text-white hover:bg-black shadow-sm'
+                    }`}
                   >
                     Update Password
                   </button>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl border bg-white/5 border-white/10 space-y-2">
-                <h4 className="text-xs font-mono font-bold uppercase text-white/80">Registered Email Address</h4>
-                <p className="text-xs text-white/70">
-                  Primary notification channel: <strong className="text-white">{email}</strong>
+              <div className={`p-4 rounded-xl border space-y-2 ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                <h4 className={`text-xs font-mono font-bold uppercase ${isDark ? 'text-white/80' : 'text-slate-900'}`}>Registered Email Address</h4>
+                <p className={`text-xs ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
+                  Primary notification channel: <strong className={isDark ? 'text-white' : 'text-slate-900'}>{email}</strong>
                 </p>
               </div>
             </div>
@@ -247,11 +267,11 @@ export default function SettingsModal({
           {/* TAB 3: TWO-FACTOR AUTHENTICATION */}
           {activeTab === '2fa' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="p-5 rounded-xl border bg-white/5 border-white/10 space-y-3">
+              <div className={`p-5 rounded-xl border space-y-3 ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-mono font-bold uppercase text-white">Two-Factor Authentication (2FA)</h4>
-                    <p className="text-xs text-white/70 mt-0.5">
+                    <h4 className={`text-xs font-mono font-bold uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>Two-Factor Authentication (2FA)</h4>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
                       Require a 6-digit verification code sent via SMS or Authenticator App on sign in.
                     </p>
                   </div>
@@ -259,8 +279,8 @@ export default function SettingsModal({
                     onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
                     className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                       twoFactorEnabled
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                        : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                        ? (isDark ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-emerald-100 text-emerald-800 border border-emerald-300')
+                        : (isDark ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' : 'bg-white hover:bg-slate-200 text-slate-800 border border-slate-300 shadow-sm')
                     }`}
                   >
                     {twoFactorEnabled ? '✓ Enabled' : 'Enable 2FA'}
@@ -268,7 +288,9 @@ export default function SettingsModal({
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl border bg-white/5 border-white/10 text-xs text-white/70 space-y-1 font-mono">
+              <div className={`p-4 rounded-xl border text-xs space-y-1 font-mono ${
+                isDark ? 'bg-white/5 border-white/10 text-white/70' : 'bg-slate-50 border-slate-200 text-slate-700'
+              }`}>
                 <p>Status: {twoFactorEnabled ? 'Enforced on next login' : 'Optional (Recommended for Admin & Officials)'}</p>
                 <p>Standard: TOTP RFC 6238 / Government Sovereign Auth</p>
               </div>
@@ -278,25 +300,31 @@ export default function SettingsModal({
           {/* TAB 4: ACTIVE SESSIONS */}
           {activeTab === 'sessions' && (
             <div className="space-y-3 animate-fade-in">
-              <h4 className="text-xs font-mono font-bold uppercase text-white/80">Active Login Sessions</h4>
+              <h4 className={`text-xs font-mono font-bold uppercase ${isDark ? 'text-white/80' : 'text-slate-900'}`}>Active Login Sessions</h4>
               <div className="space-y-2">
-                <div className="p-3.5 rounded-xl border bg-white/5 border-white/10 flex items-center justify-between text-xs">
+                <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs ${
+                  isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'
+                }`}>
                   <div className="space-y-0.5">
-                    <div className="font-bold text-white flex items-center gap-2">
+                    <div className={`font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       <span>💻 Current Device (macOS · Chrome)</span>
-                      <span className="px-2 py-0.2 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-400">Active Now</span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-mono ${
+                        isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      }`}>Active Now</span>
                     </div>
-                    <div className="text-[11px] font-mono text-white/60">IP: 103.21.244.12 · New Delhi, India</div>
+                    <div className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-500'}`}>IP: 103.21.244.12 · New Delhi, India</div>
                   </div>
-                  <span className="text-[11px] font-mono text-white/50">This session</span>
+                  <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-500'}`}>This session</span>
                 </div>
 
-                <div className="p-3.5 rounded-xl border bg-white/5 border-white/10 flex items-center justify-between text-xs">
+                <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs ${
+                  isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'
+                }`}>
                   <div className="space-y-0.5">
-                    <div className="font-bold text-white">📱 Mobile Browser (iOS Safari)</div>
-                    <div className="text-[11px] font-mono text-white/60">Last active: Yesterday at 18:24 · Mumbai, India</div>
+                    <div className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>📱 Mobile Browser (iOS Safari)</div>
+                    <div className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-500'}`}>Last active: Yesterday at 18:24 · Mumbai, India</div>
                   </div>
-                  <button className="text-xs text-rose-400 hover:underline font-mono cursor-pointer">
+                  <button className="text-xs text-rose-500 hover:underline font-mono cursor-pointer">
                     Revoke
                   </button>
                 </div>
@@ -307,22 +335,24 @@ export default function SettingsModal({
           {/* TAB 5: ACCOUNT SETTINGS */}
           {activeTab === 'account' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="p-4 rounded-xl border bg-white/5 border-white/10 space-y-2">
-                <h4 className="text-xs font-mono font-bold uppercase text-white">Account Deactivation</h4>
-                <p className="text-xs text-white/70">
+              <div className={`p-4 rounded-xl border space-y-2 ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                <h4 className={`text-xs font-mono font-bold uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>Account Deactivation</h4>
+                <p className={`text-xs ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
                   Temporarily disable your monitoring account and pause automated risk threshold SMS and email dispatches.
                 </p>
                 <button
                   onClick={() => alert('Account deactivation requested. Your department administrator will review.')}
-                  className="px-3.5 py-1.5 rounded-lg border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 text-xs font-mono cursor-pointer mt-1"
+                  className={`px-3.5 py-1.5 rounded-lg border text-xs font-mono cursor-pointer mt-1 ${
+                    isDark ? 'border-amber-500/40 text-amber-300 hover:bg-amber-500/10' : 'border-amber-500 text-amber-900 bg-white hover:bg-amber-50'
+                  }`}
                 >
                   Deactivate Account
                 </button>
               </div>
 
-              <div className="p-4 rounded-xl border bg-rose-500/10 border-rose-500/30 space-y-2">
-                <h4 className="text-xs font-mono font-bold uppercase text-rose-300">Danger Zone · Account Deletion</h4>
-                <p className="text-xs text-rose-200/80">
+              <div className={`p-4 rounded-xl border space-y-2 ${isDark ? 'bg-rose-500/10 border-rose-500/30' : 'bg-rose-50 border-rose-200'}`}>
+                <h4 className={`text-xs font-mono font-bold uppercase ${isDark ? 'text-rose-300' : 'text-rose-900'}`}>Danger Zone · Account Deletion</h4>
+                <p className={`text-xs ${isDark ? 'text-rose-200/80' : 'text-rose-700'}`}>
                   Permanently remove this login profile and disassociate all personal alert configurations.
                 </p>
                 <button
@@ -348,7 +378,11 @@ export default function SettingsModal({
             {onSignOut && (
               <button
                 onClick={onSignOut}
-                className="px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-mono cursor-pointer"
+                className={`px-3 py-1.5 rounded-lg border text-xs font-mono cursor-pointer transition-colors ${
+                  isDark
+                    ? 'border-rose-500/30 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300'
+                    : 'border-rose-300 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold'
+                }`}
               >
                 Sign Out
               </button>
@@ -358,13 +392,17 @@ export default function SettingsModal({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-1.5 rounded-lg border border-white/20 text-white/80 hover:bg-white/10 text-xs font-mono cursor-pointer"
+              className={`px-4 py-1.5 rounded-lg border text-xs font-mono cursor-pointer transition-colors ${
+                isDark ? 'border-white/20 text-white/80 hover:bg-white/10' : 'border-slate-300 text-slate-700 hover:bg-slate-200'
+              }`}
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-1.5 rounded-lg bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold cursor-pointer"
+              className={`px-4 py-1.5 rounded-lg text-xs font-mono font-bold cursor-pointer transition-all ${
+                isDark ? 'bg-white text-black hover:bg-slate-200' : 'bg-slate-900 text-white hover:bg-black shadow-sm'
+              }`}
             >
               Save Changes
             </button>

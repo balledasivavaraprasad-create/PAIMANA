@@ -94,7 +94,7 @@ export default function InvestigationModal({
         }`}>
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className={`font-mono-code font-bold text-xs px-2.5 py-0.5 rounded ${
-              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900'
+              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900 border border-slate-300 font-bold'
             }`}>
               {projectId}
             </span>
@@ -207,7 +207,7 @@ export default function InvestigationModal({
                 >
                   <div className={`font-bold text-xs font-mono ${tool.active ? (isDark ? 'text-white' : 'text-emerald-950 font-bold') : (isDark ? 'text-white/80' : 'text-slate-800')}`}>{tool.name}</div>
                   <div className={`text-[10px] font-mono ${tool.active ? (isDark ? 'text-white/70' : 'text-emerald-800') : (isDark ? 'text-white/60' : 'text-slate-500')}`}>{tool.desc}</div>
-                  <div className={`text-[10px] font-mono font-bold mt-1 ${tool.active ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : (isDark ? 'text-white/40' : 'text-slate-400')}`}>
+                  <div className={`text-[10px] font-mono font-bold mt-1 ${tool.active ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : (isDark ? 'text-white/40' : 'text-slate-500')}`}>
                     {tool.active ? '✓ Complete' : '○ Ready'}
                   </div>
                 </div>

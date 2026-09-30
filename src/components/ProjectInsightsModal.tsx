@@ -175,7 +175,9 @@ export default function ProjectInsightsModal({
           isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-200 bg-slate-50'
         }`}>
           <div className="flex items-center gap-2.5 flex-wrap">
-            <span className="font-mono-code font-bold text-xs px-2.5 py-0.5 rounded bg-white/10 text-white">
+            <span className={`font-mono-code font-bold text-xs px-2.5 py-0.5 rounded ${
+              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900 border border-slate-300'
+            }`}>
               {projectId}
             </span>
             <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${riskCat.badgeBg}`}>
@@ -203,8 +205,10 @@ export default function ProjectInsightsModal({
         <div className="overflow-y-auto p-5 sm:p-8 space-y-6 buttery-smooth-scroll">
           {loading ? (
             <div className="py-16 flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-              <div className="space-y-1 font-mono text-xs text-white/70">
+              <div className={`w-10 h-10 rounded-full border-2 animate-spin ${
+                isDark ? 'border-white/20 border-t-white' : 'border-slate-300 border-t-slate-900'
+              }`} />
+              <div className={`space-y-1 font-mono text-xs ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
                 <p>Loading project details & risk predictions...</p>
               </div>
             </div>
@@ -216,18 +220,24 @@ export default function ProjectInsightsModal({
               }`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1.5">
-                    <div className="text-[11px] font-mono uppercase tracking-wider text-white/60">
+                    <div className={`text-[11px] font-mono uppercase tracking-wider ${
+                      isDark ? 'text-white/60' : 'text-slate-500 font-bold'
+                    }`}>
                       Project Health & Overview
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-bold font-display leading-snug text-white">
+                    <h2 className={`text-xl sm:text-2xl font-bold font-display leading-snug ${
+                      isDark ? 'text-white' : 'text-slate-900'
+                    }`}>
                       {pName}
                     </h2>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-white/80 pt-1">
+                    <div className={`flex flex-wrap items-center gap-3 text-xs pt-1 ${
+                      isDark ? 'text-white/80' : 'text-slate-600 font-medium'
+                    }`}>
                       <span>📍 {pState}</span>
                       <span>•</span>
                       <span>Sector: {pSector}</span>
                       <span>•</span>
-                      <span className="font-mono font-bold text-white">
+                      <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                         Sanctioned Budget: ₹{pCostCr} Cr
                       </span>
                     </div>
@@ -238,32 +248,34 @@ export default function ProjectInsightsModal({
               {/* Project Health & DPHIS Alert Threshold Banner */}
               <div className={`p-4 sm:p-5 rounded-2xl border transition-all ${
                 isThresholdCrossed 
-                  ? 'bg-amber-500/10 border-amber-500/30' 
+                  ? (isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-300')
                   : (isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200')
               }`}>
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <div className="text-[11px] font-mono uppercase tracking-wider text-white/60 flex items-center gap-2">
+                    <div className={`text-[11px] font-mono uppercase tracking-wider flex items-center gap-2 ${
+                      isDark ? 'text-white/60' : 'text-slate-600 font-bold'
+                    }`}>
                       <span>PROJECT HEALTH</span>
                       <span>•</span>
-                      <span className="font-bold text-white">DPHIS {score} / 100</span>
+                      <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>DPHIS {score} / 100</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
                       <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${riskCat.badgeBg}`}>
                         {riskCat.label}
                       </span>
-                      <span className="text-xs sm:text-sm font-semibold text-white">
-                        Alert Threshold: <strong className="font-mono text-amber-400">{threshold}</strong> / 100
+                      <span className={`text-xs sm:text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        Alert Threshold: <strong className={`font-mono ${isDark ? 'text-amber-400' : 'text-amber-700 font-bold'}`}>{threshold}</strong> / 100
                       </span>
                       <span className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
                         isThresholdCrossed 
-                          ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse' 
-                          : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                          ? (isDark ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse' : 'bg-red-100 text-red-700 border border-red-300') 
+                          : (isDark ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-emerald-100 text-emerald-800 border border-emerald-300')
                       }`}>
                         {isThresholdCrossed ? '🔔 THRESHOLD CROSSED' : '✓ BELOW THRESHOLD'}
                       </span>
                     </div>
-                    <p className="text-xs text-white/70 pt-1">
+                    <p className={`text-xs pt-1 ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
                       {isThresholdCrossed 
                         ? 'Project risk score has reached or crossed its configured threshold. An alert event was automatically dispatched to you and the administrator.' 
                         : 'Current DPHIS score is within acceptable risk boundaries for this project. Automated monitoring continues.'}
@@ -276,8 +288,8 @@ export default function ProjectInsightsModal({
                         onClick={() => setIsEditingThreshold(!isEditingThreshold)}
                         className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer border ${
                           isEditingThreshold 
-                            ? 'bg-amber-400 text-black border-amber-300' 
-                            : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                            ? (isDark ? 'bg-amber-400 text-black border-amber-300' : 'bg-amber-400 text-black border-amber-500') 
+                            : (isDark ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' : 'bg-white hover:bg-slate-200 text-slate-800 border-slate-300 shadow-sm')
                         }`}
                       >
                         ⚙️ {isEditingThreshold ? 'Close Edit' : 'Edit Threshold'}
@@ -288,13 +300,15 @@ export default function ProjectInsightsModal({
 
                 {/* Admin Threshold Editor Drawer */}
                 {isAdmin && isEditingThreshold && (
-                  <div className="mt-4 pt-4 border-t border-white/10 space-y-4 animate-fade-in">
+                  <div className={`mt-4 pt-4 border-t space-y-4 animate-fade-in ${
+                    isDark ? 'border-white/10' : 'border-slate-300'
+                  }`}>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <h4 className="text-xs font-mono font-bold text-white uppercase">
+                        <h4 className={`text-xs font-mono font-bold uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>
                           Configure Project Alert Threshold
                         </h4>
-                        <p className="text-[11px] text-white/60">
+                        <p className={`text-[11px] ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
                           Set the independent risk threshold for {projectId}. Every project has its own threshold.
                         </p>
                       </div>
@@ -306,12 +320,16 @@ export default function ProjectInsightsModal({
                           max="100"
                           value={editThresholdValue}
                           onChange={e => setEditThresholdValue(Number(e.target.value))}
-                          className="w-20 px-3 py-1.5 rounded-lg bg-black/60 border border-amber-500/50 text-amber-300 text-sm font-mono font-bold text-center outline-none"
+                          className={`w-20 px-3 py-1.5 rounded-lg text-sm font-mono font-bold text-center outline-none ${
+                            isDark 
+                              ? 'bg-black/60 border border-amber-500/50 text-amber-300' 
+                              : 'bg-white border-2 border-amber-500 text-amber-900 shadow-sm'
+                          }`}
                         />
                         <button
                           onClick={handleSaveThreshold}
                           disabled={isSavingThreshold}
-                          className="px-4 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-mono font-bold transition-all cursor-pointer disabled:opacity-50"
+                          className="px-4 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-mono font-bold transition-all cursor-pointer disabled:opacity-50 shadow-sm"
                         >
                           {isSavingThreshold ? 'Saving...' : 'Save Threshold'}
                         </button>
@@ -319,7 +337,7 @@ export default function ProjectInsightsModal({
                     </div>
 
                     {thresholdSaveSuccess && (
-                      <div className="text-xs text-emerald-400 font-mono font-medium">
+                      <div className={`text-xs font-mono font-medium ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
                         ✓ {thresholdSaveSuccess}
                       </div>
                     )}
@@ -327,16 +345,20 @@ export default function ProjectInsightsModal({
                     {/* Threshold History Table */}
                     {project?.threshold_history && project.threshold_history.length > 0 && (
                       <div className="space-y-1.5">
-                        <div className="text-[10px] font-mono uppercase text-white/50">Threshold Change History</div>
-                        <div className="max-h-28 overflow-y-auto space-y-1 font-mono text-[11px] text-white/70">
+                        <div className={`text-[10px] font-mono uppercase ${isDark ? 'text-white/50' : 'text-slate-500 font-bold'}`}>
+                          Threshold Change History
+                        </div>
+                        <div className={`max-h-28 overflow-y-auto space-y-1 font-mono text-[11px] ${isDark ? 'text-white/70' : 'text-slate-700'}`}>
                           {project.threshold_history.slice().reverse().map((h, i) => (
-                            <div key={i} className="flex items-center justify-between p-1.5 rounded bg-black/30 border border-white/5">
+                            <div key={i} className={`flex items-center justify-between p-1.5 rounded border ${
+                              isDark ? 'bg-black/30 border-white/5' : 'bg-white border-slate-200 shadow-xs'
+                            }`}>
                               <span>
                                 {h.old_value !== null ? `${h.old_value} → ` : 'Initial: '}
-                                <strong className="text-amber-300">{h.new_value}</strong>
+                                <strong className={isDark ? 'text-amber-300' : 'text-amber-800'}>{h.new_value}</strong>
                               </span>
                               <span>By: {h.changed_by}</span>
-                              <span className="text-white/40">{new Date(h.timestamp).toLocaleDateString()}</span>
+                              <span className={isDark ? 'text-white/40' : 'text-slate-500'}>{new Date(h.timestamp).toLocaleDateString()}</span>
                             </div>
                           ))}
                         </div>
@@ -348,61 +370,79 @@ export default function ProjectInsightsModal({
 
               {/* 1. What is Happening with My Project? */}
               <div className="space-y-3">
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white/70">
+                <h3 className={`text-xs font-mono font-bold uppercase tracking-wider ${
+                  isDark ? 'text-white/70' : 'text-slate-700'
+                }`}>
                   1. What is happening with this project?
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   {/* Status Card */}
-                  <div className="oled-solid-card p-4 space-y-1.5">
-                    <div className="text-[11px] font-mono text-white/60 uppercase">Overall Status</div>
+                  <div className={`p-4 space-y-1.5 rounded-xl border ${
+                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                  }`}>
+                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-500 font-semibold'}`}>Overall Status</div>
                     <div className={`text-lg font-bold font-mono ${riskCat.colorClass}`}>
                       {riskCat.label}
                     </div>
-                    <p className="text-[11px] text-white/75 leading-relaxed">
+                    <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
                       {riskCat.description}
                     </p>
                   </div>
 
                   {/* Physical Progress */}
-                  <div className="oled-solid-card p-4 space-y-2">
-                    <div className="text-[11px] font-mono text-white/60 uppercase">Physical Progress</div>
+                  <div className={`p-4 space-y-2 rounded-xl border ${
+                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                  }`}>
+                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-500 font-semibold'}`}>Physical Progress</div>
                     <div className="flex items-baseline justify-between font-mono text-sm">
-                      <span className="text-white font-bold">Actual: {actualPhysical}%</span>
-                      <span className="text-white/60 text-xs">Target: {targetPhysical}%</span>
+                      <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Actual: {actualPhysical}%</span>
+                      <span className={`text-xs ${isDark ? 'text-white/60' : 'text-slate-500'}`}>Target: {targetPhysical}%</span>
                     </div>
-                    <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
-                      <div className="h-full bg-white rounded-full transition-all duration-700" style={{ width: `${actualPhysical}%` }} />
+                    <div className={`h-2 rounded-full overflow-hidden border ${
+                      isDark ? 'bg-white/10 border-white/15' : 'bg-slate-200 border-slate-300'
+                    }`}>
+                      <div className={`h-full rounded-full transition-all duration-700 ${
+                        isDark ? 'bg-white' : 'bg-slate-900'
+                      }`} style={{ width: `${actualPhysical}%` }} />
                     </div>
-                    <div className="text-[10px] text-white/60">
+                    <div className={`text-[10px] ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
                       {progressBehind > 0 ? `${progressBehind}% behind planned progress` : 'On track with planned schedule'}
                     </div>
                   </div>
 
                   {/* Budget Spent */}
-                  <div className="oled-solid-card p-4 space-y-2">
-                    <div className="text-[11px] font-mono text-white/60 uppercase">Budget Utilization</div>
+                  <div className={`p-4 space-y-2 rounded-xl border ${
+                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                  }`}>
+                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-500 font-semibold'}`}>Budget Utilization</div>
                     <div className="flex items-baseline justify-between font-mono text-sm">
-                      <span className="text-white font-bold">Spent: {spentPct}%</span>
-                      <span className={`text-xs font-semibold ${score >= 65 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                      <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Spent: {spentPct}%</span>
+                      <span className={`text-xs font-semibold ${score >= 65 ? (isDark ? 'text-amber-400' : 'text-amber-700 font-bold') : (isDark ? 'text-emerald-400' : 'text-emerald-700 font-bold')}`}>
                         {score >= 65 ? 'At Risk' : 'Normal'}
                       </span>
                     </div>
-                    <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
-                      <div className="h-full bg-white/80 rounded-full transition-all duration-700" style={{ width: `${spentPct}%` }} />
+                    <div className={`h-2 rounded-full overflow-hidden border ${
+                      isDark ? 'bg-white/10 border-white/15' : 'bg-slate-200 border-slate-300'
+                    }`}>
+                      <div className={`h-full rounded-full transition-all duration-700 ${
+                        isDark ? 'bg-white/80' : 'bg-slate-900'
+                      }`} style={{ width: `${spentPct}%` }} />
                     </div>
-                    <div className="text-[10px] text-white/60">
+                    <div className={`text-[10px] ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
                       {spentPct > actualPhysical ? `${spentPct - actualPhysical}% ahead of physical work` : 'Disbursement matches physical pace'}
                     </div>
                   </div>
 
                   {/* Delay Status */}
-                  <div className="oled-solid-card p-4 space-y-1.5">
-                    <div className="text-[11px] font-mono text-white/60 uppercase">Estimated Delay</div>
-                    <div className="text-lg font-bold font-mono text-white">
+                  <div className={`p-4 space-y-1.5 rounded-xl border ${
+                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                  }`}>
+                    <div className={`text-[11px] font-mono uppercase ${isDark ? 'text-white/60' : 'text-slate-500 font-semibold'}`}>Estimated Delay</div>
+                    <div className={`text-lg font-bold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       {delayMonths > 0 ? `+${delayMonths} Months` : 'On Time'}
                     </div>
-                    <p className="text-[11px] text-white/75 leading-relaxed">
+                    <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
                       Target completion: {completionDate}
                     </p>
                   </div>
@@ -412,33 +452,39 @@ export default function ProjectInsightsModal({
               {/* 2. Key Risk Drivers (Real-Time AI Explainability) */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white/70">
+                  <h3 className={`text-xs font-mono font-bold uppercase tracking-wider ${
+                    isDark ? 'text-white/70' : 'text-slate-700'
+                  }`}>
                     2. Why is this project at risk? (Key Risk Factors)
                   </h3>
-                  <span className="text-[11px] font-mono text-white/50">Live Telemetry Analysis</span>
+                  <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-500'}`}>Live Telemetry Analysis</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {shapFactors.map(f => (
-                    <div key={f.feature} className="oled-solid-card p-3.5 space-y-1.5 flex flex-col justify-between">
+                    <div key={f.feature} className={`p-3.5 space-y-1.5 flex flex-col justify-between rounded-xl border ${
+                      isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                    }`}>
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold text-xs text-white">{f.feature}</span>
+                          <span className={`font-semibold text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>{f.feature}</span>
                           <TrendBadge value={`${f.impact > 0 ? '+' : ''}${f.impact} pts`} mode="risk" iconClassName="w-3 h-3" />
                         </div>
-                        <p className="text-[11px] text-white/75 leading-relaxed">
+                        <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
                           {f.description}
                         </p>
                       </div>
-                      <div className="text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 pt-1.5 border-t border-white/5">
+                      <div className={`text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 pt-1.5 border-t ${
+                        isDark ? 'border-white/5' : 'border-slate-100'
+                      }`}>
                         {f.impact > 0 ? (
-                          <span className="text-amber-400 flex items-center gap-1">
-                            <CurvedGrowthArrow className="w-3 h-3 text-amber-400" />
+                          <span className={`flex items-center gap-1 ${isDark ? 'text-amber-400' : 'text-amber-700 font-bold'}`}>
+                            <CurvedGrowthArrow className={`w-3 h-3 ${isDark ? 'text-amber-400' : 'text-amber-700'}`} />
                             <span>Increases Project Risk</span>
                           </span>
                         ) : (
-                          <span className="text-emerald-400 flex items-center gap-1">
-                            <CurvedDecreaseArrow className="w-3 h-3 text-emerald-400" />
+                          <span className={`flex items-center gap-1 ${isDark ? 'text-emerald-400' : 'text-emerald-700 font-bold'}`}>
+                            <CurvedDecreaseArrow className={`w-3 h-3 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
                             <span>Reduces Risk / Supports On-Time</span>
                           </span>
                         )}
@@ -450,54 +496,68 @@ export default function ProjectInsightsModal({
 
               {/* 3. Recommended Actions */}
               <div className="space-y-3">
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white/70">
+                <h3 className={`text-xs font-mono font-bold uppercase tracking-wider ${
+                  isDark ? 'text-white/70' : 'text-slate-700'
+                }`}>
                   3. Recommended Actions
                 </h3>
 
                 <div className="space-y-2.5">
-                  <div className="oled-solid-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border ${
+                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                  }`}>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white text-black">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                          isDark ? 'bg-white text-black' : 'bg-slate-900 text-white'
+                        }`}>
                           HIGH PRIORITY
                         </span>
-                        <h4 className="font-semibold text-xs sm:text-sm text-white">
+                        <h4 className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
                           Review Contractor Schedule & Mobilization
                         </h4>
                       </div>
-                      <p className="text-xs text-white/75">
+                      <p className={`text-xs ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
                         Issue a directive to the EPC contractor to ramp up pier construction machinery and provide an accelerated catch-up schedule.
                       </p>
                     </div>
                   </div>
 
-                  <div className="oled-solid-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border ${
+                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                  }`}>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/20 text-white">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                          isDark ? 'bg-white/20 text-white border-transparent' : 'bg-slate-200 text-slate-800 border-slate-300'
+                        }`}>
                           MEDIUM PRIORITY
                         </span>
-                        <h4 className="font-semibold text-xs sm:text-sm text-white">
+                        <h4 className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
                           Audit Financial Disbursements vs Ground Progress
                         </h4>
                       </div>
-                      <p className="text-xs text-white/75">
+                      <p className={`text-xs ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
                         Verify on-site measurement books (MB) before passing the next interim running invoice to ensure funds correspond to verified physical progress.
                       </p>
                     </div>
                   </div>
 
-                  <div className="oled-solid-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border ${
+                    isDark ? 'oled-solid-card' : 'bg-white border-slate-200 shadow-sm'
+                  }`}>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-white/80">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                          isDark ? 'bg-white/10 text-white/80 border-transparent' : 'bg-slate-100 text-slate-700 border-slate-200'
+                        }`}>
                           MEDIUM PRIORITY
                         </span>
-                        <h4 className="font-semibold text-xs sm:text-sm text-white">
+                        <h4 className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
                           Track Upcoming Milestone Review (Next 45 Days)
                         </h4>
                       </div>
-                      <p className="text-xs text-white/75">
+                      <p className={`text-xs ${isDark ? 'text-white/75' : 'text-slate-600'}`}>
                         Schedule a review with the state executing agency to ensure utility shifting clearances on corridor km 42–68 are resolved.
                       </p>
                     </div>
@@ -513,14 +573,35 @@ export default function ProjectInsightsModal({
           isDark ? 'border-white/10 bg-[#0F1522]' : 'border-slate-200 bg-slate-50'
         }`}>
           <span className={`text-[11px] font-mono ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
-            Press <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-[10px]">Esc</kbd> or click ✕ to close
+            Press <kbd className={`px-1.5 py-0.5 rounded font-mono text-[10px] ${
+              isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-800'
+            }`}>Esc</kbd> or click ✕ to close
           </span>
-          <button
-            onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-white text-black hover:bg-slate-200 text-xs font-mono font-bold transition-all cursor-pointer"
-          >
-            Close Insights
-          </button>
+          <div className="flex items-center gap-2">
+            {onNavigateToInvestigation && (
+              <button
+                type="button"
+                onClick={() => onNavigateToInvestigation(projectId)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border flex items-center gap-1.5 ${
+                  isDark 
+                    ? 'bg-amber-400 text-black border-amber-300 hover:bg-amber-300' 
+                    : 'bg-amber-400 text-black border-amber-500 hover:bg-amber-500 shadow-sm'
+                }`}
+              >
+                <span>⚡ Deep AI Investigation</span>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className={`px-4 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                isDark 
+                  ? 'bg-white text-black hover:bg-slate-200' 
+                  : 'bg-slate-900 text-white hover:bg-black shadow-sm'
+              }`}
+            >
+              Close Insights
+            </button>
+          </div>
         </div>
       </div>
     </div>

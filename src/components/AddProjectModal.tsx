@@ -171,10 +171,12 @@ export default function AddProjectModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
       <div className={`w-full max-w-2xl rounded-2xl border p-6 sm:p-8 backdrop-blur-2xl shadow-2xl transition-all max-h-[92vh] overflow-y-auto ${
-        isDark ? 'bg-[#0A1222]/95 border-white/20 text-white shadow-black/80' : 'bg-white/95 border-slate-300 text-slate-900 shadow-xl'
+        isDark ? 'bg-[#0A1222]/95 border-white/20 text-white shadow-black/80' : 'bg-white border-slate-300 text-slate-900 shadow-2xl'
       }`}>
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-5">
+        <div className={`flex items-center justify-between pb-4 border-b mb-5 ${
+          isDark ? 'border-white/10' : 'border-slate-200'
+        }`}>
           <div>
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isDark ? 'bg-white' : 'bg-black'}`} />
@@ -182,7 +184,7 @@ export default function AddProjectModal({
                 Add New Project
               </h2>
             </div>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
               Enter core project metrics to compute risk scores, SHAP explanations, and delay forecasts.
             </p>
           </div>
@@ -190,7 +192,9 @@ export default function AddProjectModal({
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="text-slate-400 hover:text-white text-2xl font-mono cursor-pointer"
+            className={`text-2xl font-mono cursor-pointer transition-colors ${
+              isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-black'
+            }`}
           >
             ×
           </button>
@@ -218,7 +222,7 @@ export default function AddProjectModal({
               <h4 className={`font-mono font-bold text-sm ${isDark ? 'text-white' : 'text-black'}`}>
                 {statusStep || 'Saving project & analyzing...'}
               </h4>
-              <p className="text-[11px] text-slate-400 font-mono">
+              <p className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Calculating cost trends, delay projections, and risk scores.
               </p>
             </div>
@@ -227,14 +231,14 @@ export default function AddProjectModal({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Autofill helper */}
             <div className={`flex justify-between items-center p-2.5 rounded-lg text-xs font-mono border ${
-              isDark ? 'bg-white/5 border-white/15 text-white' : 'bg-black/5 border-black/15 text-black'
+              isDark ? 'bg-white/5 border-white/15 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
             }`}>
-              <span className={isDark ? 'text-white/80' : 'text-black/80'}>Prefill sample values from Flash Report:</span>
+              <span className={isDark ? 'text-white/80' : 'text-slate-700 font-medium'}>Prefill sample values from Flash Report:</span>
               <button
                 type="button"
                 onClick={handleAutofillSample}
                 className={`px-2.5 py-1 rounded border text-[11px] font-bold cursor-pointer transition-colors ${
-                  isDark ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' : 'bg-black/10 hover:bg-black/20 text-black border-black/20'
+                  isDark ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' : 'bg-white hover:bg-slate-200 text-slate-900 border-slate-300 shadow-sm'
                 }`}
               >
                 ⚡ Populate Sample Corridor
@@ -244,7 +248,7 @@ export default function AddProjectModal({
             {/* Row 1: Identification */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
+                <label className={`block text-[11px] font-mono font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   1. Project ID (project_id) *
                 </label>
                 <input
@@ -260,7 +264,7 @@ export default function AddProjectModal({
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
+                <label className={`block text-[11px] font-mono font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   2. Infrastructure Nomenclature (project_name) *
                 </label>
                 <input
@@ -279,7 +283,7 @@ export default function AddProjectModal({
             {/* Row 2: Financial Capital Outlay */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
+                <label className={`block text-[11px] font-mono font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   3. Original Cost (₹ Cr) *
                 </label>
                 <input
@@ -296,7 +300,7 @@ export default function AddProjectModal({
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
+                <label className={`block text-[11px] font-mono font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   4. Revised Cost (₹ Cr) *
                 </label>
                 <input
@@ -313,7 +317,7 @@ export default function AddProjectModal({
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
+                <label className={`block text-[11px] font-mono font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   5. Cumulative Exp. (₹ Cr) *
                 </label>
                 <input
@@ -333,7 +337,7 @@ export default function AddProjectModal({
             {/* Row 3: Physical Progress & Automatic S.No info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
+                <label className={`block text-[11px] font-mono font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   6. Physical Progress (%) *
                 </label>
                 <input
@@ -353,10 +357,12 @@ export default function AddProjectModal({
 
               <div className="flex flex-col justify-end">
                 <div className={`p-2.5 rounded-lg border text-xs font-mono flex items-center justify-between ${
-                  isDark ? 'bg-white/5 border-white/10 text-white/70' : 'bg-slate-100 border-slate-200 text-slate-700'
+                  isDark ? 'bg-white/5 border-white/10 text-white/70' : 'bg-slate-100 border-slate-200 text-slate-700 font-medium'
                 }`}>
                   <span>Serial No (Auto-calculated):</span>
-                  <span className="font-bold text-white font-mono bg-white/10 px-2 py-0.5 rounded">
+                  <span className={`font-bold font-mono px-2 py-0.5 rounded ${
+                    isDark ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-900 border border-slate-300'
+                  }`}>
                     #{autoSNo}
                   </span>
                 </div>
@@ -366,7 +372,7 @@ export default function AddProjectModal({
             {/* Row 4: Jurisdiction Context with Indian States Dropdown & Department */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <div>
-                <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
+                <label className={`block text-[11px] font-mono font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   7. Ministry / Department (Existing or New) *
                 </label>
                 <input
@@ -379,13 +385,13 @@ export default function AddProjectModal({
                     isDark ? 'bg-black/50 border-white/20 text-white focus:border-white' : 'bg-white border-slate-300 text-black focus:border-black'
                   }`}
                 />
-                <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
+                <span className={`text-[10px] font-mono mt-0.5 block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                   Enter your department or ministry name directly.
                 </span>
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono font-semibold text-slate-300 mb-1">
+                <label className={`block text-[11px] font-mono font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   8. State / Union Territory *
                 </label>
                 <select
@@ -401,7 +407,7 @@ export default function AddProjectModal({
                     </option>
                   ))}
                 </select>
-                <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
+                <span className={`text-[10px] font-mono mt-0.5 block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                   Select geographical execution jurisdiction in India.
                 </span>
               </div>
@@ -409,10 +415,12 @@ export default function AddProjectModal({
 
             {/* Project-Specific DPHIS Alert Threshold */}
             <div className={`p-4 rounded-xl border ${
-              isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50/80 border-amber-300'
+              isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-300'
             }`}>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-bold text-amber-500 dark:text-amber-400 tracking-wider flex items-center gap-1.5 font-display">
+                <label className={`text-xs font-bold tracking-wider flex items-center gap-1.5 font-display ${
+                  isDark ? 'text-amber-400' : 'text-amber-800'
+                }`}>
                   <span>🔔</span> RISK ALERT THRESHOLD *
                 </label>
                 <div className="flex items-center gap-2">
@@ -423,23 +431,33 @@ export default function AddProjectModal({
                     required
                     value={dphisThreshold}
                     onChange={e => setDphisThreshold(Number(e.target.value))}
-                    className="w-16 px-2 py-1 rounded bg-black/60 border border-amber-500/50 text-amber-300 text-xs font-mono font-bold text-center outline-none"
+                    className={`w-16 px-2 py-1 rounded text-xs font-mono font-bold text-center outline-none ${
+                      isDark 
+                        ? 'bg-black/60 border border-amber-500/50 text-amber-300' 
+                        : 'bg-white border-2 border-amber-500 text-amber-900 shadow-sm'
+                    }`}
                   />
-                  <span className="text-xs text-amber-400/80 font-mono">/ 100</span>
+                  <span className={`text-xs font-mono font-bold ${isDark ? 'text-amber-400/80' : 'text-amber-800'}`}>/ 100</span>
                 </div>
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
+              <p className={`text-[11px] leading-relaxed font-sans ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Set the independent health risk threshold (DPHIS 1–100) for this specific asset. When risk score reaches or exceeds this value, an instant alert will be dispatched to you and logged to the audit history.
               </p>
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+            <div className={`flex items-center justify-end gap-3 pt-3 border-t ${
+              isDark ? 'border-white/10' : 'border-slate-200'
+            }`}>
               <button
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="px-4 py-2 rounded-lg border border-white/10 text-xs font-mono hover:bg-white/5 cursor-pointer text-slate-400 hover:text-white"
+                className={`px-4 py-2 rounded-lg border text-xs font-mono cursor-pointer transition-colors ${
+                  isDark 
+                    ? 'border-white/10 text-slate-400 hover:text-white hover:bg-white/5' 
+                    : 'border-slate-300 text-slate-700 hover:text-black hover:bg-slate-100'
+                }`}
               >
                 Cancel
               </button>
@@ -447,7 +465,7 @@ export default function AddProjectModal({
                 type="submit"
                 disabled={loading}
                 className={`px-6 py-2 rounded-lg font-mono font-bold text-xs cursor-pointer shadow-lg transition-all ${
-                  isDark ? 'bg-white text-black hover:bg-slate-200' : 'bg-black text-white hover:bg-slate-800'
+                  isDark ? 'bg-white text-black hover:bg-slate-200' : 'bg-slate-900 text-white hover:bg-black'
                 }`}
               >
                 {loading ? 'Analyzing Project...' : 'Add Project →'}
