@@ -258,6 +258,7 @@ export default function MyProjects({
                 key={st}
                 type="button"
                 onClick={() => setStatusFilter(st)}
+                style={active ? (!isDark ? { color: '#ffffff' } : { color: '#000000' }) : undefined}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer whitespace-nowrap border focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                   active
                     ? (isDark 
@@ -266,25 +267,31 @@ export default function MyProjects({
                       )
                     : (isDark 
                         ? 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15 focus:ring-white/20' 
-                        : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-300 shadow-sm focus:ring-slate-300'
+                        : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-300 shadow-sm focus:ring-slate-300 font-medium'
                       )
                 }`}
               >
-                {labelMap[st]}
+                <span style={active ? (!isDark ? { color: '#ffffff' } : { color: '#000000' }) : undefined}>
+                  {labelMap[st]}
+                </span>
               </button>
             );
           })}
         </div>
 
         {/* LINE 3: Secondary Filter Toolbar: Sector, State, Sort By */}
-        <div className="flex flex-wrap items-center gap-3 pt-0.5">
+        <div className={`flex flex-wrap items-center gap-3 p-2.5 rounded-xl border backdrop-blur-md transition-all ${
+          isDark 
+            ? 'bg-white/[0.03] border-white/10' 
+            : 'bg-white/85 border-slate-200 shadow-sm'
+        }`}>
           {/* Sector Filter */}
           <div className="flex items-center gap-1.5">
             <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-700 font-semibold'}`}>Sector:</span>
             <select
               value={sectorFilter}
               onChange={e => setSectorFilter(e.target.value)}
-              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
+              className={`border rounded-lg px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
                 isDark 
                   ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50 focus:ring-white/20' 
                   : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 focus:ring-slate-400/30'
@@ -307,7 +314,7 @@ export default function MyProjects({
             <select
               value={stateFilter}
               onChange={e => setStateFilter(e.target.value)}
-              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
+              className={`border rounded-lg px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
                 isDark 
                   ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50 focus:ring-white/20' 
                   : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 focus:ring-slate-400/30'
@@ -330,7 +337,7 @@ export default function MyProjects({
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as any)}
-              className={`border rounded-xl px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
+              className={`border rounded-lg px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
                 isDark 
                   ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50 focus:ring-white/20' 
                   : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 focus:ring-slate-400/30'
@@ -367,13 +374,14 @@ export default function MyProjects({
                 setSectorFilter('ALL'); 
                 setStateFilter('ALL'); 
               }}
+              style={!isDark ? { color: '#ffffff' } : undefined}
               className={`px-4 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer shadow-sm ${
                 isDark
                   ? 'bg-white/10 hover:bg-white/20 text-white border-white/20'
                   : 'bg-slate-900 hover:bg-black text-white border-slate-900'
               }`}
             >
-              Clear Filters
+              <span style={!isDark ? { color: '#ffffff' } : undefined}>Clear Filters</span>
             </button>
           )}
         </GlassCard>
@@ -387,16 +395,28 @@ export default function MyProjects({
             return (
               <div
                 key={pin.id}
-                className="oled-solid-card frosted-glass-card p-5 sm:p-6 space-y-4 hover:border-white/40 transition-all flex flex-col justify-between"
+                className={`oled-solid-card frosted-glass-card p-5 sm:p-6 space-y-4 transition-all flex flex-col justify-between border ${
+                  isDark 
+                    ? 'hover:border-white/40 border-white/15' 
+                    : 'hover:border-slate-400 border-slate-200/90 shadow-sm'
+                }`}
               >
                 <div className="space-y-3.5">
                   {/* Top Bar: ID, Location & Remove Action */}
-                  <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
+                  <div className={`flex items-center justify-between gap-2 border-b pb-3 ${
+                    isDark ? 'border-white/10' : 'border-slate-200'
+                  }`}>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono-code font-bold text-xs sm:text-sm text-white px-2 py-0.5 rounded bg-white/10">
+                      <span className={`font-mono-code font-bold text-xs sm:text-sm px-2 py-0.5 rounded border ${
+                        isDark 
+                          ? 'text-white bg-white/10 border-white/15' 
+                          : 'text-slate-900 bg-slate-100 border-slate-300 font-bold'
+                      }`}>
                         {pin.id}
                       </span>
-                      <span className="text-xs text-white/70 flex items-center gap-1 font-medium">
+                      <span className={`text-xs flex items-center gap-1 font-medium ${
+                        isDark ? 'text-white/70' : 'text-slate-600'
+                      }`}>
                         <span>📍</span>
                         <span>{pin.state}</span>
                       </span>
@@ -410,7 +430,11 @@ export default function MyProjects({
                           onRemoveProject(pin.id);
                         }}
                         title="Remove Project"
-                        className="text-xs text-red-400/80 hover:text-red-300 hover:bg-red-500/15 px-2 py-1 rounded-lg border border-red-500/20 transition-all cursor-pointer font-mono flex items-center gap-1"
+                        className={`text-xs px-2 py-1 rounded-lg border transition-all cursor-pointer font-mono flex items-center gap-1 ${
+                          isDark
+                            ? 'text-red-400/80 hover:text-red-300 hover:bg-red-500/15 border-red-500/20'
+                            : 'text-red-600 hover:text-red-700 bg-red-50/70 hover:bg-red-100 border-red-200 font-semibold'
+                        }`}
                       >
                         <span>✕</span>
                         <span>Remove</span>
@@ -420,17 +444,21 @@ export default function MyProjects({
 
                   {/* Project Name and Sector */}
                   <div>
-                    <span className="text-[10px] font-mono uppercase text-white/60 tracking-wider">
+                    <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${
+                      isDark ? 'text-white/60' : 'text-slate-500'
+                    }`}>
                       {pinSector}
                     </span>
-                    <h3 className="font-bold text-base sm:text-lg text-[var(--text-primary)] leading-snug line-clamp-2 mt-0.5">
+                    <h3 className={`font-bold text-base sm:text-lg leading-snug line-clamp-2 mt-0.5 ${
+                      isDark ? 'text-white' : 'text-slate-900'
+                    }`}>
                       {pin.name}
                     </h3>
                   </div>
 
                   {/* DPHIS / Risk Score Display without progress bar */}
                   <div className={`p-3.5 rounded-xl border flex items-center gap-3.5 ${
-                    isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-slate-200'
+                    isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-xs'
                   }`}>
                     <CompactDphisGauge score={pin.dphis} isDark={isDark} />
 
@@ -516,14 +544,15 @@ export default function MyProjects({
                         setInsightsModalProjectId(pin.id);
                       }
                     }}
+                    style={!isDark ? { color: '#ffffff' } : undefined}
                     className={`flex-1 py-2 px-3 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer text-center shadow-md flex items-center justify-center gap-1 whitespace-nowrap ${
                       isDark
                         ? 'bg-white text-black hover:bg-slate-200'
                         : 'bg-slate-900 text-white hover:bg-black shadow-sm'
                     }`}
                   >
-                    <span>View Project Insights</span>
-                    <span>→</span>
+                    <span style={!isDark ? { color: '#ffffff' } : undefined}>View Project Insights</span>
+                    <span style={!isDark ? { color: '#ffffff' } : undefined}>→</span>
                   </button>
 
                   <button

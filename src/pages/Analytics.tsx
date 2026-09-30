@@ -394,8 +394,8 @@ export default function Analytics({
   // 7. Sorted & Paginated Table Data
   const sortedProjects = useMemo(() => {
     return [...filteredProjects].sort((a, b) => {
-      let valA = a[sortField];
-      let valB = b[sortField];
+      let valA: number = a.dphis;
+      let valB: number = b.dphis;
       if (sortField === 'cost') {
         valA = a.revCost;
         valB = b.revCost;
@@ -405,6 +405,9 @@ export default function Analytics({
       } else if (sortField === 'progress') {
         valA = a.physicalProgress;
         valB = b.physicalProgress;
+      } else if (sortField === 'dphis') {
+        valA = a.dphis;
+        valB = b.dphis;
       }
       if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
       if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
