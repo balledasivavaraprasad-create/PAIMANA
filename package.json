@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@types/nodemailer": "^8.0.1",
+    "@types/plotly.js-dist-min": "^2.3.4",
     "lucide-react": "^1.45.0",
     "nodemailer": "^10.0.10",
+    "plotly.js-dist-min": "^4.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

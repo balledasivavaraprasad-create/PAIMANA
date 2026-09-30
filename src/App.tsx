@@ -1066,11 +1066,18 @@ export default function App() {
           {currentTab === 'analytics' && (
             <Analytics
               pinsCount={pins.length}
+              allProjects={pins}
+              currentUser={currentUser}
               onOpenAddProject={!isAdmin ? () => setShowAddModal(true) : undefined}
               onNavigateToProject={(id) => {
                 const found = pins.find(p => p.id === id);
                 if (found) setSelectedPin(found);
                 setCurrentTab('intelligence');
+              }}
+              onNavigateToInvestigation={(id) => {
+                const found = pins.find(p => p.id === id);
+                if (found) setSelectedPin(found);
+                setInvestigationModalProjectId(id);
               }}
             />
           )}

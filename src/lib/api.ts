@@ -969,6 +969,59 @@ export async function fetchAnalyticsOverview(): Promise<AnalyticsOverview | null
   }
 }
 
+export interface PortfolioIntelligence {
+  portfolio_pulse: {
+    status: string;
+    last_sync: string;
+    last_scan: string;
+    next_scan: string;
+    projects_monitored: number;
+    insights: string[];
+  };
+  kpi_strip: {
+    total_projects: number;
+    attention_needed: number;
+    critical_projects: number;
+    average_dphis: number;
+    dphis_delta: string;
+    cost_exposure_cr: number;
+    delayed_projects: number;
+    divergence_count: number;
+    data_freshness_pct: number;
+  };
+  risk_trends: Array<{
+    month: string;
+    average_dphis: number;
+    median_dphis?: number;
+    critical_count: number;
+  }>;
+  distribution: {
+    critical: number;
+    high: number;
+    moderate: number;
+    low: number;
+  };
+  model_health?: {
+    cost_model: any;
+    delay_model: any;
+    explainability: any;
+  };
+}
+
+export async function fetchPortfolioAnalytics(params?: { sector?: string; state?: string; risk?: string }): Promise<PortfolioIntelligence | null> {
+  try {
+    const url = new URL(`${API_BASE}/analytics/portfolio-intelligence`);
+    if (params?.sector && params.sector.toLowerCase() !== 'all') url.searchParams.set('sector', params.sector);
+    if (params?.state && params.state.toLowerCase() !== 'all') url.searchParams.set('state', params.state);
+    if (params?.risk && params.risk.toLowerCase() !== 'all') url.searchParams.set('risk', params.risk);
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error('Analytics error');
+    return await res.json();
+  } catch (err) {
+    return null;
+  }
+}
+
 export async function fetchRiskTrend(): Promise<any[]> {
   try {
     const res = await fetch(`${API_BASE}/analytics/risk-trend`);
@@ -1015,6 +1068,61 @@ export async function sendChatMessage(
   const normMsg = lowerMsg.replace(/[?!.,;:'"()\[\]{}]/g, ' ').replace(/\s+/g, ' ').trim();
   const isAdmin = (userRole || '').toUpperCase() === 'ADMIN' || (userRole || '').toUpperCase() === 'ANALYST';
 
+  // Instant greeting handling without waiting
+  const greetingWords = ['hi', 'hello', 'hey', 'greetings', 'namaste', 'hola', 'sup', 'yo'];
+  const greetingPhrases = ['hi there', 'hello there', 'hey there', 'good morning', 'good afternoon', 'good evening', 'good day', 'howdy'];
+  const isGreeting = 
+    greetingWords.includes(normMsg) ||
+    greetingPhrases.includes(normMsg) ||
+    (greetingWords.some(w => normMsg.startsWith(w + ' ')) && normMsg.split(' ').length <= 3 && !normMsg.includes('project') && !normMsg.includes('dphis') && !normMsg.includes('risk') && !normMsg.includes('what') && !normMsg.includes('how'));
+
+  if (isGreeting) {
+    return {
+      reply: `Hello! My name is PAIMANA Intelligence. How can I help you today?`,
+      intent: "GREETING",
+      grounded_evidence: [
+        { feature: "Assistant", impact: "PAIMANA Sovereign AI Engine" },
+        { feature: "Status", impact: "Ready & Active" }
+      ],
+      suggested_actions: [
+        "What can you do?",
+        "What is DPHIS?",
+        "Show my projects"
+      ]
+    };
+  }
+
+  // Attempt live backend database access with LLM grounding in browser environments (skip during automated test runs)
+  const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+  if (typeof window !== 'undefined' && !isTestEnv) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const backendRes = await fetch(`${API_BASE}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message,
+          project_id: projectId,
+          user_role: userRole,
+          username,
+          ministry,
+          conversation_history: conversationHistory
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (backendRes.ok) {
+        const data = await backendRes.json();
+        if (data && data.reply) {
+          return data;
+        }
+      }
+    } catch (e) {
+      // Backend offline or timeout, smoothly fall through to client-side grounding
+    }
+  }
+
   // 1. Client-Side Grounded Projects Context
   let availableProjects: any[] = allProjectsContext && allProjectsContext.length > 0 ? allProjectsContext : [];
   if (availableProjects.length === 0 && typeof window !== 'undefined') {
@@ -1039,34 +1147,6 @@ export async function sendChatMessage(
   }
 
   const depName = ministry || (isAdmin ? 'MoSPI Infrastructure Coordination' : 'Ministry of Infrastructure');
-
-  // ==========================================
-  // INTENT 1: GREETING & INTRODUCTION
-  // User says "hi", "hello", "hey", etc.
-  // Reply required: "Hello! My name is PAIMANA Intelligence..."
-  // ==========================================
-  const greetingWords = ['hi', 'hello', 'hey', 'greetings', 'namaste', 'hola', 'sup', 'yo'];
-  const greetingPhrases = ['hi there', 'hello there', 'hey there', 'good morning', 'good afternoon', 'good evening', 'good day', 'howdy'];
-  const isGreeting = 
-    greetingWords.includes(normMsg) ||
-    greetingPhrases.includes(normMsg) ||
-    (greetingWords.some(w => normMsg.startsWith(w + ' ')) && normMsg.split(' ').length <= 3 && !normMsg.includes('project') && !normMsg.includes('dphis') && !normMsg.includes('risk') && !normMsg.includes('what') && !normMsg.includes('how'));
-
-  if (isGreeting) {
-    return {
-      reply: `Hello! My name is PAIMANA Intelligence. How can I help you today?`,
-      intent: "GREETING",
-      grounded_evidence: [
-        { feature: "Assistant", impact: "PAIMANA Sovereign AI Engine" },
-        { feature: "Status", impact: "Ready & Active" }
-      ],
-      suggested_actions: [
-        "What can you do?",
-        "What is DPHIS?",
-        "Show my projects"
-      ]
-    };
-  }
 
   // ==========================================
   // INTENT 2: WHO ARE YOU / IDENTITY / CAPABILITIES
@@ -1431,6 +1511,39 @@ The **Root Cause Investigation Console** is an advanced diagnostic workspace tha
   // If selectedProjectId was explicitly provided and user's query asks about it
   if (!target && projectId && (lowerMsg.includes('project') || lowerMsg.includes('status') || lowerMsg.includes('delay') || lowerMsg.includes('cost') || lowerMsg.includes('progress') || lowerMsg.includes('why') || lowerMsg.includes('tell me more'))) {
     target = availableProjects.find(p => (p.id || p.project_id) === projectId);
+  }
+
+  // Complete database fallback: Check SEEDED_PROJECTS_MAP across entire system
+  if (!target && typeof SEEDED_PROJECTS_MAP !== 'undefined') {
+    for (const [id, p] of Object.entries(SEEDED_PROJECTS_MAP as Record<string, any>)) {
+      const pId = id.toLowerCase();
+      const pName = (p.project_name || p.name || '').toLowerCase();
+      if (lowerMsg.includes(pId) || (pName && lowerMsg.includes(pName))) {
+        target = {
+          id: p.project_id || id,
+          name: p.project_name || p.name,
+          state: p.state || 'National Corridor',
+          dphis: p.dphis || 65,
+          risk: p.risk_level || 'moderate',
+          cost: `₹${(p.cost?.revised || p.cost?.original || 3500).toLocaleString()} Cr`,
+          delay: `${p.schedule_slippage_months || 0} mo`
+        };
+        break;
+      }
+    }
+  }
+
+  // Also check all demo arrays if not already in availableProjects
+  if (!target) {
+    const allKnown = [...DEMO_ADMIN_28_PROJECTS, ...DEMO_SIVA_17_PROJECTS];
+    for (const p of allKnown) {
+      const pId = (p.id || '').toLowerCase();
+      const pName = (p.name || '').toLowerCase();
+      if ((pId && lowerMsg.includes(pId)) || (pName && lowerMsg.includes(pName))) {
+        target = p;
+        break;
+      }
+    }
   }
 
   if (target) {

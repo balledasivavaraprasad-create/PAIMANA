@@ -163,37 +163,75 @@ async def chat_endpoint(payload: ChatRequest):
     # 3. Identify if user is asking about a specific project
     target_project = None
     pid = payload.project_id
-    
-    if not pid:
-        # Check explicit ID match in message
-        for p in context_projects:
-            p_id = p.get("project_id", "")
-            if p_id and p_id.lower() in lower_msg:
-                pid = p_id
-                target_project = p
-                break
-        
-        # Check distinctive project name keywords
-        if not target_project:
+
+    # Informational or portfolio intents must NOT be hijacked by spurious project keyword matches
+    is_general_intent = intent in (
+        "GREETING", "IDENTITY", "DPHIS_EXPLANATION", "ML_EXPLANATION",
+        "ALERTS_EXPLANATION", "INVESTIGATION_EXPLANATION", "GENERAL_KNOWLEDGE",
+        "PORTFOLIO_ANALYSIS", "CHANGES"
+    )
+
+    if not is_general_intent:
+        if not pid:
+            # Check explicit ID match in message
             for p in context_projects:
-                p_name = p.get("project_name", "").lower()
-                words = [w for w in re.split(r'[\s\-_,\(\)]+', p_name) if len(w) > 4 and w not in ["project", "corridor", "phase", "extension", "limited", "railway", "national", "highway", "expressway", "development"]]
-                for w in words:
-                    if w in lower_msg:
-                        pid = p.get("project_id")
-                        target_project = p
-                        break
-                if target_project:
+                p_id = p.get("project_id", "")
+                if p_id and p_id.lower() in lower_msg:
+                    pid = p_id
+                    target_project = p
                     break
-        
-        # If still not found and message has an explicit project code pattern, search MongoDB
-        if not target_project and db is not None:
-            match = re.search(r'\b(P\d{3,5}|PRJ[_\-]\w+|\d{6,8}|N\d{8})\b', message, re.IGNORECASE)
-            if match:
-                found_id = match.group(1)
-                target_project = await db.projects.find_one({"project_id": {"$regex": f"^{found_id}$", "$options": "i"}}, {"_id": 0})
-                if target_project:
-                    pid = target_project.get("project_id")
+
+            # Check distinctive project name keywords
+            if not target_project:
+                for p in context_projects:
+                    p_name = p.get("project_name", "").lower()
+                    words = [w for w in re.split(r'[\s\-_,\(\)]+', p_name) if len(w) > 4 and w not in ["project", "corridor", "phase", "extension", "limited", "railway", "national", "highway", "expressway", "development", "machine", "capital"]]
+                    for w in words:
+                        if w in lower_msg:
+                            pid = p.get("project_id")
+                            target_project = p
+                            break
+                    if target_project:
+                        break
+
+            # If still not found, search MongoDB by ID or project name keywords
+            if not target_project and db is not None:
+                match = re.search(r'\b(P\d{3,5}|PRJ[_\-]\w+|\d{6,8}|N\d{8})\b', message, re.IGNORECASE)
+                if match:
+                    found_id = match.group(1)
+                    target_project = await db.projects.find_one({"project_id": {"$regex": f"^{found_id}$", "$options": "i"}}, {"_id": 0})
+                    if target_project:
+                        pid = target_project.get("project_id")
+
+                if not target_project:
+                    stopwords = {
+                        "the", "a", "an", "is", "are", "was", "were", "what", "how", "why", "when",
+                        "where", "who", "tell", "me", "about", "status", "of", "project", "projects", "corridor",
+                        "in", "and", "or", "for", "with", "can", "you", "give", "details", "information",
+                        "regarding", "any", "please", "database", "fetch", "available", "show", "list",
+                        "machine", "learning", "models", "model", "capital", "india", "delhi", "joke"
+                    }
+                    words = [w for w in re.split(r'[^a-zA-Z0-9]+', lower_msg) if len(w) >= 4 and w not in stopwords]
+                    # If multiple keywords present (e.g. 'Ahmedabad Metro'), match projects containing all terms first
+                    if len(words) > 1:
+                        all_query = {"$and": [{"project_name": {"$regex": w, "$options": "i"}} for w in words]}
+                        cand = await db.projects.find_one(all_query, {"_id": 0})
+                        if cand:
+                            target_project = cand
+                            pid = target_project.get("project_id")
+
+                    if not target_project and words:
+                        for w in words:
+                            cand = await db.projects.find_one({
+                                "$or": [
+                                    {"project_name": {"$regex": w, "$options": "i"}},
+                                    {"project_id": {"$regex": f"^{w}", "$options": "i"}}
+                                ]
+                            }, {"_id": 0})
+                            if cand:
+                                target_project = cand
+                                pid = target_project.get("project_id")
+                                break
 
     # Specific SHAP factors if project focused
     shap_factors = []
@@ -315,9 +353,17 @@ Respond strictly as a JSON object:
             "Show all my projects",
             "Explain risk factors"
         ]
-    elif intent == "PORTFOLIO_ANALYSIS":
+    elif intent in ("PORTFOLIO_ANALYSIS", "PORTFOLIO_SUMMARY"):
+        db_count = len(projects_summary)
+        if db is not None:
+            try:
+                total_db = await db.projects.count_documents({})
+                if total_db > 0:
+                    db_count = total_db
+            except Exception:
+                pass
         proj_list = "\n".join([f"• **{p['id']}** — {p['name']} (DPHIS: {p['dphis_score']}/100)" for p in projects_summary[:8]])
-        reply = f"You have **{len(projects_summary)} projects** in your database:\n\n{proj_list}"
+        reply = f"### Monitored Infrastructure Portfolio Overview\n\nYou have **{db_count} projects** in your database:\n\n{proj_list}"
         suggested = [
             "Which project needs attention?",
             "What are recent delay changes?",
@@ -402,7 +448,9 @@ Respond strictly as a JSON object:
             "What can you do?"
         ]
 
-    resolved_intent = intent if intent != "CONVERSATION" else ("PROJECT_INTELLIGENCE" if (target_project or pid) else "CONVERSATION")
+    resolved_intent = "PORTFOLIO_SUMMARY" if intent in ("PORTFOLIO_ANALYSIS", "PORTFOLIO_SUMMARY") else (
+        "PROJECT_INTELLIGENCE" if (target_project or pid) and intent == "CONVERSATION" else intent
+    )
 
     return ChatResponse(
         reply=reply,
