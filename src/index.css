@@ -322,32 +322,32 @@
 }
 
 /* Ensure solid dark buttons and surfaces retain pure white text for high contrast in light mode */
-:root[data-theme="light"] button[class*="bg-slate-900"],
-:root[data-theme="light"] button[class*="bg-slate-900"] *,
-:root[data-theme="light"] button[class*="bg-slate-800"],
-:root[data-theme="light"] button[class*="bg-slate-800"] *,
-:root[data-theme="light"] button[class*="bg-black"],
-:root[data-theme="light"] button[class*="bg-black"] *,
-:root[data-theme="light"] button[class*="bg-zinc-900"],
-:root[data-theme="light"] button[class*="bg-zinc-900"] *,
-:root[data-theme="light"] a[class*="bg-slate-900"],
-:root[data-theme="light"] a[class*="bg-slate-900"] *,
-:root[data-theme="light"] a[class*="bg-black"],
-:root[data-theme="light"] a[class*="bg-black"] *,
-:root[data-theme="light"] span[class*="bg-slate-900"]:not([class*="fixed"]),
-:root[data-theme="light"] span[class*="bg-slate-900"]:not([class*="fixed"]) *,
-:root[data-theme="light"] span[class*="bg-black"]:not([class*="fixed"]):not([class*="/"]):not([class*="overlay"]),
-:root[data-theme="light"] span[class*="bg-black"]:not([class*="fixed"]):not([class*="/"]):not([class*="overlay"]) *,
-:root[data-theme="light"] button[class*="bg-indigo-600"],
-:root[data-theme="light"] button[class*="bg-indigo-600"] *,
-:root[data-theme="light"] button[class*="bg-blue-600"],
-:root[data-theme="light"] button[class*="bg-blue-600"] *,
-:root[data-theme="light"] button[class*="bg-emerald-600"],
-:root[data-theme="light"] button[class*="bg-emerald-600"] *,
-:root[data-theme="light"] button[class*="bg-red-600"],
-:root[data-theme="light"] button[class*="bg-red-600"] *,
-:root[data-theme="light"] button[class*="bg-rose-600"],
-:root[data-theme="light"] button[class*="bg-rose-600"] *,
+:root[data-theme="light"] button[class~="bg-slate-900"],
+:root[data-theme="light"] button[class~="bg-slate-900"] *,
+:root[data-theme="light"] button[class~="bg-slate-800"],
+:root[data-theme="light"] button[class~="bg-slate-800"] *,
+:root[data-theme="light"] button[class~="bg-black"],
+:root[data-theme="light"] button[class~="bg-black"] *,
+:root[data-theme="light"] button[class~="bg-zinc-900"],
+:root[data-theme="light"] button[class~="bg-zinc-900"] *,
+:root[data-theme="light"] a[class~="bg-slate-900"],
+:root[data-theme="light"] a[class~="bg-slate-900"] *,
+:root[data-theme="light"] a[class~="bg-black"],
+:root[data-theme="light"] a[class~="bg-black"] *,
+:root[data-theme="light"] span[class~="bg-slate-900"]:not([class*="fixed"]),
+:root[data-theme="light"] span[class~="bg-slate-900"]:not([class*="fixed"]) *,
+:root[data-theme="light"] span[class~="bg-black"]:not([class*="fixed"]):not([class*="/"]):not([class*="overlay"]),
+:root[data-theme="light"] span[class~="bg-black"]:not([class*="fixed"]):not([class*="/"]):not([class*="overlay"]) *,
+:root[data-theme="light"] button[class~="bg-indigo-600"],
+:root[data-theme="light"] button[class~="bg-indigo-600"] *,
+:root[data-theme="light"] button[class~="bg-blue-600"],
+:root[data-theme="light"] button[class~="bg-blue-600"] *,
+:root[data-theme="light"] button[class~="bg-emerald-600"],
+:root[data-theme="light"] button[class~="bg-emerald-600"] *,
+:root[data-theme="light"] button[class~="bg-red-600"],
+:root[data-theme="light"] button[class~="bg-red-600"] *,
+:root[data-theme="light"] button[class~="bg-rose-600"],
+:root[data-theme="light"] button[class~="bg-rose-600"] *,
 :root[data-theme="light"] .user-bubble-light,
 :root[data-theme="light"] .user-bubble-light *,
 :root[data-theme="light"] .header-avatar-light,
@@ -554,14 +554,14 @@
 :root[data-theme="light"] button.bg-slate-900 *,
 :root[data-theme="light"] button.bg-slate-800,
 :root[data-theme="light"] button.bg-slate-800 *,
-:root[data-theme="light"] button[class*="bg-black"],
-:root[data-theme="light"] button[class*="bg-black"] *,
-:root[data-theme="light"] button[class*="bg-slate-900"],
-:root[data-theme="light"] button[class*="bg-slate-900"] *,
-:root[data-theme="light"] a[class*="bg-black"],
-:root[data-theme="light"] a[class*="bg-black"] *,
-:root[data-theme="light"] a[class*="bg-slate-900"],
-:root[data-theme="light"] a[class*="bg-slate-900"] *,
+:root[data-theme="light"] button[class~="bg-black"],
+:root[data-theme="light"] button[class~="bg-black"] *,
+:root[data-theme="light"] button[class~="bg-slate-900"],
+:root[data-theme="light"] button[class~="bg-slate-900"] *,
+:root[data-theme="light"] a[class~="bg-black"],
+:root[data-theme="light"] a[class~="bg-black"] *,
+:root[data-theme="light"] a[class~="bg-slate-900"],
+:root[data-theme="light"] a[class~="bg-slate-900"] *,
 :root[data-theme="light"] .badge-dark,
 :root[data-theme="light"] .badge-dark * {
   color: #FFFFFF !important;
@@ -571,6 +571,42 @@
 :root[data-theme="light"] button.bg-black:hover *,
 :root[data-theme="light"] button.bg-slate-900:hover,
 :root[data-theme="light"] button.bg-slate-900:hover * {
+  color: #FFFFFF !important;
+}
+
+/* =========================================================================
+   LIGHT MODE HOVER CONTRAST INVERSION
+   When hovering elements with hover:bg-black or hover:bg-slate-900 in light mode:
+   - When NOT hovered: text is solid black (#000000 !important)
+   - When hovered: background turns black (#000000 !important), text & icons turn pure white (#FFFFFF !important)
+   ========================================================================= */
+
+:root[data-theme="light"] button[class*="hover:bg-black"]:not([class*="hover:bg-black/"]):not([class~="bg-black"]):not([class~="bg-slate-900"]):not([class~="bg-zinc-900"]):not([class~="bg-slate-800"]):not([class~="bg-sky-500"]):not([class~="bg-blue-600"]):not([class~="bg-indigo-600"]):not([class~="bg-rose-600"]):not([class~="bg-emerald-500"]):not([class~="bg-emerald-600"]):not(:hover),
+:root[data-theme="light"] button[class*="hover:bg-black"]:not([class*="hover:bg-black/"]):not([class~="bg-black"]):not([class~="bg-slate-900"]):not([class~="bg-zinc-900"]):not([class~="bg-slate-800"]):not([class~="bg-sky-500"]):not([class~="bg-blue-600"]):not([class~="bg-indigo-600"]):not([class~="bg-rose-600"]):not([class~="bg-emerald-500"]):not([class~="bg-emerald-600"]):not(:hover) *,
+:root[data-theme="light"] button[class*="hover:bg-slate-900"]:not([class*="hover:bg-slate-900/"]):not([class~="bg-black"]):not([class~="bg-slate-900"]):not([class~="bg-zinc-900"]):not([class~="bg-slate-800"]):not([class~="bg-sky-500"]):not([class~="bg-blue-600"]):not([class~="bg-indigo-600"]):not([class~="bg-rose-600"]):not([class~="bg-emerald-500"]):not([class~="bg-emerald-600"]):not(:hover),
+:root[data-theme="light"] button[class*="hover:bg-slate-900"]:not([class*="hover:bg-slate-900/"]):not([class~="bg-black"]):not([class~="bg-slate-900"]):not([class~="bg-zinc-900"]):not([class~="bg-slate-800"]):not([class~="bg-sky-500"]):not([class~="bg-blue-600"]):not([class~="bg-indigo-600"]):not([class~="bg-rose-600"]):not([class~="bg-emerald-500"]):not([class~="bg-emerald-600"]):not(:hover) *,
+:root[data-theme="light"] a[class*="hover:bg-black"]:not([class*="hover:bg-black/"]):not([class~="bg-black"]):not([class~="bg-slate-900"]):not([class~="bg-zinc-900"]):not([class~="bg-slate-800"]):not(:hover),
+:root[data-theme="light"] a[class*="hover:bg-black"]:not([class*="hover:bg-black/"]):not([class~="bg-black"]):not([class~="bg-slate-900"]):not([class~="bg-zinc-900"]):not([class~="bg-slate-800"]):not(:hover) *,
+:root[data-theme="light"] .demo-cred-btn:not(:hover),
+:root[data-theme="light"] .demo-cred-btn:not(:hover) * {
+  color: #000000 !important;
+}
+
+:root[data-theme="light"] button[class*="hover:bg-black"]:not([class*="hover:bg-black/"]):hover,
+:root[data-theme="light"] button[class*="hover:bg-slate-900"]:not([class*="hover:bg-slate-900/"]):hover,
+:root[data-theme="light"] a[class*="hover:bg-black"]:not([class*="hover:bg-black/"]):hover,
+:root[data-theme="light"] a[class*="hover:bg-slate-900"]:not([class*="hover:bg-slate-900/"]):hover,
+:root[data-theme="light"] .demo-cred-btn:hover {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="light"] button[class*="hover:bg-black"]:not([class*="hover:bg-black/"]):hover *,
+:root[data-theme="light"] button[class*="hover:bg-slate-900"]:not([class*="hover:bg-slate-900/"]):hover *,
+:root[data-theme="light"] a[class*="hover:bg-black"]:not([class*="hover:bg-black/"]):hover *,
+:root[data-theme="light"] a[class*="hover:bg-slate-900"]:not([class*="hover:bg-slate-900/"]):hover *,
+:root[data-theme="light"] .demo-cred-btn:hover * {
+  background-color: transparent !important;
   color: #FFFFFF !important;
 }
 

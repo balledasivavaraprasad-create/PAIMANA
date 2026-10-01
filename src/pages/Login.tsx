@@ -456,10 +456,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           {activeTab === 'signin' && (
             <div>
               <div className="mb-5">
-                <h1 className="text-xl sm:text-2xl font-serif font-bold tracking-tight mb-1">
+                <h1 className={`text-xl sm:text-2xl font-serif font-bold tracking-tight mb-1 ${
+                  isDark ? 'text-white' : 'text-slate-950'
+                }`}>
                   Sign in
                 </h1>
-                <p className="text-xs text-slate-400">
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-800 font-medium'}`}>
                   Sign in to check your projects, costs, and delay risks.
                 </p>
               </div>
@@ -472,7 +474,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-mono text-slate-300 mb-1.5">
+                  <label className={`block text-xs font-mono mb-1.5 font-bold ${
+                    isDark ? 'text-slate-300 font-normal' : 'text-slate-900'
+                  }`}>
                     Official Email or Username
                   </label>
                   <input
@@ -484,17 +488,21 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                     className={`w-full px-3.5 py-2.5 rounded-lg border text-sm font-mono outline-none transition-all ${
                       isDark 
                         ? 'bg-black/40 border-white/15 text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20' 
-                        : 'bg-white/90 border-slate-300 text-black focus:border-sky-600 focus:ring-2 focus:ring-sky-600/20'
+                        : 'bg-white/90 border-slate-300 text-black placeholder:text-slate-500 focus:border-sky-600 focus:ring-2 focus:ring-sky-600/20'
                     }`}
                   />
                 </div>
 
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs font-mono text-slate-300">
+                    <label className={`text-xs font-mono font-bold ${
+                      isDark ? 'text-slate-300 font-normal' : 'text-slate-900'
+                    }`}>
                       Password
                     </label>
-                    <a href="#forgot" onClick={(e) => { e.preventDefault(); alert('Please contact your ministry system administrator for credential reset.'); }} className="text-[11px] text-sky-400 hover:underline">
+                    <a href="#forgot" onClick={(e) => { e.preventDefault(); alert('Please contact your ministry system administrator for credential reset.'); }} className={`text-[11px] hover:underline font-medium ${
+                      isDark ? 'text-sky-400' : 'text-sky-700'
+                    }`}>
                       Forgot password?
                     </a>
                   </div>
@@ -507,12 +515,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                     className={`w-full px-3.5 py-2.5 rounded-lg border text-sm font-mono outline-none transition-all ${
                       isDark 
                         ? 'bg-black/40 border-white/15 text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20' 
-                        : 'bg-white/90 border-slate-300 text-black focus:border-sky-600 focus:ring-2 focus:ring-sky-600/20'
+                        : 'bg-white/90 border-slate-300 text-black placeholder:text-slate-500 focus:border-sky-600 focus:ring-2 focus:ring-sky-600/20'
                     }`}
                   />
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-slate-400">
+                <div className={`flex items-center justify-between text-xs font-medium ${
+                  isDark ? 'text-slate-400 font-normal' : 'text-slate-900'
+                }`}>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" defaultChecked className="rounded border-slate-600 text-sky-500 focus:ring-0" />
                     <span>Keep me signed in</span>
@@ -529,16 +539,20 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               </form>
 
               {/* Quick Demo Credentials */}
-              <div className="mt-6 pt-4 border-t border-white/10 text-center">
-                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-2">
+              <div className={`mt-6 pt-4 border-t text-center ${isDark ? 'border-white/10' : 'border-slate-300'}`}>
+                <span className={`text-[10px] font-mono uppercase tracking-wider block mb-2 font-bold ${
+                  isDark ? 'text-slate-400 font-normal' : 'text-slate-900'
+                }`}>
                   Demo Evaluation Credentials
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => fillDemoCredentials('admin', true)}
-                    className={`py-2 px-3 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm ${
-                      isDark ? 'bg-white/10 hover:bg-white hover:text-black border-white/20 text-white' : 'bg-slate-100 hover:bg-black hover:text-white border-slate-300 text-slate-800'
+                    className={`demo-cred-btn py-2 px-3 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm ${
+                      isDark 
+                        ? 'bg-white/10 hover:bg-white hover:text-black border-white/20 text-white' 
+                        : 'bg-slate-100 hover:bg-black hover:text-white border-slate-300 text-black'
                     }`}
                     title="MoSPI Admin (paimana2026)"
                   >
@@ -548,8 +562,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   <button
                     type="button"
                     onClick={() => fillDemoCredentials('siva', true)}
-                    className={`py-2 px-3 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm ${
-                      isDark ? 'bg-white/10 hover:bg-white hover:text-black border-white/20 text-white' : 'bg-slate-100 hover:bg-black hover:text-white border-slate-300 text-slate-800'
+                    className={`demo-cred-btn py-2 px-3 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm ${
+                      isDark 
+                        ? 'bg-white/10 hover:bg-white hover:text-black border-white/20 text-white' 
+                        : 'bg-slate-100 hover:bg-black hover:text-white border-slate-300 text-black'
                     }`}
                     title="User: balledasivavaraprasad@gmail.com (paimana2026)"
                   >
@@ -568,10 +584,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               {signupStep === 1 && (
                 <div>
                   <div className="mb-4">
-                    <h1 className="text-xl sm:text-2xl font-serif font-bold tracking-tight mb-1">
+                    <h1 className={`text-xl sm:text-2xl font-serif font-bold tracking-tight mb-1 ${
+                      isDark ? 'text-white' : 'text-slate-950'
+                    }`}>
                       Request access
                     </h1>
-                    <p className="text-xs text-slate-400">
+                    <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-800 font-medium'}`}>
                       Register with your official ministry credentials. Access is role-governed.
                     </p>
                   </div>
@@ -584,7 +602,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
                   <form onSubmit={handleSignupSubmit} className="space-y-3">
                     <div>
-                      <label className="block text-xs font-mono text-slate-300 mb-1">
+                      <label className={`block text-xs font-mono mb-1 font-bold ${
+                        isDark ? 'text-slate-300 font-normal' : 'text-slate-900'
+                      }`}>
                         Full Name
                       </label>
                       <input
@@ -593,13 +613,15 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                         onChange={e => setFullName(e.target.value)}
                         placeholder="As per official records"
                         className={`w-full px-3 py-2 rounded-lg border text-sm font-mono outline-none ${
-                          isDark ? 'bg-black/40 border-white/15 text-white' : 'bg-white border-slate-300 text-black'
+                          isDark ? 'bg-black/40 border-white/15 text-white' : 'bg-white border-slate-300 text-black placeholder:text-slate-500'
                         }`}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-mono text-slate-300 mb-1">
+                      <label className={`block text-xs font-mono mb-1 font-bold ${
+                        isDark ? 'text-slate-300 font-normal' : 'text-slate-900'
+                      }`}>
                         Official Email
                       </label>
                       <input
@@ -608,14 +630,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                         onChange={e => setSignupEmail(e.target.value)}
                         placeholder="name@ministry.gov.in"
                         className={`w-full px-3 py-2 rounded-lg border text-sm font-mono outline-none ${
-                          isDark ? 'bg-black/40 border-white/15 text-white' : 'bg-white border-slate-300 text-black'
+                          isDark ? 'bg-black/40 border-white/15 text-white' : 'bg-white border-slate-300 text-black placeholder:text-slate-500'
                         }`}
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-xs font-mono text-slate-300 mb-1">
+                        <label className={`block text-xs font-mono mb-1 font-bold ${
+                          isDark ? 'text-slate-300 font-normal' : 'text-slate-900'
+                        }`}>
                           Ministry / Dept
                         </label>
                         <select
@@ -633,7 +657,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-mono text-slate-300 mb-1">
+                        <label className={`block text-xs font-mono mb-1 font-bold ${
+                          isDark ? 'text-slate-300 font-normal' : 'text-slate-900'
+                        }`}>
                           Designation
                         </label>
                         <input
@@ -642,7 +668,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                           onChange={e => setDesignation(e.target.value)}
                           placeholder="e.g. Chief Engineer"
                           className={`w-full px-3 py-2 rounded-lg border text-sm font-mono outline-none ${
-                            isDark ? 'bg-black/40 border-white/15 text-white' : 'bg-white border-slate-300 text-black'
+                            isDark ? 'bg-black/40 border-white/15 text-white' : 'bg-white border-slate-300 text-black placeholder:text-slate-500'
                           }`}
                         />
                       </div>
@@ -650,7 +676,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-xs font-mono text-slate-300 mb-1">
+                        <label className={`block text-xs font-mono mb-1 font-bold ${
+                          isDark ? 'text-slate-300 font-normal' : 'text-slate-900'
+                        }`}>
                           Password
                         </label>
                         <input
@@ -659,13 +687,15 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                           onChange={e => setSignupPassword(e.target.value)}
                           placeholder="Min. 8 chars"
                           className={`w-full px-3 py-2 rounded-lg border text-sm font-mono outline-none ${
-                            isDark ? 'bg-black/40 border-white/15 text-white' : 'bg-white border-slate-300 text-black'
+                            isDark ? 'bg-black/40 border-white/15 text-white' : 'bg-white border-slate-300 text-black placeholder:text-slate-500'
                           }`}
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-mono text-slate-300 mb-1">
+                        <label className={`block text-xs font-mono mb-1 font-bold ${
+                          isDark ? 'text-slate-300 font-normal' : 'text-slate-900'
+                        }`}>
                           Confirm
                         </label>
                         <input
@@ -674,13 +704,15 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                           onChange={e => setConfirmPassword(e.target.value)}
                           placeholder="Re-enter"
                           className={`w-full px-3 py-2 rounded-lg border text-sm font-mono outline-none ${
-                            isDark ? 'bg-black/40 border-white/15 text-white' : 'bg-white border-slate-300 text-black'
+                            isDark ? 'bg-black/40 border-white/15 text-white' : 'bg-white border-slate-300 text-black placeholder:text-slate-500'
                           }`}
                         />
                       </div>
                     </div>
 
-                    <div className="space-y-2 pt-1 text-[11px] text-slate-400">
+                    <div className={`space-y-2 pt-1 text-[11px] font-medium ${
+                      isDark ? 'text-slate-400 font-normal' : 'text-slate-800'
+                    }`}>
                       <label className="flex items-start gap-2 cursor-pointer">
                         <input
                           type="checkbox"
@@ -693,7 +725,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                           <button
                             type="button"
                             onClick={() => { setShowPolicyModal(true); setPolicyTab('terms'); }}
-                            className="text-sky-400 hover:underline"
+                            className={`hover:underline font-medium ${isDark ? 'text-sky-400' : 'text-sky-700'}`}
                           >
                             Terms &amp; Conditions and Privacy Policy
                           </button>.
@@ -712,7 +744,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                           <button
                             type="button"
                             onClick={() => { setShowPolicyModal(true); setPolicyTab('privacy'); }}
-                            className="text-sky-400 hover:underline"
+                            className={`hover:underline font-medium ${isDark ? 'text-sky-400' : 'text-sky-700'}`}
                           >
                             AI/ML predictive systems
                           </button>{' '}

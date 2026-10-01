@@ -67,16 +67,23 @@ export function HeaderNav({
         { id: 'assistant', label: 'Assistant', icon: '🤖' },
       ];
 
-  // Mobile Phone Menu Navigation Items (ONLY the 7 specific items requested)
-  const mobileNavItems: Array<{ id: ActiveTab; label: string; badge?: number; icon: string }> = [
-    { id: 'motion', label: 'Overview', icon: '🏛️' },
-    { id: 'projects', label: 'Portfolio', icon: '📁' },
-    { id: 'analytics', label: 'Analytics', icon: '📈' },
-    { id: 'alerts', label: 'Alerts and Automation', badge: alertCount, icon: '🔔' },
-    { id: 'assistant', label: 'Assistant', icon: '🤖' },
-    { id: 'data_models', label: 'Data and Models', icon: '🧠' },
-    { id: 'users_audit', label: 'Users and Audit', icon: '👥' },
-  ];
+  // Mobile Phone Menu Navigation Items (Role-based: Admin has all items, regular user has 4 items)
+  const mobileNavItems: Array<{ id: ActiveTab; label: string; badge?: number; icon: string }> = isAdmin
+    ? [
+        { id: 'motion', label: 'Overview', icon: '🏛️' },
+        { id: 'projects', label: 'Portfolio', icon: '📁' },
+        { id: 'analytics', label: 'Analytics', icon: '📈' },
+        { id: 'alerts', label: 'Alerts & Automation', badge: alertCount, icon: '🔔' },
+        { id: 'assistant', label: 'Assistant', icon: '🤖' },
+        { id: 'data_models', label: 'Data & Models', icon: '🧠' },
+        { id: 'users_audit', label: 'Users & Audit', icon: '👥' },
+      ]
+    : [
+        { id: 'motion', label: 'Overview', icon: '🏛️' },
+        { id: 'projects', label: 'My Projects', icon: '📁' },
+        { id: 'alerts', label: 'Alerts', badge: alertCount, icon: '🔔' },
+        { id: 'assistant', label: 'Assistant', icon: '🤖' },
+      ];
 
   const checkScroll = () => {
     const el = scrollRef.current;

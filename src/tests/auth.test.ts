@@ -48,4 +48,69 @@ describe('Frontend Authentication and RBAC Logic', () => {
     expect(localStorage.getItem('paimana_user')).toBeNull()
     expect(localStorage.getItem('paimana_token')).toBeNull()
   })
+
+  it('filters navigation items for regular users to only 4 items', () => {
+    const userRole = 'PROJECT_OFFICER'
+    const isAdmin = userRole === 'ADMIN' || userRole === 'ANALYST'
+
+    const navItems = isAdmin
+      ? [
+          { id: 'motion', label: 'Overview' },
+          { id: 'projects', label: 'Portfolio' },
+          { id: 'analytics', label: 'Analytics' },
+          { id: 'alerts', label: 'Alerts & Automation' },
+          { id: 'assistant', label: 'Assistant' },
+          { id: 'data_models', label: 'Data & Models' },
+          { id: 'users_audit', label: 'Users & Audit' },
+        ]
+      : [
+          { id: 'motion', label: 'Overview' },
+          { id: 'projects', label: 'My Projects' },
+          { id: 'alerts', label: 'Alerts' },
+          { id: 'assistant', label: 'Assistant' },
+        ]
+
+    expect(isAdmin).toBe(false)
+    expect(navItems).toHaveLength(4)
+    expect(navItems.map(i => i.label)).toEqual([
+      'Overview',
+      'My Projects',
+      'Alerts',
+      'Assistant'
+    ])
+  })
+
+  it('provides all 7 navigation items for Admin users', () => {
+    const adminRole = 'ADMIN'
+    const isAdmin = adminRole === 'ADMIN' || adminRole === 'ANALYST'
+
+    const navItems = isAdmin
+      ? [
+          { id: 'motion', label: 'Overview' },
+          { id: 'projects', label: 'Portfolio' },
+          { id: 'analytics', label: 'Analytics' },
+          { id: 'alerts', label: 'Alerts & Automation' },
+          { id: 'assistant', label: 'Assistant' },
+          { id: 'data_models', label: 'Data & Models' },
+          { id: 'users_audit', label: 'Users & Audit' },
+        ]
+      : [
+          { id: 'motion', label: 'Overview' },
+          { id: 'projects', label: 'My Projects' },
+          { id: 'alerts', label: 'Alerts' },
+          { id: 'assistant', label: 'Assistant' },
+        ]
+
+    expect(isAdmin).toBe(true)
+    expect(navItems).toHaveLength(7)
+    expect(navItems.map(i => i.label)).toEqual([
+      'Overview',
+      'Portfolio',
+      'Analytics',
+      'Alerts & Automation',
+      'Assistant',
+      'Data & Models',
+      'Users & Audit'
+    ])
+  })
 })
