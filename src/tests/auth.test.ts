@@ -50,7 +50,7 @@ describe('Frontend Authentication and RBAC Logic', () => {
   })
 
   it('filters navigation items for regular users to only 4 items', () => {
-    const userRole = 'PROJECT_OFFICER'
+    const userRole: string = 'PROJECT_OFFICER'
     const isAdmin = userRole === 'ADMIN' || userRole === 'ANALYST'
 
     const navItems = isAdmin
@@ -81,7 +81,7 @@ describe('Frontend Authentication and RBAC Logic', () => {
   })
 
   it('provides all 7 navigation items for Admin users', () => {
-    const adminRole = 'ADMIN'
+    const adminRole: string = 'ADMIN'
     const isAdmin = adminRole === 'ADMIN' || adminRole === 'ANALYST'
 
     const navItems = isAdmin
