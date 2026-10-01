@@ -279,12 +279,32 @@ export default function MyProjects({
           })}
         </div>
 
-        {/* LINE 3: Secondary Filter Toolbar: Sector, State, Sort By */}
+        {/* LINE 3: Filter & Sort Toolbar (All controls aligned to the LEFT) */}
         <div className={`flex flex-wrap items-center gap-3 p-2.5 rounded-xl border backdrop-blur-md transition-all ${
           isDark 
             ? 'bg-white/[0.03] border-white/10' 
             : 'bg-white/85 border-slate-200 shadow-sm'
         }`}>
+          {/* Sort By Filter (Positioned on the LEFT) */}
+          <div className="flex items-center gap-1.5">
+            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-700 font-semibold'}`}>Sort:</span>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as any)}
+              className={`border rounded-lg px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
+                isDark 
+                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50 focus:ring-white/20' 
+                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 focus:ring-slate-400/30'
+              }`}
+            >
+              <option value="dphis_desc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Highest Risk (Score)</option>
+              <option value="dphis_asc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Lowest Risk (Score)</option>
+              <option value="cost_desc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Approved Budget (High to Low)</option>
+              <option value="delay_desc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Project Delay (Longest First)</option>
+              <option value="name_asc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Project Name (A–Z)</option>
+            </select>
+          </div>
+
           {/* Sector Filter */}
           <div className="flex items-center gap-1.5">
             <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-700 font-semibold'}`}>Sector:</span>
@@ -331,25 +351,21 @@ export default function MyProjects({
             </select>
           </div>
 
-          {/* Sort By */}
-          <div className="flex items-center gap-1.5 sm:ml-auto">
-            <span className={`text-[11px] font-mono ${isDark ? 'text-white/60' : 'text-slate-700 font-semibold'}`}>Sort:</span>
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value as any)}
-              className={`border rounded-lg px-3 py-1.5 text-xs focus:outline-none cursor-pointer shadow-sm transition-all focus:ring-2 ${
-                isDark 
-                  ? 'bg-[#0B0F17] border-white/20 text-white focus:border-white/50 focus:ring-white/20' 
-                  : 'bg-white border-slate-300 text-slate-900 focus:border-slate-500 focus:ring-slate-400/30'
-              }`}
+          {/* Clear Filters (if active) */}
+          {(sectorFilter !== 'ALL' || stateFilter !== 'ALL' || statusFilter !== 'ALL' || searchQuery.trim() !== '') && (
+            <button
+              type="button"
+              onClick={() => {
+                setSectorFilter('ALL');
+                setStateFilter('ALL');
+                setStatusFilter('ALL');
+                setSearchQuery('');
+              }}
+              className="text-xs font-mono text-sky-500 hover:text-sky-400 hover:underline cursor-pointer"
             >
-              <option value="dphis_desc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Highest Risk (Score)</option>
-              <option value="dphis_asc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Lowest Risk (Score)</option>
-              <option value="cost_desc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Approved Budget (High to Low)</option>
-              <option value="delay_desc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Project Delay (Longest First)</option>
-              <option value="name_asc" className={isDark ? 'bg-[#0B0F17] text-white' : 'bg-white text-slate-900'}>Project Name (A–Z)</option>
-            </select>
-          </div>
+              Clear filters
+            </button>
+          )}
         </div>
       </div>
 
