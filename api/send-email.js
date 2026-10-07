@@ -5,8 +5,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: process.env.SMTP_USER || 'syntaxtrrors@gmail.com',
-    pass: process.env.SMTP_PASS || 'szbfukaiioisvnly',
+    user: process.env.SMTP_USER || 'balledasivavaraprasad@gmail.com',
+    pass: process.env.SMTP_PASS || 'hfdchogrqricwnby',
   },
 });
 
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     if (type === 'otp') {
       const purposeText = purpose === 'signup' ? 'verify your new PAIMANA account' : 'sign in to PAIMANA';
       const info = await transporter.sendMail({
-        from: '"PAIMANA Sovereign Platform" <syntaxtrrors@gmail.com>',
+        from: '"PAIMANA Sovereign Platform" <balledasivavaraprasad@gmail.com>',
         to,
         subject: `Your PAIMANA verification code: ${code}`,
         text: `Your verification code is ${code}. Use it to ${purposeText}. It expires in 5 minutes.`,
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, messageId: info.messageId });
     } else if (type === 'welcome') {
       const info = await transporter.sendMail({
-        from: '"PAIMANA Sovereign Platform" <syntaxtrrors@gmail.com>',
+        from: '"PAIMANA Sovereign Platform" <balledasivavaraprasad@gmail.com>',
         to,
         subject: 'Your PAIMANA account is ready',
         text: `Hi ${fullName || 'Officer'}, your PAIMANA account has been verified successfully. You can now sign in.`,
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
     } else if (type === 'login_alert') {
       const timeStr = time || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
       const info = await transporter.sendMail({
-        from: '"PAIMANA Sovereign Platform" <syntaxtrrors@gmail.com>',
+        from: '"PAIMANA Sovereign Platform" <balledasivavaraprasad@gmail.com>',
         to,
         subject: 'Security Notice: New sign-in to PAIMANA',
         text: `Your PAIMANA account was signed in to at ${timeStr}${ip ? ` from IP ${ip}` : ''}.`,

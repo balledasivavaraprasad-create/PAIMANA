@@ -1,0 +1,83 @@
+"""Authoritative domain objects for InfraBuild-AI.
+
+These types are the public contract between the application API and the
+existing PAIMANA agent/ML stack. They must not be computed in the browser.
+"""
+
+from app.domain.availability import Availability, Unavailable
+from app.domain.enums import (
+    AlertDeliveryStatus,
+    AlertStatus,
+    CohortQuality,
+    DataFreshness,
+    EventType,
+    InvestigationStatus,
+    InterventionExecutionStatus,
+    OutcomeStatus,
+    OutboxStatus,
+    PeerClassification,
+    RecommendationApprovalStatus,
+    RecommendationValidationStatus,
+    RiskTier,
+    TerminationReason,
+)
+from app.domain.entities import (
+    Alert,
+    AuditLog,
+    DataQuality,
+    Event,
+    Evidence,
+    Hypothesis,
+    Intervention,
+    InterventionOutcome,
+    Investigation,
+    ModelMetadata,
+    MonitoringCycle,
+    NotificationDelivery,
+    PeerAnalysis,
+    Prediction,
+    Project,
+    ProjectSnapshot,
+    Recommendation,
+    UserAccount,
+)
+from app.domain.errors import DomainError, ErrorCode
+
+__all__ = [
+    "Availability",
+    "Unavailable",
+    "AlertDeliveryStatus",
+    "AlertStatus",
+    "CohortQuality",
+    "DataFreshness",
+    "EventType",
+    "InvestigationStatus",
+    "InterventionExecutionStatus",
+    "OutcomeStatus",
+    "OutboxStatus",
+    "PeerClassification",
+    "RecommendationApprovalStatus",
+    "RecommendationValidationStatus",
+    "RiskTier",
+    "TerminationReason",
+    "Alert",
+    "AuditLog",
+    "DataQuality",
+    "Event",
+    "Evidence",
+    "Hypothesis",
+    "Intervention",
+    "InterventionOutcome",
+    "Investigation",
+    "ModelMetadata",
+    "MonitoringCycle",
+    "NotificationDelivery",
+    "PeerAnalysis",
+    "Prediction",
+    "Project",
+    "ProjectSnapshot",
+    "Recommendation",
+    "UserAccount",
+    "DomainError",
+    "ErrorCode",
+]

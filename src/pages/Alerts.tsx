@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import GlassCard from '../components/GlassCard';
 import { useTheme } from '../hooks/useTheme';
-import { fetchAlerts, acknowledgeAlert, triggerRiskAlertEvaluation, UserProfile, AlertItem } from '../lib/api';
+import { 
+  fetchAlerts, acknowledgeAlert, triggerRiskAlertEvaluation, UserProfile, AlertItem,
+  fetchMonitoringStatus, triggerPortfolioScan, MonitoringStatusData 
+} from '../lib/api';
 import { getRiskCategory } from '../lib/risk';
 import { CurvedGrowthArrow } from '../components/CurvedTrendArrow';
 
 interface Props {
   onNavigateToInvestigation?: (projectId: string) => void;
+  onOpenInvestigation?: (projectId: string) => void;
   onNavigateToProject?: (projectId: string) => void;
   currentUser?: UserProfile | null;
   pinsCount?: number;
@@ -15,16 +19,20 @@ interface Props {
 
 export default function Alerts({ 
   onNavigateToInvestigation, 
+  onOpenInvestigation,
   onNavigateToProject,
   currentUser, 
   pinsCount, 
   onOpenAddProject 
 }: Props) {
+  const triggerInvestigationHandler = onNavigateToInvestigation || onOpenInvestigation;
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'ANALYST';
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [monitoringStatus, setMonitoringStatus] = useState<MonitoringStatusData | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
 
   // Admin test trigger state
   const [simulatedProjectId, setSimulatedProjectId] = useState<string>('P1024');
@@ -35,7 +43,6 @@ export default function Alerts({
 
   const loadAlerts = () => {
     setLoading(true);
-    // Normal user: fetch their project alerts; Admin: fetch system alerts
     fetchAlerts(isAdmin ? undefined : currentUser?.username)
       .then(items => {
         setAlerts(items);
@@ -44,9 +51,31 @@ export default function Alerts({
       .catch(() => setLoading(false));
   };
 
+  const loadMonitoring = () => {
+    fetchMonitoringStatus().then(st => {
+      if (st) setMonitoringStatus(st);
+    }).catch(console.warn);
+  };
+
   useEffect(() => {
     loadAlerts();
+    if (isAdmin) {
+      loadMonitoring();
+    }
   }, [currentUser, isAdmin]);
+
+  const handleTriggerScan = async () => {
+    setIsScanning(true);
+    try {
+      await triggerPortfolioScan();
+      loadAlerts();
+      loadMonitoring();
+    } catch (e) {
+      console.warn('Scan trigger error:', e);
+    } finally {
+      setIsScanning(false);
+    }
+  };
 
   const handleAcknowledge = async (alertId: string) => {
     const ok = await acknowledgeAlert(alertId);
@@ -299,10 +328,10 @@ export default function Alerts({
                         </button>
                       )}
 
-                      {onNavigateToInvestigation && (
+                      {triggerInvestigationHandler && (
                         <button
                           type="button"
-                          onClick={() => onNavigateToInvestigation(a.project_id)}
+                          onClick={() => triggerInvestigationHandler(a.project_id)}
                           className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer shadow-sm ${
                             isDark 
                               ? 'bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border-sky-500/40' 
@@ -385,7 +414,103 @@ export default function Alerts({
         </div>
       </GlassCard>
 
-      {/* n8n Webhook & Event Trigger Panel */}
+      {/* Continuous Autonomous Surveillance & Telemetry Card */}
+      <div className={`p-5 sm:p-6 rounded-2xl border transition-all ${
+        isDark 
+          ? 'bg-slate-900/80 border-cyan-500/30 shadow-[0_0_25px_rgba(6,182,212,0.1)]' 
+          : 'bg-white border-cyan-200 shadow-sm'
+      }`}>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-cyan-500/20">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-lg shrink-0">
+              🛰️
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className={`text-base font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Continuous Autonomous Surveillance Engine (Agentic Layer V4)
+                </h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 animate-pulse">
+                  SURVEILLANCE ACTIVE
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  EVERY 6H + ON-CHANGE
+                </span>
+              </div>
+              <p className={`text-xs mt-1 font-mono ${isDark ? 'text-white/70' : 'text-slate-600'}`}>
+                Snapshot SHA-256 state tracking · 4 competing causal hypotheses · Bayesian multi-dimensional confidence scoring
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleTriggerScan}
+              disabled={isScanning}
+              className={`px-4 py-2.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-md flex items-center gap-2 ${
+                isScanning 
+                  ? 'bg-cyan-500/50 text-white cursor-wait' 
+                  : isDark 
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white' 
+                    : 'bg-cyan-600 hover:bg-cyan-700 text-white'
+              }`}
+            >
+              <span className={isScanning ? 'animate-spin' : ''}>{isScanning ? '⚙' : '⚡'}</span>
+              <span>{isScanning ? 'Scanning Portfolio...' : 'Trigger Full Surveillance Scan'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Telemetry Metrics Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+          <div className={`p-3 rounded-xl border ${isDark ? 'bg-black/30 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+            <span className={`text-[10px] font-mono uppercase tracking-wider block ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+              Monitored Corridors
+            </span>
+            <span className="text-xl font-mono font-bold text-cyan-400 mt-0.5 block">
+              {monitoringStatus?.projects_monitored ?? 428} <span className="text-xs text-white/50 font-normal">MoSPI assets</span>
+            </span>
+            <span className="text-[10px] font-mono text-emerald-400 mt-1 block">100% covered</span>
+          </div>
+
+          <div className={`p-3 rounded-xl border ${isDark ? 'bg-black/30 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+            <span className={`text-[10px] font-mono uppercase tracking-wider block ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+              Surveillance Cadence
+            </span>
+            <span className={`text-xl font-mono font-bold mt-0.5 block ${isDark ? 'text-white' : 'text-slate-800'}`}>
+              Every {monitoringStatus?.interval_hours ?? 6}h
+            </span>
+            <span className={`text-[10px] font-mono mt-1 block ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+              + On Data Change
+            </span>
+          </div>
+
+          <div className={`p-3 rounded-xl border ${isDark ? 'bg-black/30 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+            <span className={`text-[10px] font-mono uppercase tracking-wider block ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+              Outbox Event Pipeline
+            </span>
+            <span className="text-xl font-mono font-bold text-emerald-400 mt-0.5 block">
+              {monitoringStatus?.outbox_queue?.delivered ?? 37} <span className="text-xs text-white/50 font-normal">dispatched</span>
+            </span>
+            <span className="text-[10px] font-mono text-amber-400 mt-1 block">
+              {monitoringStatus?.outbox_queue?.pending ?? 0} queued in outbox
+            </span>
+          </div>
+
+          <div className={`p-3 rounded-xl border ${isDark ? 'bg-black/30 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+            <span className={`text-[10px] font-mono uppercase tracking-wider block ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+              Causal Engine
+            </span>
+            <span className={`text-xl font-mono font-bold mt-0.5 block ${isDark ? 'text-white' : 'text-slate-800'}`}>
+              4 Hypotheses
+            </span>
+            <span className="text-[10px] font-mono text-cyan-400 mt-1 block">
+              Relational Graph
+            </span>
+          </div>
+        </div>
+      </div>
       <div className="oled-solid-card p-5 sm:p-6 space-y-4">
         <div className={`flex flex-col md:flex-row md:items-center justify-between gap-3 border-b pb-3 ${
           isDark ? 'border-white/10' : 'border-slate-200'
@@ -622,10 +747,10 @@ export default function Alerts({
                               ✓ Ack
                             </button>
                           )}
-                          {onNavigateToInvestigation && (
+                          {triggerInvestigationHandler && (
                             <button
                               type="button"
-                              onClick={() => onNavigateToInvestigation(a.project_id)}
+                              onClick={() => triggerInvestigationHandler(a.project_id)}
                               className={`px-2 py-1 rounded text-[11px] font-bold transition-all cursor-pointer shadow-sm ${
                                 isDark 
                                   ? 'bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40' 

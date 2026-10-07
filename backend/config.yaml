@@ -1,0 +1,39 @@
+models:
+  cost_overrun: models/model_cost_overrun.joblib
+  time_overrun: models/model_time_overrun.joblib
+  risk_score:   models/model_risk_score.joblib
+reference_stats: reference_stats.json
+database: monitoring.db
+
+risk:
+  # Same cut-offs as notebook 03. NOTE: the score is a percentile rank, so ~15% of projects
+  # land in High by construction. Re-tune with the admin team before go-live.
+  high: 75
+  medium: 40
+  disagreement_threshold: 20     # |model risk - combined(cost,time)| above this is flagged in the alert
+  event_threshold: 75            # default per-project alert boundary (events.py) when a project has no
+                                  # threshold of its own set via Store.set_threshold(); same as "high" out
+                                  # of the box, override per-project for the "Project A -> 70, Project B ->
+                                  # 62" design in the architecture review (problem #4).
+
+alerting:
+  alert_on: [High]               # add "Medium" to also alert on Medium
+  alert_on_escalation: true      # always alert when tier gets worse than last evaluation
+  min_score_jump: 10             # alert if score rises this much vs last evaluation while at/above alert tier
+  cooldown_hours: 24             # suppress repeat alerts (same tier, small change) inside this window
+
+events:
+  # Tuning for events.py's THRESHOLD_CROSSED / RISK_ACCELERATING / MILESTONE_DELAYED /
+  # PROGRESS_STALLED / COST_PROGRESS_MISMATCH taxonomy. Independent of `alerting` above.
+  acceleration_jump: 8               # RISK_ACCELERATING fires when score rises this much between evaluations
+  cost_progress_gap: 15              # COST_PROGRESS_MISMATCH: expenditure %  ahead of physical progress %
+  stall_velocity_pct_per_month: 0.5  # PROGRESS_STALLED: progress moving slower than this, and <95% done
+
+scheduler:
+  interval_hours: 6    # periodic re-scan cadence (scheduler.py); complements the on-change trigger
+
+file:    {path: alerts.jsonl}
+email:   {enabled: false, host: smtp.example.gov.in, port: 587, user: "", password: "", sender: "monitoring@example.gov.in", recipients: ["admin@example.gov.in"], use_tls: true}
+webhook: {enabled: false, url: ""}
+llm:     {enabled: false, url: "http://localhost:11434/api/generate", model: "llama3.1:8b", timeout: 20}
+n8n:     {enabled: false, webhook_url: "", timeout: 10}

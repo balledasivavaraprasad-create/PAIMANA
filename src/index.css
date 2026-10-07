@@ -1,4 +1,7 @@
 @import 'tailwindcss';
+@import './theme/theme.css';
+@import './landing/styles/editorial-landing.css';
+
 
 @layer base {
   :root[data-theme="dark"], :root {
@@ -538,11 +541,12 @@
   color: #94A3B8 !important;
 }
 
-/* Explicit Header Nav Bar styling in Light Mode */
-:root[data-theme="light"] header button:not(.text-rose-500):not(.text-rose-400),
-:root[data-theme="light"] header button:not(.text-rose-500):not(.text-rose-400) span,
-:root[data-theme="light"] header div:not([class*="bg-black"]) {
-  color: #000000 !important;
+/* Ensure public showcase button and dark header pill text remain pure crisp white */
+:root[data-theme="light"] .public-showcase-btn,
+:root[data-theme="light"] .public-showcase-btn *,
+.public-showcase-btn,
+.public-showcase-btn * {
+  color: #FFFFFF !important;
 }
 
 /* Ensure solid dark buttons and solid dark badges retain pure white text for high contrast in light mode */

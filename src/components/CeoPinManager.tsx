@@ -51,7 +51,7 @@ export function CeoPinManager({ onAddPin, onClose }: CeoPinManagerProps) {
   };
 
   return (
-    <div className={`fixed inset-0 z-50 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in ${
+    <div className={`fixed inset-0 z-[100000] backdrop-blur-md flex items-center justify-center p-4 animate-fade-in ${
       isDark ? 'bg-black/80' : 'bg-slate-900/60'
     }`}>
       <div 

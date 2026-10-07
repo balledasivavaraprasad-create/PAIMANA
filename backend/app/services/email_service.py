@@ -9,8 +9,8 @@ from app.config.logging import logger
 
 def _send_smtp_sync(to_email: str, subject: str, text_content: str, html_content: str) -> bool:
     """Synchronous RFC-compliant SMTP email delivery with SSL/STARTTLS fallback."""
-    smtp_user = settings.SMTP_USER or "syntaxtrrors@gmail.com"
-    smtp_pass = settings.SMTP_PASS or "szbfukaiioisvnly"
+    smtp_user = settings.SMTP_USER or "balledasivavaraprasad@gmail.com"
+    smtp_pass = settings.SMTP_PASS or "hfdchogrqricwnby"
     smtp_host = settings.SMTP_HOST or "smtp.gmail.com"
     from_name = settings.SMTP_FROM_NAME or "PAIMANA Sovereign Platform"
 

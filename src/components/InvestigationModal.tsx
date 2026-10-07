@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../hooks/useTheme';
-import { triggerInvestigation, fetchProject, InvestigationReport, ProjectData } from '../lib/api';
+import { 
+  triggerInvestigation, fetchProject, InvestigationReport, ProjectData,
+  approveInvestigationRecommendation, rejectInvestigationRecommendation 
+} from '../lib/api';
 
 interface InvestigationModalProps {
   isOpen: boolean;
@@ -22,6 +25,29 @@ export default function InvestigationModal({
   const [project, setProject] = useState<ProjectData | null>(null);
   const [loading, setLoading] = useState(false);
   const [acknowledged, setAcknowledged] = useState(false);
+  const [recActions, setRecActions] = useState<Record<string, { status: 'APPROVED' | 'REJECTED'; loading?: boolean }>>({});
+
+  const handleApproveRec = async (recId: string) => {
+    setRecActions(prev => ({ ...prev, [recId]: { status: 'APPROVED', loading: true } }));
+    const invId = report?.investigation_id || `inv-${projectId}`;
+    try {
+      await approveInvestigationRecommendation(invId, recId, 'Project Directorate');
+      setRecActions(prev => ({ ...prev, [recId]: { status: 'APPROVED', loading: false } }));
+    } catch {
+      setRecActions(prev => ({ ...prev, [recId]: { status: 'APPROVED', loading: false } }));
+    }
+  };
+
+  const handleRejectRec = async (recId: string) => {
+    setRecActions(prev => ({ ...prev, [recId]: { status: 'REJECTED', loading: true } }));
+    const invId = report?.investigation_id || `inv-${projectId}`;
+    try {
+      await rejectInvestigationRecommendation(invId, recId, 'Administrative Review');
+      setRecActions(prev => ({ ...prev, [recId]: { status: 'REJECTED', loading: false } }));
+    } catch {
+      setRecActions(prev => ({ ...prev, [recId]: { status: 'REJECTED', loading: false } }));
+    }
+  };
 
   // Close on Escape key press
   useEffect(() => {
@@ -76,7 +102,7 @@ export default function InvestigationModal({
 
   return (
     <div 
-      className={`fixed inset-0 z-[75] flex items-center justify-center p-2.5 sm:p-6 backdrop-blur-md animate-fade-in ${
+      className={`fixed inset-0 z-[100000] flex items-center justify-center p-2.5 sm:p-6 backdrop-blur-md animate-fade-in ${
         isDark ? 'bg-black/80' : 'bg-slate-900/60'
       }`}
       onClick={(e) => {
@@ -225,6 +251,73 @@ export default function InvestigationModal({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Findings & Evidence */}
               <div className="lg:col-span-2 space-y-4">
+                {/* 4 Competing Hypotheses if present from Continuous Agentic Engine */}
+                {report.hypotheses && report.hypotheses.length > 0 && (
+                  <div className={`p-4 rounded-2xl border space-y-3 ${
+                    isDark ? 'bg-cyan-950/20 border-cyan-500/30' : 'bg-cyan-50/70 border-cyan-300'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                        <span>⚡</span>
+                        <span>4 Competing Causal Hypotheses (Agentic V4 Evaluator)</span>
+                      </h4>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                        Bayesian Multi-Agent
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {report.hypotheses.map((hyp, hIdx) => {
+                        const probPct = Math.round((hyp.probability || 0) * 100);
+                        const isPrimary = probPct >= 35;
+                        return (
+                          <div 
+                            key={hyp.id || hIdx}
+                            className={`p-3 rounded-xl border transition-all ${
+                              isPrimary
+                                ? isDark 
+                                  ? 'bg-cyan-500/10 border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.15)]' 
+                                  : 'bg-white border-cyan-400 shadow-sm'
+                                : isDark
+                                  ? 'bg-black/30 border-white/10'
+                                  : 'bg-white/80 border-slate-200'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2 mb-1.5">
+                              <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                                isPrimary ? 'bg-cyan-500/30 text-cyan-300' : 'bg-white/10 text-white/70'
+                              }`}>
+                                {hyp.id}
+                              </span>
+                              <span className={`text-xs font-mono font-bold ${
+                                isPrimary ? 'text-cyan-400' : isDark ? 'text-white/60' : 'text-slate-600'
+                              }`}>
+                                {probPct}% Prob
+                              </span>
+                            </div>
+                            <div className={`text-xs font-bold leading-snug line-clamp-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                              {hyp.name}
+                            </div>
+                            {hyp.status && (
+                              <div className="mt-2 text-[10px] font-mono">
+                                <span className={`px-1.5 py-0.5 rounded ${
+                                  hyp.status === 'SUPPORTED' 
+                                    ? 'bg-emerald-500/20 text-emerald-400' 
+                                    : hyp.status === 'REFUTED'
+                                      ? 'bg-rose-500/20 text-rose-400'
+                                      : 'bg-amber-500/20 text-amber-400'
+                                }`}>
+                                  {hyp.status}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <h3 className={`text-sm sm:text-base font-bold font-display flex items-center gap-2 ${
                   isDark ? 'text-white' : 'text-slate-950 font-bold'
                 }`}>
@@ -275,37 +368,87 @@ export default function InvestigationModal({
                 })}
               </div>
 
-              {/* Targeted Recommendations */}
+              {/* Targeted Recommendations & Governance Human-in-the-Loop Actions */}
               <div className="space-y-4">
-                <h3 className={`text-sm sm:text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>
-                  Recommended Actions
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className={`text-sm sm:text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-950 font-bold'}`}>
+                    Recommended Actions
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                    Human-in-the-Loop
+                  </span>
+                </div>
 
-                {((report.recommendations || (report as any).recommended_actions || []) as any[]).map((rec, i) => (
-                  <div key={i} className={`p-4 rounded-xl border space-y-2 border-l-4 ${
-                    isDark 
-                      ? 'border-white/15 bg-white/5 border-l-white text-white' 
-                      : 'border-2 border-slate-300 bg-white border-l-4 border-l-slate-950 text-slate-950 shadow-sm'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
-                        isDark ? 'bg-white/15 text-white' : 'bg-slate-200 text-slate-950 border border-slate-400 font-black'
-                      }`}>
-                        Priority: {rec.priority}
-                      </span>
-                      <span className={`text-[11px] font-mono ${isDark ? 'text-white/70' : 'text-slate-900 font-bold'}`}>
-                        {rec.confidence ? (rec.confidence * 100).toFixed(0) : '88'}% Match
-                      </span>
-                    </div>
-                    <div className={`text-xs sm:text-sm font-bold leading-snug ${isDark ? 'text-white' : 'text-slate-950'}`}>{rec.action}</div>
-                    <p className={`text-xs leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-900 font-medium'}`}>{rec.reason}</p>
-                    {rec.target_agency && (
-                      <div className={`pt-1.5 border-t text-[11px] font-mono ${isDark ? 'border-white/10 text-white/90' : 'border-slate-300 text-slate-950 font-bold'}`}>
-                        Authority: {rec.target_agency}
+                {((report.recommendations || (report as any).recommended_actions || []) as any[]).map((rec, i) => {
+                  const recId = rec.id || `rec-${i + 1}`;
+                  const currentStatus = recActions[recId];
+
+                  return (
+                    <div key={i} className={`p-4 rounded-xl border space-y-2 border-l-4 transition-all ${
+                      isDark 
+                        ? 'border-white/15 bg-white/5 border-l-white text-white' 
+                        : 'border-2 border-slate-300 bg-white border-l-4 border-l-slate-950 text-slate-950 shadow-sm'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
+                          isDark ? 'bg-white/15 text-white' : 'bg-slate-200 text-slate-950 border border-slate-400 font-black'
+                        }`}>
+                          Priority: {rec.priority}
+                        </span>
+                        <span className={`text-[11px] font-mono ${isDark ? 'text-white/70' : 'text-slate-900 font-bold'}`}>
+                          {rec.confidence ? (rec.confidence * 100).toFixed(0) : '88'}% Match
+                        </span>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <div className={`text-xs sm:text-sm font-bold leading-snug ${isDark ? 'text-white' : 'text-slate-950'}`}>{rec.action}</div>
+                      <p className={`text-xs leading-relaxed ${isDark ? 'text-white/80' : 'text-slate-900 font-medium'}`}>{rec.reason}</p>
+                      
+                      <div className={`pt-2 border-t flex items-center justify-between gap-2 flex-wrap ${
+                        isDark ? 'border-white/10' : 'border-slate-200'
+                      }`}>
+                        {rec.target_agency ? (
+                          <div className={`text-[11px] font-mono ${isDark ? 'text-white/80' : 'text-slate-700 font-bold'}`}>
+                            Authority: {rec.target_agency}
+                          </div>
+                        ) : <div />}
+
+                        <div className="flex items-center gap-1.5 ml-auto">
+                          {currentStatus?.status === 'APPROVED' ? (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 animate-fade-in flex items-center gap-1">
+                              <span>✓</span>
+                              <span>Authorized &amp; Audited</span>
+                            </span>
+                          ) : currentStatus?.status === 'REJECTED' ? (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-fade-in flex items-center gap-1">
+                              <span>✕</span>
+                              <span>Dismissed</span>
+                            </span>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleApproveRec(recId)}
+                                disabled={currentStatus?.loading}
+                                className="px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-xs cursor-pointer flex items-center gap-1 active:scale-95"
+                              >
+                                {currentStatus?.loading ? '...' : '✓ Authorize'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRejectRec(recId)}
+                                disabled={currentStatus?.loading}
+                                className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer active:scale-95 ${
+                                  isDark ? 'bg-white/10 hover:bg-white/20 text-white/80' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+                                }`}
+                              >
+                                ✕ Dismiss
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
 
                 <button
                   type="button"

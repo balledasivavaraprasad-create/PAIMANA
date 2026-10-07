@@ -1,0 +1,22 @@
+from app.repositories.base import MongoRepository
+from app.repositories import collections as C
+
+projects_repo = MongoRepository(C.PROJECTS)
+snapshots_repo = MongoRepository(C.PROJECT_SNAPSHOTS)
+predictions_repo = MongoRepository(C.PREDICTIONS)
+events_repo = MongoRepository(C.EVENTS)
+alerts_repo = MongoRepository(C.ALERTS)
+investigations_repo = MongoRepository(C.INVESTIGATIONS)
+evidence_repo = MongoRepository(C.EVIDENCE)
+hypotheses_repo = MongoRepository(C.HYPOTHESES)
+recommendations_repo = MongoRepository(C.RECOMMENDATIONS)
+interventions_repo = MongoRepository(C.INTERVENTIONS)
+outcomes_repo = MongoRepository(C.INTERVENTION_OUTCOMES)
+peer_analyses_repo = MongoRepository(C.PEER_ANALYSES)
+data_quality_repo = MongoRepository(C.DATA_QUALITY)
+audit_logs_repo = MongoRepository(C.AUDIT_LOGS)
+deliveries_repo = MongoRepository(C.NOTIFICATION_DELIVERIES)
+model_metadata_repo = MongoRepository(C.MODEL_METADATA)
+monitoring_cycles_repo = MongoRepository(C.MONITORING_CYCLES)
+users_repo = MongoRepository(C.USERS)
+outbox_repo = MongoRepository(C.OUTBOX)

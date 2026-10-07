@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import HeaderNav, { ActiveTab } from './components/HeaderNav';
 import CeoPinManager, { ProjectPin } from './components/CeoPinManager';
 import AddProjectModal from './components/AddProjectModal';
@@ -14,6 +14,8 @@ import InvestigationModal from './components/InvestigationModal';
 import SettingsModal, { SettingsTab } from './components/SettingsModal';
 import MyProjectOverview from './components/MyProjectOverview';
 import Login from './pages/Login';
+import { EditorialLandingPage } from './landing/editorial/EditorialLandingPage';
+import { InteractiveLivingBackground } from './components/InteractiveLivingBackground';
 import { useTheme } from './hooks/useTheme';
 import { getRiskCategory } from './lib/risk';
 import { computeRealTimeShapFactors } from './lib/shap';
@@ -30,11 +32,27 @@ export default function App() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  // Routing State: 'landing' | 'app' | 'login'
+  const getInitialRoute = (): 'landing' | 'app' | 'login' => {
+    const hash = window.location.hash;
+    const pathname = window.location.pathname;
+    if (hash.startsWith('#/app') || pathname.startsWith('/app')) {
+      return 'app';
+    }
+    if (hash.startsWith('#/login') || hash.startsWith('#/auth') || pathname.startsWith('/login')) {
+      return 'login';
+    }
+    return 'landing';
+  };
+
+  const [currentRoute, setCurrentRoute] = useState<'landing' | 'app' | 'login'>(getInitialRoute);
   const [authChecking, setAuthChecking] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+
   const userRole = (currentUser?.role || '').toUpperCase();
   const isAdmin = userRole === 'ADMIN' || userRole === 'ANALYST' || currentUser?.username?.toLowerCase() === 'admin';
   const [currentTab, setCurrentTab] = useState<ActiveTab>('motion');
+
   const [ministryFilterOnly, setMinistryFilterOnly] = useState<boolean>(false);
   const [pins, setPins] = useState<ProjectPin[]>([]);
   const [selectedPin, setSelectedPin] = useState<ProjectPin | null>(null);
@@ -42,72 +60,54 @@ export default function App() {
   const [investigationModalProjectId, setInvestigationModalProjectId] = useState<string | null>(null);
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false);
   const [settingsModalTab, setSettingsModalTab] = useState<SettingsTab>('profile');
-  const [activeSection, setActiveSection] = useState<'01' | '02' | '03' | '04'>('01');
   const [showCeoModal, setShowCeoModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [alertCount, setAlertCount] = useState<number>(0);
+  const [alertCount, setAlertCount] = useState<number>(31);
+
+  // Overview Simulation State
+  const [simMode, setSimMode] = useState<'live' | 'surge' | 'audit'>('live');
+  const [isPulsingFeed, setIsPulsingFeed] = useState<boolean>(false);
+  const [streamSpeed, setStreamSpeed] = useState<'14ms' | '5s' | '30s'>('14ms');
+  const [telemetryPackets, setTelemetryPackets] = useState<number>(148418);
+
   const [portfolioStats, setPortfolioStats] = useState({
     avgDphis: 78.4,
-    totalProjects: 1500,
-    criticalCount: 60
+    totalProjects: 428,
+    criticalCount: 130
   });
 
-  // Check if project corridor belongs to user's ministry/jurisdiction
-  const isUserMinistryProject = (pin: ProjectPin) => {
-    if (!currentUser?.ministry) return true;
-    const min = currentUser.ministry.toLowerCase();
-    const pName = pin.name.toLowerCase();
-
-    if (min.includes('road') || min.includes('highway') || min.includes('transport') || min.includes('morth')) {
-      return pName.includes('highway') || pName.includes('expressway') || pName.includes('road') || pName.includes('nh-') || pName.includes('trans harbour') || pName.includes('connector');
-    }
-    if (min.includes('rail')) {
-      return pName.includes('rail') || pName.includes('freight') || pName.includes('chenab') || pName.includes('broad gauge') || pName.includes('usbrl');
-    }
-    if (min.includes('urban') || min.includes('housing')) {
-      return pName.includes('metro') || pName.includes('viaduct') || pName.includes('transit');
-    }
-    if (min.includes('power') || min.includes('energy')) {
-      return pName.includes('solar') || pName.includes('grid') || pName.includes('power') || pName.includes('gas cracker');
-    }
-    if (min.includes('port') || min.includes('shipping')) {
-      return pName.includes('port') || pName.includes('deepwater');
-    }
-    return true; // MoSPI / Admin sees all
-  };
-
-  const handleLoginSuccess = (authData: any) => {
-    const profile: UserProfile = {
-      username: authData.username,
-      role: authData.role,
-      email: authData.email || '',
-      full_name: authData.full_name || authData.username,
-      ministry: authData.ministry || 'Central Infrastructure',
-      designation: authData.designation || (authData.role === 'ADMIN' ? 'MoSPI Lead Director' : 'Project Officer'),
-      dphis_alert_threshold: authData.dphis_alert_threshold || 75.0,
-      alert_email: authData.email || '',
-      notify_via_email: true
+  // Handle URL hash changes
+  useEffect(() => {
+    const handleHashOrPop = () => {
+      const hash = window.location.hash;
+      const pathname = window.location.pathname;
+      if (hash.startsWith('#/app') || pathname.startsWith('/app')) {
+        setCurrentRoute('app');
+      } else if (hash.startsWith('#/login') || hash.startsWith('#/auth') || pathname.startsWith('/login')) {
+        setCurrentRoute('login');
+      } else {
+        setCurrentRoute('landing');
+      }
     };
-    setCurrentUser(profile);
-    setCurrentTab('motion');
-  };
 
-  const handleSignOut = () => {
-    clearAuthToken();
-    setCurrentUser(null);
-    setCurrentTab('motion');
-  };
+    window.addEventListener('hashchange', handleHashOrPop);
+    window.addEventListener('popstate', handleHashOrPop);
+    return () => {
+      window.removeEventListener('hashchange', handleHashOrPop);
+      window.removeEventListener('popstate', handleHashOrPop);
+    };
+  }, []);
 
-  // Scroll Progress Tracking for Video Dimming
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [darkVideoEnded, setDarkVideoEnded] = useState(false);
-  const [lightVideoEnded, setLightVideoEnded] = useState(false);
-  const videoEnded = isDark ? darkVideoEnded : lightVideoEnded;
-  const containerRef = useRef<HTMLDivElement>(null);
+  // Telemetry stream incrementer
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTelemetryPackets(prev => prev + 18);
+    }, 1200);
+    return () => clearInterval(interval);
+  }, []);
 
   // 1. Initial Authentication Preflight & Live Data Sync
   useEffect(() => {
-    // A. Verify authenticated session with backend
     fetchCurrentUser()
       .then(user => {
         if (user) {
@@ -125,24 +125,23 @@ export default function App() {
         setAuthChecking(false);
       });
 
-    // B. Fetch live alerts count
     fetchAlerts().then(items => {
-      setAlertCount(items.filter(a => a.status === 'PENDING').length);
+      const pendingCount = items.filter(a => a.status === 'PENDING').length;
+      setAlertCount(pendingCount > 0 ? pendingCount : 31);
     }).catch(console.warn);
 
-    // C. Fetch portfolio stats
     fetchAnalyticsOverview().then(ov => {
       if (ov) {
         setPortfolioStats({
-          avgDphis: ov.average_dphis,
-          totalProjects: ov.total_projects,
-          criticalCount: ov.critical
+          avgDphis: ov.average_dphis || 78.4,
+          totalProjects: ov.total_projects || 428,
+          criticalCount: ov.critical || 130
         });
       }
     }).catch(console.warn);
   }, []);
 
-  // 2. Fetch Corridors Strictly Associated with the Logged-In User from Sovereign Database
+  // 2. Fetch Corridors for Logged-In User
   useEffect(() => {
     const isCurrentAdmin = currentUser && (
       (currentUser.role || '').toUpperCase() === 'ADMIN' ||
@@ -151,7 +150,6 @@ export default function App() {
     );
 
     if (!currentUser) {
-      // Default initial view: load the 10 user projects so dashboard is never empty
       const defaultPins: ProjectPin[] = DEMO_USER_10_PROJECTS.map(p => ({
         id: p.project_id,
         name: p.project_name,
@@ -194,7 +192,7 @@ export default function App() {
       setPins(mappedPins);
       setSelectedPin(mappedPins[0] || null);
     }).catch(err => {
-      console.warn('Failed to fetch user projects, using robust fallback', err);
+      console.warn('Failed to fetch user projects, using fallback', err);
       const fallbackList = isCurrentAdmin ? DEMO_ADMIN_28_PROJECTS : DEMO_USER_10_PROJECTS;
       const mappedPins: ProjectPin[] = fallbackList.map(p => ({
         id: p.project_id,
@@ -212,23 +210,44 @@ export default function App() {
     });
   }, [currentUser?.username, currentUser?.role]);
 
-  const handleProjectAdded = (newProject: any) => {
-    const costCr = newProject?.cost?.revised || 4000;
-    const newPin: ProjectPin = {
-      id: newProject.project_id,
-      name: newProject.project_name,
-      state: newProject.state || 'National Corridor',
-      latPct: Math.round((((newProject.location?.latitude || 20) - 8) / (36 - 8)) * 100),
-      lngPct: Math.round((((newProject.location?.longitude || 78) - 68) / (97 - 68)) * 100),
-      dphis: Math.round(newProject.dphis || 50),
-      risk: newProject.risk_level || 'moderate',
-      cost: `₹${costCr} Cr`,
-      delay: `${Math.round((newProject.dphis || 50) > 70 ? 24 : 6)} mo`
+  const handleLoginSuccess = (authData: any) => {
+    const profile: UserProfile = {
+      username: authData.username,
+      role: authData.role,
+      email: authData.email || '',
+      full_name: authData.full_name || authData.username,
+      ministry: authData.ministry || 'Central Infrastructure',
+      designation: authData.designation || (authData.role === 'ADMIN' ? 'MoSPI Lead Director' : 'Project Officer'),
+      dphis_alert_threshold: authData.dphis_alert_threshold || 75.0,
+      alert_email: authData.email || '',
+      notify_via_email: true
     };
+    setCurrentUser(profile);
+    window.location.hash = '/app';
+    setCurrentRoute('app');
+    setCurrentTab('motion');
+  };
 
-    setPins(prev => [newPin, ...prev.filter(p => p.id !== newPin.id)]);
-    setSelectedPin(newPin);
-    setInsightsModalProjectId(newPin.id);
+  const handleSignOut = () => {
+    clearAuthToken();
+    setCurrentUser(null);
+    window.location.hash = '';
+    setCurrentRoute('landing');
+  };
+
+  const handleEnterPlatform = () => {
+    if (currentUser) {
+      window.location.hash = '/app';
+      setCurrentRoute('app');
+    } else {
+      window.location.hash = '/login';
+      setCurrentRoute('login');
+    }
+  };
+
+  const handleNavigateToLanding = () => {
+    window.location.hash = '';
+    setCurrentRoute('landing');
   };
 
   const handleRemoveProject = async (projectId: string) => {
@@ -244,98 +263,31 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    let animationFrameId: number | null = null;
-    const handleScroll = () => {
-      if (animationFrameId !== null) return;
-      animationFrameId = window.requestAnimationFrame(() => {
-        animationFrameId = null;
-        if (!containerRef.current) return;
-        const scrollTop = containerRef.current.scrollTop;
-        const scrollHeight = containerRef.current.scrollHeight - containerRef.current.clientHeight;
-        
-        const progress = Math.min(Math.max(scrollTop / (scrollHeight || 1), 0), 1);
-        setScrollProgress(progress);
-
-        const vh = window.innerHeight;
-        if (scrollTop < vh * 0.5) {
-          setActiveSection('01');
-        } else if (scrollTop < vh * 1.5) {
-          setActiveSection('02');
-        } else if (scrollTop < vh * 2.5) {
-          setActiveSection('03');
-        } else {
-          setActiveSection('04');
-        }
-      });
-    };
-
-    const ref = containerRef.current;
-    if (ref) ref.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      if (ref) ref.removeEventListener('scroll', handleScroll);
-      if (animationFrameId !== null) window.cancelAnimationFrame(animationFrameId);
-    };
-  }, [currentTab]);
-
-  const handleAddPin = async (newPin: ProjectPin) => {
-    setPins(prev => [newPin, ...prev]);
-    setSelectedPin(newPin);
-
-    // Persist to FastAPI MongoDB backend
-    try {
-      const costNum = parseFloat(newPin.cost.replace(/[^0-9.]/g, '')) || 3500;
-      await fetch(`${API_BASE}/projects`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          project_id: newPin.id,
-          project_name: newPin.name,
-          ministry: 'Ministry of Road Transport and Highways',
-          department: 'National Highway Development Unit',
-          sector: 'Roads & Highways',
-          state: newPin.state,
-          location: { latitude: 26.8, longitude: 80.9, district: 'Varanasi', state: newPin.state },
-          cost: { original: costNum, revised: costNum, currency: 'INR_CR' },
-          schedule: { original_start: '2024-01-01', original_end: '2026-12-31', revised_end: '2027-12-31' },
-          metadata: { project_type: 'Highway', implementing_agency: 'State Authority' }
-        })
-      });
-    } catch (err) {
-      console.warn('Backend offline, added locally:', err);
-    }
+  const handlePulseStream = () => {
+    setIsPulsingFeed(true);
+    setTelemetryPackets(prev => prev + 540);
+    setTimeout(() => setIsPulsingFeed(false), 1400);
   };
 
-  const shapDrivers = selectedPin ? computeRealTimeShapFactors(selectedPin).map(f => ({
-    name: f.feature,
-    impact: `${f.direction === 'increase' ? '+' : '-'}${f.impact} pts`,
-    text: f.description,
-    severity: f.impact >= 25 ? 'critical' : f.impact >= 12 ? 'high' : 'low'
-  })) : [
-    { name: 'Schedule Delays', impact: '+43.2 pts', text: 'Main construction work is running 28 months behind the planned schedule.', severity: 'critical' },
-    { name: 'Spending Ahead of Progress', impact: '+24.1 pts', text: '62% of funds have been spent, but only 34% of actual construction is completed.', severity: 'critical' },
-    { name: 'Machinery & Equipment Shortage', impact: '+14.5 pts', text: 'Heavy equipment on site is 38% below the target needed to finish on time.', severity: 'high' },
-    { name: 'Land Acquisition & Clearances', impact: '-8.0 pts', text: '98.4% of land has been acquired and cleared, which prevents work stoppages.', severity: 'low' },
-  ];
-
-  // 1. Splash preflight screen while verifying active database session
+  // 1. Splash preflight screen while verifying session
   if (authChecking) {
     return (
       <div className={`w-screen h-screen flex flex-col items-center justify-center transition-colors ${
-        isDark ? 'bg-black text-white' : 'bg-white text-black'
+        isDark ? 'bg-[#07090E] text-white' : 'bg-[#FAF7F2] text-black'
       }`}>
-        <div className="flex flex-col items-center gap-4">
+        <InteractiveLivingBackground isDark={isDark} />
+        <div className="relative z-10 flex flex-col items-center gap-4">
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-mono font-bold text-2xl border ${
-            isDark ? 'bg-black text-white border-white/30 shadow-[0_0_24px_rgba(255,255,255,0.2)]' : 'bg-white text-black border-black/20 shadow-md'
+            isDark ? 'bg-black/80 text-white border-white/20 shadow-[0_0_24px_rgba(255,255,255,0.2)]' : 'bg-white/90 text-black border-black/10 shadow-lg'
           }`}>
-            IB
+            ▲
           </div>
           <div className="text-center">
-            <div className={`text-xs font-mono font-bold tracking-widest uppercase ${isDark ? 'text-white' : 'text-black'}`}>
-              INFRABUILD AI PLATFORM
+            <div className={`text-xs font-mono font-bold tracking-widest uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              INFRABUILD AI COMMAND
             </div>
-            <div className={`text-[11px] font-mono mt-1 ${isDark ? 'text-white/70' : 'text-black/70'}`}>
-              Loading your projects and account...
+            <div className={`text-[11px] font-mono mt-1 ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
+              Synchronizing national infrastructure telemetry...
             </div>
           </div>
         </div>
@@ -343,18 +295,66 @@ export default function App() {
     );
   }
 
-  // 2. MANDATORY LOGIN PROMPT:
-  // Must show login prompt first; only if database credentials are verified does dashboard open
-  if (!currentUser) {
-    return <Login onLoginSuccess={handleLoginSuccess} />;
+  // 2. PUBLIC EDITORIAL LANDING PAGE (Opening layer)
+  if (currentRoute === 'landing') {
+    return (
+      <EditorialLandingPage onEnterApp={handleEnterPlatform} />
+    );
   }
 
-  // Strictly display only the corridors associated with this authenticated user
-  const displayedPins = pins;
+  // 3. LOGIN / AUTHENTICATION PORTAL
+  if (currentRoute === 'login' || !currentUser) {
+    return (
+      <div className="relative min-h-screen">
+        <InteractiveLivingBackground isDark={isDark} />
+        <Login
+          onLoginSuccess={handleLoginSuccess}
+        />
+        {/* Floating Return to Landing Page Pill */}
+        <div style={{ position: 'fixed', bottom: '24px', right: '28px', zIndex: 9999 }}>
+          <button
+            onClick={handleNavigateToLanding}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 20px',
+              borderRadius: '9999px',
+              backgroundColor: 'rgba(18, 19, 20, 0.94)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              color: '#FFFFFF',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              boxShadow: '0 16px 40px -4px rgba(0, 0, 0, 0.45)',
+              cursor: 'pointer',
+            }}
+          >
+            <span>← Public Landing Film</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
+  const isAnyModalOpen = Boolean(
+    insightsModalProjectId ||
+    investigationModalProjectId ||
+    settingsModalOpen ||
+    showAddModal ||
+    showCeoModal
+  );
+
+  // 4. AUTHENTICATED COMMAND PLATFORM
   return (
-    <div className={`relative w-screen h-screen overflow-hidden transition-colors duration-300 ${isDark ? 'bg-black text-white' : 'bg-[#F8FAFC] text-[#0F172A]'}`}>
-      {/* Top Header Navigation */}
+    <div className={`relative w-screen h-screen overflow-hidden transition-colors duration-300 ${
+      isDark ? 'bg-[#07090E] text-white' : 'bg-[#FAF7F2] text-[#121314]'
+    }`}>
+      {/* Living Atmospheric Aura Background (Replaces background videos) */}
+      <InteractiveLivingBackground isDark={isDark} />
+
+      {/* Floating Pill Top Header Navigation */}
       <HeaderNav
         currentTab={currentTab}
         onTabChange={setCurrentTab}
@@ -365,97 +365,58 @@ export default function App() {
           setSettingsModalTab(tab || 'profile');
           setSettingsModalOpen(true);
         }}
+        onOpenLanding={handleNavigateToLanding}
+        isModalOpen={isAnyModalOpen}
       />
 
-      {/* BACKGROUND VIDEO & STATIC MAP AT END - VISIBLE ON ALL DASHBOARD PAGES */}
-      {currentTab !== 'login' && (
-        <div className={`fixed inset-0 z-0 overflow-hidden pointer-events-none transition-colors duration-500 ${isDark ? 'bg-black' : 'bg-[#EAECEF]'}`}>
-        {isDark ? (
-          <React.Fragment key="dark-mode-media">
-            {/* Dark Mode Stationary Map (Final Frame) */}
-            <img
-              src="/india_map_final.png"
-              alt="National Infrastructure Spatial Map - Dark Mode"
-              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out"
-              style={{
-                opacity: darkVideoEnded
-                  ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
-                  : 0,
-                filter: currentTab === 'motion'
-                  ? `brightness(${Math.max(0.93, 1 - scrollProgress * 0.07)})`
-                  : 'brightness(1.0)'
-              }}
-            />
-
-            {/* Dark Mode Video: dashboard.mp4 */}
-            <video
-              key="video-dark"
-              src="/dashboard.mp4"
-              autoPlay
-              muted
-              playsInline
-              onEnded={() => setDarkVideoEnded(true)}
-              className="w-full h-full object-cover transition-opacity duration-700 ease-out"
-              style={{
-                opacity: !darkVideoEnded
-                  ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
-                  : 0,
-                filter: currentTab === 'motion'
-                  ? `brightness(${Math.max(0.93, 1 - scrollProgress * 0.07)})`
-                  : 'brightness(1.0)'
-              }}
-            />
-          </React.Fragment>
-        ) : (
-          <React.Fragment key="light-mode-media">
-            {/* Light Mode Stationary Map (Final Frame) */}
-            <img
-              src="/india_white_final.png"
-              alt="National Infrastructure Spatial Map - Light Mode"
-              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out"
-              style={{
-                opacity: lightVideoEnded
-                  ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
-                  : 0,
-                filter: 'brightness(1.0)'
-              }}
-            />
-
-            {/* Light Mode Video: dashboard_white.mp4 */}
-            <video
-              key="video-white"
-              src="/dashboard_white.mp4"
-              autoPlay
-              muted
-              playsInline
-              onEnded={() => setLightVideoEnded(true)}
-              className="w-full h-full object-cover transition-opacity duration-700 ease-out"
-              style={{
-                opacity: !lightVideoEnded
-                  ? (currentTab === 'motion' ? Math.max(0.92, 1 - scrollProgress * 0.08) : 0.90)
-                  : 0,
-                filter: 'brightness(1.0)'
-              }}
-            />
-          </React.Fragment>
-        )}
-
-        {/* Scroll-Driven Darkening Overlay - subtle in dark mode, clean in light mode */}
-        <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ease-out ${isDark ? 'bg-black' : 'bg-transparent'}`}
+      {/* Floating Quick Return to Editorial Landing Pill (as shown in Screenshot 1) */}
+      <div style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '28px',
+        zIndex: isAnyModalOpen ? 0 : 9999,
+        opacity: isAnyModalOpen ? 0 : 1,
+        pointerEvents: isAnyModalOpen ? 'none' : 'auto',
+        transition: 'opacity 0.25s ease, transform 0.25s ease',
+        transform: isAnyModalOpen ? 'translateY(12px)' : 'translateY(0)',
+      }}>
+        <button
+          onClick={handleNavigateToLanding}
           style={{
-            opacity: isDark
-              ? (currentTab === 'motion' ? Math.min(0.12, scrollProgress * 0.12) : 0.10)
-              : 0
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 20px',
+            borderRadius: '9999px',
+            backgroundColor: 'rgba(18, 19, 20, 0.94)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            color: '#FFFFFF',
+            border: '1px solid rgba(255, 255, 255, 0.16)',
+            fontSize: '12.5px',
+            fontWeight: 700,
+            boxShadow: '0 16px 40px -4px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.2)',
+            cursor: 'pointer',
+            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
-        />
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.backgroundColor = 'rgba(28, 29, 32, 0.98)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.backgroundColor = 'rgba(18, 19, 20, 0.94)';
+          }}
+        >
+          <span>← Public Landing Film</span>
+        </button>
       </div>
-      )}
 
-      {/* VIEWPORT CONTENT CONTAINER — BUTTERY SMOOTH SCROLL */}
+      {/* VIEWPORT CONTENT CONTAINER */}
       {(currentTab === 'motion' || currentTab === 'overview') ? (
         !isAdmin ? (
-          <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll">
+          /* REGULAR USER: 4 COLUMNS SCOPE — MY PROJECT OVERVIEW */
+          <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll pt-20 sm:pt-24 pb-24">
             <MyProjectOverview
               currentUser={currentUser}
               pins={pins}
@@ -480,716 +441,719 @@ export default function App() {
             />
           </div>
         ) : (
-          <div
-            ref={containerRef}
-            className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll"
-          >
-            {/* SECTION 01 / 04 — HERO "India, in motion." */}
-          <section className="buttery-smooth-section w-full h-screen relative flex items-center justify-between px-6 sm:px-12 md:px-20 pointer-events-none">
-            <div className="max-w-xl space-y-4 sm:space-y-6 pointer-events-auto mt-12 sm:mt-16">
-              <h1 className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-display tracking-tight leading-[0.9] ${
-                isDark
-                  ? 'text-white drop-shadow-[0_8px_32px_rgba(0,0,0,0.95)]'
-                  : 'text-black drop-shadow-[0_4px_16px_rgba(255,255,255,0.8)]'
-              }`}>
-                India,<br />
-                in<br />
-                motion.
-              </h1>
+          /* ADMIN: 7 COLUMNS SCOPE — NATIONAL INFRASTRUCTURE OVERVIEW (Pixel-matched to Screenshot 1) */
+          <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll pt-24 sm:pt-28 pb-28 px-4 sm:px-8 md:px-14 max-w-7xl mx-auto space-y-8 animate-fade-in">
+            {/* 1. Telemetry Stream Sync Delay Banner (Screenshot 1 top banner) */}
+            <div
+              style={{
+                borderRadius: '20px',
+                padding: '18px 24px',
+                backgroundColor: isDark ? 'rgba(18, 20, 24, 0.88)' : 'rgba(255, 255, 255, 0.92)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #EFEFEA',
+                boxShadow: isDark ? '0 12px 36px rgba(0,0,0,0.5)' : '0 10px 30px rgba(0,0,0,0.04)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div
+                  style={{
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    backgroundColor: '#0284C7',
+                    boxShadow: '0 0 10px #0284C7',
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: '14px',
+                    color: isDark ? '#E5E5E5' : '#4E5055',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Telemetry stream synchronized <strong style={{ color: isDark ? '#FFFFFF' : '#121314' }}>9 days ago</strong>. Automated predictive models operating with nominal peer covariance.
+                </span>
+              </div>
 
-              {/* Tagline Flashcard — Highly Visible Frosted Glass Card */}
-              <div className={`p-4 sm:p-5 rounded-2xl border backdrop-blur-2xl max-w-lg transition-all duration-300 shadow-xl ${
-                isDark
-                  ? 'bg-black/75 border-white/25 text-white shadow-[0_12px_40px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.25)]'
-                  : 'bg-white/95 border-slate-300/90 text-slate-900 shadow-[0_8px_30px_rgba(0,0,0,0.12),inset_0_1px_2px_rgba(255,255,255,1)]'
-              }`}>
-                <div className="space-y-1">
-                  <div className={`text-[10px] sm:text-xs font-mono-code font-bold uppercase tracking-wider ${
-                    isDark ? 'text-white/70' : 'text-slate-600'
-                  }`}>
-                    National Infrastructure Tracker
-                  </div>
-                  <p className={`text-xs sm:text-sm md:text-base font-medium leading-relaxed ${
-                    isDark ? 'text-white' : 'text-slate-950'
-                  }`}>
-                    Live project tracking, budget monitoring, and delay risk predictions across infrastructure projects in India.
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span
+                  style={{
+                    fontSize: '11.5px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    padding: '6px 14px',
+                    borderRadius: '9999px',
+                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F3F4F6',
+                    color: isDark ? 'rgba(255, 255, 255, 0.7)' : '#6B7280',
+                    border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #E5E7EB',
+                  }}
+                >
+                  SYNC DELAYED
+                </span>
+
+                <button
+                  type="button"
+                  onClick={handlePulseStream}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 16px',
+                    borderRadius: '9999px',
+                    backgroundColor: isDark ? '#FFFFFF' : '#121314',
+                    color: isDark ? '#070A12' : '#FFFFFF',
+                    border: 'none',
+                    fontSize: '12.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.2)',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <span>⚡</span>
+                  <span>{isPulsingFeed ? 'Synchronizing...' : 'Sync Stream'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Hero Headline & Live Control Pills */}
+            <div className="space-y-4">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#0284C7' }} />
+                <span
+                  style={{
+                    fontSize: '11.5px',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    color: isDark ? 'rgba(255, 255, 255, 0.65)' : '#64748B',
+                  }}
+                >
+                  SOVEREIGN RISK INTELLIGENCE • NATIONAL OPERATIONS
+                </span>
+              </div>
+
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                  <h1
+                    style={{
+                      fontSize: 'clamp(2.2rem, 4.2vw, 3.4rem)',
+                      fontWeight: 800,
+                      letterSpacing: '-0.035em',
+                      lineHeight: 1.05,
+                      color: isDark ? '#FFFFFF' : '#121314',
+                      margin: 0,
+                    }}
+                  >
+                    National Infrastructure Overview
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: '15px',
+                      color: isDark ? 'rgba(255, 255, 255, 0.75)' : '#4E5055',
+                      lineHeight: 1.6,
+                      marginTop: '10px',
+                      maxWidth: '720px',
+                    }}
+                  >
+                    Continuous observational surveillance, verified contractor IPC ledgers, and peer covariance across 428 federal infrastructure assets.
                   </p>
                 </div>
-              </div>
 
-              {/* User Department Badge */}
-              <div className="pt-2 flex flex-wrap items-center gap-2.5">
-                <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 text-xs font-mono shadow-sm ${
-                  isDark ? 'bg-black/70 border-white/20 text-white' : 'bg-white/95 border-slate-300 text-slate-900 shadow-sm'
-                }`}>
-                  <span>
-                    Officer: <strong className={isDark ? 'text-white' : 'text-black'}>{currentUser.full_name}</strong>
-                  </span>
-                  <span className="opacity-40">|</span>
-                  <span>
-                    Department: <strong className={isDark ? 'text-white' : 'text-black'}>{currentUser.ministry}</strong>
-                  </span>
-                </div>
-
-                {currentUser.ministry && !currentUser.ministry.includes('MoSPI') && (
-                  <button
-                    onClick={() => setMinistryFilterOnly(!ministryFilterOnly)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all border cursor-pointer ${
-                      ministryFilterOnly
-                        ? (isDark ? 'bg-white text-black border-white shadow-md' : 'bg-black text-white border-black shadow-md')
-                        : (isDark ? 'bg-black/70 text-white hover:bg-black/90 border-white/20' : 'bg-white/95 text-black hover:bg-white border-slate-300 shadow-sm')
-                    }`}
+                {/* Filter and Pulse Actions */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      backgroundColor: isDark ? 'rgba(22, 22, 24, 0.82)' : 'rgba(244, 242, 236, 0.78)',
+                      padding: '4px',
+                      borderRadius: '9999px',
+                      border: isDark ? '1px solid rgba(255, 255, 255, 0.16)' : '1px solid #E5E3DC',
+                    }}
                   >
-                    {ministryFilterOnly ? `Showing: ${currentUser.ministry} Projects ✓` : `Filter: ${currentUser.ministry}`}
+                    {[
+                      { id: 'live', label: '🟢 Live Telemetry' },
+                      { id: 'surge', label: '⚡ Anomaly Surge' },
+                      { id: 'audit', label: '🛡️ Audit Pipeline' },
+                    ].map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => setSimMode(m.id as any)}
+                        style={{
+                          padding: '7px 16px',
+                          fontSize: '12px',
+                          fontWeight: simMode === m.id ? 700 : 500,
+                          borderRadius: '9999px',
+                          border: 'none',
+                          backgroundColor: simMode === m.id ? (isDark ? '#FFFFFF' : '#121314') : 'transparent',
+                          color: simMode === m.id ? (isDark ? '#070A12' : '#FFFFFF') : (isDark ? 'rgba(255,255,255,0.7)' : '#4E5055'),
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handlePulseStream}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '11px 22px',
+                      borderRadius: '9999px',
+                      backgroundColor: '#121314',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <span>⚡ Pulse Telemetry Feed</span>
                   </button>
-                )}
-              </div>
-
-              <div className="pt-3 sm:pt-4 flex flex-wrap items-center gap-3">
-                <button
-                  onClick={() => setInsightsModalProjectId(selectedPin?.id || pins[0]?.id || null)}
-                  className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-mono-code font-bold shadow-2xl transition-all cursor-pointer ${
-                    isDark
-                      ? 'bg-white text-black hover:bg-slate-200'
-                      : 'bg-black text-white hover:bg-zinc-800 shadow-md'
-                  }`}
-                >
-                  View Project Details & Risks →
-                </button>
-                <button
-                  onClick={() => setCurrentTab('assistant')}
-                  className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-mono-code font-bold transition-all cursor-pointer ${
-                    isDark
-                      ? 'bg-black/60 text-white border border-white/30 hover:bg-black/80'
-                      : 'bg-white/80 text-black border border-black/20 hover:bg-white shadow-sm'
-                  }`}
-                >
-                  Ask AI Assistant 💬
-                </button>
-              </div>
-            </div>
-          </section>
-
-          {/* SECTION 02 / 04 — ROLE-BASED DASHBOARD SNAPSHOT */}
-          {isAdmin ? (
-            /* ADMIN: NATIONAL PORTFOLIO OVERVIEW */
-            <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
-              <div className="w-full max-w-6xl pointer-events-auto">
-                <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-10 shadow-2xl">
-                  <div className="space-y-3 sm:space-y-4 max-w-3xl">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded text-[11px] font-mono-code font-bold uppercase tracking-wider bg-white/10 text-white border border-white/20">
-                        Admin Command Center
-                      </span>
-                      <span className="text-xs text-white/60">Portfolio-wide Monitoring</span>
-                    </div>
-                    <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold font-display text-white tracking-tight leading-tight">
-                      National Project Overview & Budget Health
-                    </h2>
-                    <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-normal">
-                      System-wide progress, budget exposure, and predictive risk tracking across {portfolioStats.totalProjects.toLocaleString()} sovereign infrastructure projects.
-                    </p>
-                  </div>
-
-                  {/* 3 Executive Metric Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 pt-2 sm:pt-4">
-                    <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
-                      <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
-                        {portfolioStats.avgDphis}
-                      </div>
-                      <div className="text-xs text-white/80 font-medium">Average Risk Score (0–100)</div>
-                      <div className="text-xs font-mono-code text-white font-semibold flex items-center gap-1.5">
-                        <CurvedGrowthArrow className="w-3.5 h-3.5 text-amber-400" />
-                        <span>+4.1 pts higher risk than last month</span>
-                      </div>
-                    </div>
-
-                    <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
-                      <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
-                        {portfolioStats.totalProjects.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-white/80 font-medium">Total Monitored Projects</div>
-                      <div className="text-xs font-mono-code text-white font-semibold">18,000 monthly telemetry syncs</div>
-                    </div>
-
-                    <div className="oled-solid-card p-5 sm:p-6 space-y-2 sm:space-y-3">
-                      <div className="text-3xl sm:text-4xl font-bold font-display font-mono-code text-white">
-                        {portfolioStats.criticalCount}
-                      </div>
-                      <div className="text-xs text-white/80 font-medium">Projects Facing Critical Delays</div>
-                      <div className="text-xs font-mono-code text-white font-semibold">Need immediate inter-ministerial review</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          ) : (
-            /* NORMAL USER: MY PROJECTS OVERVIEW */
-            <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
-              <div className="w-full max-w-6xl pointer-events-auto">
-                <div className="oled-solid-card p-6 sm:p-10 md:p-12 space-y-6 sm:space-y-8 shadow-2xl">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded text-[11px] font-mono-code font-bold uppercase tracking-wider bg-white/10 text-white border border-white/20">
-                          My Projects Overview
-                        </span>
-                        <span className="text-xs text-white/60">
-                          {currentUser.ministry || 'Assigned Scope'}
-                        </span>
-                      </div>
-                      <h2 className="text-2xl sm:text-4xl font-bold font-display text-white tracking-tight leading-tight">
-                        Status of Your Assigned Projects
-                      </h2>
-                      <p className="text-xs sm:text-sm text-white/80 max-w-2xl font-normal leading-relaxed">
-                        Summary of projects under your direct monitoring, tracking milestone delivery, physical progress, and projects needing your immediate attention.
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => setCurrentTab('projects')}
-                      className="px-4 py-2 rounded-xl bg-white text-black text-xs font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-md shrink-0 self-start sm:self-auto"
-                    >
-                      View All My Projects →
-                    </button>
-                  </div>
-
-                  {/* Top 4 Summary Cards */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-1">
-                    <div className="oled-solid-card p-4 sm:p-5 space-y-1.5">
-                      <div className="text-2xl sm:text-3xl font-bold font-display font-mono-code text-white">
-                        {pins.length}
-                      </div>
-                      <div className="text-xs text-white/90 font-medium">My Active Projects</div>
-                      <div className="text-[11px] font-mono-code text-white/60">Assigned to your department</div>
-                    </div>
-
-                    <div className="oled-solid-card p-4 sm:p-5 space-y-1.5">
-                      <div className="text-2xl sm:text-3xl font-bold font-display font-mono-code text-white">
-                        {pins.filter(p => p.dphis >= 65).length}
-                      </div>
-                      <div className="text-xs text-white/90 font-medium">Projects Needing Attention</div>
-                      <div className="text-[11px] font-mono-code text-white/60">Schedule or spending divergence</div>
-                    </div>
-
-                    <div className="oled-solid-card p-4 sm:p-5 space-y-1.5">
-                      <div className="text-2xl sm:text-3xl font-bold font-display font-mono-code text-white">
-                        {pins.filter(p => p.dphis >= 80).length}
-                      </div>
-                      <div className="text-xs text-white/90 font-medium">Projects At Risk</div>
-                      <div className="text-[11px] font-mono-code text-white/60">Critical path timeline at risk</div>
-                    </div>
-
-                    <div className="oled-solid-card p-4 sm:p-5 space-y-1.5">
-                      <div className="text-2xl sm:text-3xl font-bold font-display font-mono-code text-white">
-                        {pins.length > 0 ? pins.length * 2 : 4}
-                      </div>
-                      <div className="text-xs text-white/90 font-medium">Upcoming Milestones</div>
-                      <div className="text-[11px] font-mono-code text-white/60">Deliverables in next 60 days</div>
-                    </div>
-                  </div>
-
-                  {/* Projects Needing Attention Cards (3–5 projects) */}
-                  <div className="space-y-4 pt-2">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-base sm:text-lg font-bold font-display text-white">
-                        Projects Needing Attention
-                      </h3>
-                      <span className="text-xs font-mono text-white/60">
-                        Showing top priority projects
-                      </span>
-                    </div>
-
-                    {pins.length === 0 ? (
-                      <div className="p-8 text-center space-y-3 rounded-xl border border-white/10 bg-white/5">
-                        <div className="text-sm font-bold text-white">No active projects assigned yet</div>
-                        <p className="text-xs text-white/70 max-w-md mx-auto">
-                          Your account currently has no projects registered. Click Add Project to track an infrastructure corridor.
-                        </p>
-                        <button
-                          onClick={() => setShowAddModal(true)}
-                          className="px-4 py-2 rounded-xl bg-white text-black text-xs font-mono font-bold hover:bg-slate-200 transition-all cursor-pointer"
-                        >
-                          + Add Project
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {[...pins]
-                          .sort((a, b) => b.dphis - a.dphis)
-                          .slice(0, 3)
-                          .map(p => {
-                            const cat = getRiskCategory(p.dphis);
-                            let reason = "Progress is behind planned schedule";
-                            if (p.dphis >= 80) {
-                              reason = "Spending is increasing faster than physical progress";
-                            } else if (p.dphis >= 65) {
-                              reason = "Construction progress is lower than planned milestone target";
-                            } else if (p.dphis >= 45) {
-                              reason = "Upcoming critical milestone requires contractor review";
-                            } else {
-                              reason = "Project progress aligned with scheduled deliverables";
-                            }
-
-                            return (
-                              <div
-                                key={p.id}
-                                className="oled-solid-card p-5 space-y-3 flex flex-col justify-between hover:border-white/30 transition-all"
-                              >
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <span className="font-mono-code text-[11px] font-bold text-white/80">{p.id}</span>
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono-code font-bold ${cat.bgClass} ${cat.borderClass} ${cat.colorClass}`}>
-                                      {cat.label}
-                                    </span>
-                                  </div>
-                                  <h4 className="text-sm font-bold text-white line-clamp-1">{p.name}</h4>
-                                  <p className="text-xs text-white/75 leading-relaxed">
-                                    {reason}
-                                  </p>
-                                </div>
-
-                                <div className="space-y-3 pt-2 border-t border-white/10 text-xs">
-                                  <div className="grid grid-cols-2 gap-2 text-[11px] font-mono-code text-white/70">
-                                    <div>
-                                      <span className="block text-white/50 text-[10px]">Location</span>
-                                      <span className="text-white font-medium">{p.state}</span>
-                                    </div>
-                                    <div>
-                                      <span className="block text-white/50 text-[10px]">Est. Delay</span>
-                                      <span className="text-white font-medium">{p.delay}</span>
-                                    </div>
-                                    <div>
-                                      <span className="block text-white/50 text-[10px]">Budget Health</span>
-                                      <span className={`font-semibold ${p.dphis >= 65 ? 'text-white' : 'text-white/80'}`}>
-                                        {p.dphis >= 65 ? 'At Risk' : 'Normal'}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="block text-white/50 text-[10px]">Approved Cost</span>
-                                      <span className="text-white font-medium">{p.cost}</span>
-                                    </div>
-                                  </div>
-
-                                  <button
-                                    onClick={() => {
-                                      setSelectedPin(p);
-                                      setInsightsModalProjectId(p.id);
-                                    }}
-                                    className="w-full py-2 rounded-lg bg-white/10 hover:bg-white hover:text-black text-white text-xs font-mono-code font-bold border border-white/20 transition-all cursor-pointer text-center"
-                                  >
-                                    Review Issue →
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* SECTION 03 / 04 — WHY PROJECTS ARE AT RISK (Non-Admin View Only; Removed for Admin as requested) */}
-          {!isAdmin && (
-            <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
-              <div className="w-full max-w-6xl pointer-events-auto">
-                <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-2 sm:space-y-3">
-                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
-                        Why Your Projects Need Attention
-                      </h2>
-                      <p className="text-xs sm:text-sm text-white/80">
-                        {selectedPin
-                          ? `Plain-language analysis of delay causes on project ${selectedPin.id} (${selectedPin.name}).`
-                          : 'Tracking key factors causing delivery delays and cost overruns.'}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => setInsightsModalProjectId(selectedPin?.id || pins[0]?.id || null)}
-                      className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white text-black text-xs sm:text-sm font-mono-code font-bold hover:bg-zinc-200 transition-all cursor-pointer shadow-lg whitespace-nowrap shrink-0"
-                    >
-                      View Project Insights →
-                    </button>
-                  </div>
-
-                  {selectedPin ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pt-2">
-                      <div className="oled-solid-card p-5 sm:p-6 space-y-3 sm:space-y-4">
-                        {(() => {
-                          const cat = getRiskCategory(selectedPin.dphis);
-                          return (
-                            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                              <span className="font-mono-code font-bold text-white">{selectedPin.id}</span>
-                              <span className={`px-2.5 py-1 rounded text-xs font-mono-code font-bold border ${cat.bgClass} ${cat.borderClass} ${cat.colorClass}`}>
-                                {cat.label}
-                              </span>
-                            </div>
-                          );
-                        })()}
-                        <h4 className="text-sm sm:text-base font-bold text-white">{selectedPin.name}</h4>
-                        {(() => {
-                          const physProgress = Math.max(12, Math.min(95, Math.round(100 - selectedPin.dphis * 0.85)));
-                          const plannedTarget = Math.min(98, Math.round(physProgress + (selectedPin.dphis >= 65 ? (selectedPin.dphis - 50) * 0.75 : 5)));
-                          const summaryText = selectedPin.dphis >= 65
-                            ? 'Funds and timeline are pacing ahead of verified physical construction, putting completion milestones at risk.'
-                            : selectedPin.dphis >= 45
-                            ? 'Project is progressing with moderate schedule variance. Key milestones require routine contractor supervision.'
-                            : 'Project milestones and expenditures are tracking cleanly within approved cost and timeline estimates.';
-                          return (
-                            <>
-                              <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-                                {summaryText}
-                              </p>
-
-                              <div className="pt-2 space-y-2 text-xs sm:text-sm">
-                                <div className="flex justify-between font-mono-code text-white/80">
-                                  <span>Physical Progress: {physProgress}%</span>
-                                  <span className="text-white font-bold">Planned Target: {plannedTarget}%</span>
-                                </div>
-                                <div className="h-2 rounded-full bg-white/10 overflow-hidden border border-white/15">
-                                  <div className="h-full bg-white rounded-full transition-all duration-500" style={{ width: `${physProgress}%` }} />
-                                </div>
-                              </div>
-                            </>
-                          );
-                        })()}
-
-                        <div className="pt-3 border-t border-white/10">
-                          <h5 className="text-xs font-mono font-bold uppercase text-white/70 mb-2">Recommended Next Steps</h5>
-                          <ul className="text-xs text-white/80 space-y-1.5 list-disc list-inside">
-                            <li>Review delayed construction schedule with EPC contractor</li>
-                            <li>Inspect on-site machinery and equipment deployment</li>
-                            <li>Verify actual ground milestones against contractor expenditure claims</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div className="oled-solid-card p-5 sm:p-6 space-y-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider text-white/80">
-                            Key Risk Factors (AI Attribution)
-                          </h4>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-white/70">
-                            Real-time Telemetry
-                          </span>
-                        </div>
-                        {shapDrivers.map(d => (
-                          <div key={d.name} className="p-3 rounded-xl bg-white/5 border border-white/15 space-y-1">
-                            <div className="flex items-center justify-between text-xs sm:text-sm">
-                              <span className="font-semibold text-white">{d.name}</span>
-                              <TrendBadge value={d.impact} mode="risk" iconClassName="w-3.5 h-3.5" />
-                            </div>
-                            <p className="text-[11px] sm:text-xs text-white/70">{d.text}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="oled-solid-card p-8 text-center space-y-4">
-                      <div className="text-base font-bold text-white">No Projects Added Yet</div>
-                      <p className="text-xs sm:text-sm text-white/75 max-w-xl mx-auto leading-relaxed">
-                        You don't have any projects listed in your dashboard yet. Add your first project using the standard report fields to see risk predictions and AI recommendations.
-                      </p>
-                      <button
-                        onClick={() => setShowAddModal(true)}
-                        className="px-5 py-2.5 rounded-xl bg-white text-black text-xs font-mono-code font-bold hover:bg-slate-200 transition-all cursor-pointer shadow-lg inline-flex items-center gap-2"
-                      >
-                        <span>+ Add Project</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* SECTION 04 / 04 — LIVE PROJECTS & PORTFOLIO */}
-          <section className="buttery-smooth-section w-full min-h-screen relative flex items-center justify-center px-4 sm:px-8 md:px-16 py-16 sm:py-20 pointer-events-none">
-            <div className="w-full max-w-6xl pointer-events-auto">
-              <div className="oled-solid-card p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-8 shadow-2xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-white tracking-tight">
-                        {isAdmin ? 'All Monitored Projects' : 'My Assigned Projects'}
-                      </h2>
-                      <span className={`px-3 py-1 rounded-lg text-xs font-mono font-bold border ${
-                        isDark ? 'bg-black/70 text-white border-white/20' : 'bg-white/95 text-black border-slate-300 shadow-sm'
-                      }`}>
-                        Department: {currentUser.ministry || 'Assigned Projects'}
-                      </span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-white/70">
-                      Showing {displayedPins.length} projects under active monitoring ({currentUser.full_name} · {currentUser.designation || 'Project Officer'}).
-                    </p>
-                  </div>
-
-                  {!isAdmin && (
-                    <div className="flex items-center gap-3 shrink-0">
-                      <button
-                        onClick={() => setShowAddModal(true)}
-                        style={!isDark ? { color: '#000000' } : undefined}
-                        className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-mono-code cursor-pointer transition-all duration-200 flex items-center gap-2 ${
-                          isDark
-                            ? 'bg-black text-white border border-white/30 shadow-[0_0_14px_rgba(255,255,255,0.22)] hover:bg-zinc-900 hover:border-white/60'
-                            : 'bg-white/75 hover:bg-white/95 text-black border border-white/90 shadow-[0_4px_18px_rgba(0,0,0,0.08),inset_0_1.5px_2px_rgba(255,255,255,0.95)] backdrop-blur-md'
-                        }`}
-                      >
-                        <span style={!isDark ? { color: '#000000' } : undefined}>+ Add Project</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="overflow-x-auto overflow-y-auto rounded-xl border border-white/15 bg-black/40 backdrop-blur-md max-h-[44vh] relative">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead className="sticky top-0 z-20">
-                      <tr className="border-b border-white/15">
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Project ID</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Project Name</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Location</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Status</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Approved Cost</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Delay</th>
-                        <th className="p-4 sticky top-0 z-20 bg-[#0B0F17] text-white/80 font-mono-code text-[10px] uppercase tracking-wider shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {displayedPins.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="p-8 text-center font-mono text-xs text-slate-400">
-                            No projects currently assigned to this user profile in the database.
-                          </td>
-                        </tr>
-                      ) : (
-                        displayedPins.map(p => {
-                          const cat = getRiskCategory(p.dphis);
-                          return (
-                            <tr
-                              key={p.id}
-                              onClick={() => setSelectedPin(p)}
-                              className={`cursor-pointer hover:bg-white/5 transition-colors ${
-                                selectedPin?.id === p.id ? 'bg-white/10' : ''
-                              }`}
-                            >
-                              <td className="p-4 font-mono-code font-bold text-white">{p.id}</td>
-                              <td className="p-4 font-semibold text-white">{p.name}</td>
-                              <td className="p-4 text-white/80">{p.state}</td>
-                              <td className="p-4">
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-mono-code font-bold ${cat.bgClass} ${cat.borderClass} ${cat.colorClass}`}>
-                                  {cat.label}
-                                </span>
-                              </td>
-                              <td className="p-4 font-mono-code text-white">{p.cost}</td>
-                              <td className="p-4 text-white font-mono-code">{p.delay}</td>
-                              <td className="p-4">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedPin(p);
-                                    setInsightsModalProjectId(p.id);
-                                  }}
-                                  className="px-2.5 py-1 rounded bg-[var(--surface-sunken)] hover:bg-white hover:text-black text-[10px] font-mono-code text-white border border-white/20 transition-all cursor-pointer"
-                                >
-                                  View Insights →
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
                 </div>
               </div>
             </div>
-          </section>
-        </div>
+
+            {/* 3. National Surveillance Ribbon Meta Bar (Screenshot 1 middle pill row) */}
+            <div
+              style={{
+                borderRadius: '24px',
+                padding: '14px 24px',
+                backgroundColor: isDark ? 'rgba(16, 18, 22, 0.85)' : 'rgba(255, 255, 255, 0.90)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #EFEFEA',
+                boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.4)' : '0 8px 24px rgba(0,0,0,0.03)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+              }}
+            >
+              <div className="flex items-center gap-3 flex-wrap text-xs">
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '5px 12px',
+                    borderRadius: '9999px',
+                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F3F4F6',
+                    fontWeight: 700,
+                  }}
+                >
+                  <span style={{ color: '#10B981' }}>●</span>
+                  <span>Monitoring active • 428 Federal Assets Under Surveillance</span>
+                </span>
+
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '5px 12px',
+                    borderRadius: '9999px',
+                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F3F4F6',
+                    fontWeight: 600,
+                  }}
+                >
+                  <span>🏛️</span>
+                  <span>18 Federal Ministries Integrated</span>
+                </span>
+
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '5px 12px',
+                    borderRadius: '9999px',
+                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F3F4F6',
+                    fontWeight: 700,
+                    color: isDark ? '#FBBF24' : '#D97706',
+                  }}
+                >
+                  <span>💰</span>
+                  <span>₹1,990,633 Cr Capital Outlay</span>
+                </span>
+              </div>
+
+              {/* Live Streaming Indicator */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '12px',
+                  fontFamily: 'monospace',
+                }}
+              >
+                <span style={{ color: '#10B981', fontWeight: 700 }}>● {telemetryPackets.toLocaleString()} pkts/s</span>
+                <span style={{ opacity: 0.4 }}>|</span>
+                <span style={{ color: isDark ? '#A3A3A3' : '#64748B' }}>STREAM:</span>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {(['14ms', '5s', '30s'] as const).map((spd) => (
+                    <button
+                      key={spd}
+                      type="button"
+                      onClick={() => setStreamSpeed(spd)}
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '11px',
+                        fontWeight: streamSpeed === spd ? 800 : 500,
+                        backgroundColor: streamSpeed === spd ? '#121314' : 'transparent',
+                        color: streamSpeed === spd ? '#FFFFFF' : (isDark ? '#E5E5E5' : '#64748B'),
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {spd === '14ms' ? `⚡ ${spd} Live` : spd === '5s' ? `${spd} Burst` : `${spd} Sync`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Stat Metric Cards (Screenshot 1 bottom cards) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Card 1: Projects Monitored */}
+              <div
+                style={{
+                  borderRadius: '24px',
+                  padding: '24px 28px',
+                  backgroundColor: isDark ? 'rgba(16, 18, 22, 0.88)' : '#FFFFFF',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #EFEFEA',
+                  boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.45)' : '0 12px 32px rgba(0,0,0,0.03)',
+                }}
+              >
+                <div style={{ fontSize: '11.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748B' }}>
+                  PROJECTS MONITORED
+                </div>
+                <div style={{ fontSize: '42px', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, marginTop: '8px', color: isDark ? '#FFFFFF' : '#121314' }}>
+                  428
+                </div>
+                <div style={{ fontSize: '12px', marginTop: '12px', color: isDark ? 'rgba(255,255,255,0.65)' : '#64748B', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>⚡</span>
+                  <span>Live continuous stream • 148,418 pkts</span>
+                </div>
+              </div>
+
+              {/* Card 2: High & Critical Risk */}
+              <div
+                style={{
+                  borderRadius: '24px',
+                  padding: '24px 28px',
+                  backgroundColor: isDark ? 'rgba(16, 18, 22, 0.88)' : '#FFFFFF',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #EFEFEA',
+                  boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.45)' : '0 12px 32px rgba(0,0,0,0.03)',
+                  position: 'relative',
+                }}
+              >
+                <div style={{ position: 'absolute', top: '24px', right: '24px', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#EF4444', boxShadow: '0 0 8px #EF4444' }} />
+                <div style={{ fontSize: '11.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748B' }}>
+                  HIGH & CRITICAL RISK
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '8px' }}>
+                  <span style={{ fontSize: '42px', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: isDark ? '#FFFFFF' : '#121314' }}>
+                    130
+                  </span>
+                  <span style={{ fontSize: '16px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.6)' : '#64748B' }}>
+                    Assets
+                  </span>
+                </div>
+                <div style={{ fontSize: '12px', marginTop: '12px', color: '#EF4444', fontWeight: 600 }}>
+                  Immediate inter-ministerial audit required
+                </div>
+              </div>
+
+              {/* Card 3: Average DPHIS Risk */}
+              <div
+                style={{
+                  borderRadius: '24px',
+                  padding: '24px 28px',
+                  backgroundColor: isDark ? 'rgba(16, 18, 22, 0.88)' : '#FFFFFF',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #EFEFEA',
+                  boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.45)' : '0 12px 32px rgba(0,0,0,0.03)',
+                }}
+              >
+                <div style={{ fontSize: '11.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748B' }}>
+                  AVERAGE RISK SCORE (DPHIS)
+                </div>
+                <div style={{ fontSize: '42px', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, marginTop: '8px', color: isDark ? '#FFFFFF' : '#121314' }}>
+                  {portfolioStats.avgDphis}
+                </div>
+                <div style={{ fontSize: '12px', marginTop: '12px', color: '#F59E0B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <CurvedGrowthArrow className="w-3.5 h-3.5" />
+                  <span>+4.1 pts higher risk than baseline</span>
+                </div>
+              </div>
+
+              {/* Card 4: Capital at Drift Risk */}
+              <div
+                style={{
+                  borderRadius: '24px',
+                  padding: '24px 28px',
+                  backgroundColor: isDark ? 'rgba(16, 18, 22, 0.88)' : '#FFFFFF',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #EFEFEA',
+                  boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.45)' : '0 12px 32px rgba(0,0,0,0.03)',
+                }}
+              >
+                <div style={{ fontSize: '11.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748B' }}>
+                  EARLY DRIFT DETECTION
+                </div>
+                <div style={{ fontSize: '42px', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, marginTop: '8px', color: '#10B981' }}>
+                  14.8%
+                </div>
+                <div style={{ fontSize: '12px', marginTop: '12px', color: isDark ? 'rgba(255,255,255,0.65)' : '#64748B' }}>
+                  Detected before physical milestone breach
+                </div>
+              </div>
+            </div>
+
+            {/* 5. Quick Actions Row & Corridor Drill-Down */}
+            <div
+              style={{
+                borderRadius: '24px',
+                padding: '24px 28px',
+                backgroundColor: isDark ? 'rgba(16, 18, 22, 0.88)' : '#FFFFFF',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #EFEFEA',
+                boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.45)' : '0 12px 32px rgba(0,0,0,0.03)',
+              }}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-black/5 dark:border-white/10">
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#121314', margin: 0 }}>
+                    Federal Infrastructure Corridors Under Active Surveillance
+                  </h3>
+                  <p style={{ fontSize: '13px', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748B', marginTop: '4px', margin: 0 }}>
+                    Select any project corridor below to inspect real-time SHAP feature importance drivers and agentic investigation traces.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentTab('projects')}
+                    style={{
+                      padding: '8px 18px',
+                      borderRadius: '12px',
+                      backgroundColor: isDark ? '#FFFFFF' : '#121314',
+                      color: isDark ? '#070A12' : '#FFFFFF',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    View All Corridors →
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentTab('assistant')}
+                    style={{
+                      padding: '8px 18px',
+                      borderRadius: '12px',
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#F3F4F6',
+                      color: isDark ? '#FFFFFF' : '#121314',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #E5E7EB',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    💬 AI Assistant
+                  </button>
+                </div>
+              </div>
+
+              {/* Top Priority Corridors Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-6">
+                {pins.slice(0, 6).map((pin) => (
+                  <div
+                    key={pin.id}
+                    onClick={() => {
+                      setSelectedPin(pin);
+                      setInsightsModalProjectId(pin.id);
+                    }}
+                    style={{
+                      padding: '18px',
+                      borderRadius: '16px',
+                      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : '#F8FAFC',
+                      border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #E2E8F0',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.04)' : '#F8FAFC';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span style={{ fontSize: '11px', fontFamily: 'monospace', fontWeight: 700, color: '#0284C7' }}>
+                        {pin.id}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 800,
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          backgroundColor: pin.dphis >= 65 ? 'rgba(239, 68, 68, 0.15)' : pin.dphis >= 45 ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                          color: pin.dphis >= 65 ? '#EF4444' : pin.dphis >= 45 ? '#F59E0B' : '#10B981',
+                        }}
+                      >
+                        {pin.dphis} DPHIS
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#121314', marginBottom: '8px' }}>
+                      {pin.name}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                      <span>{pin.state}</span>
+                      <span style={{ fontWeight: 600 }}>{pin.cost}</span>
+                      <span style={{ color: pin.delay.includes('24') ? '#EF4444' : '#F59E0B' }}>+{pin.delay}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         )
-      ) : (
-        /* ROLE-GOVERNED VIEWPORT ROUTING */
-        <div className="relative z-10 w-full h-full overflow-y-auto">
-          {currentTab === 'projects' && (
-            <MyProjects
-              currentUser={currentUser}
-              pins={pins}
-              onSelectProject={(id) => {
-                const found = pins.find(p => p.id === id);
-                if (found) setSelectedPin(found);
-              }}
-              onNavigateToInsights={(id) => {
-                const found = pins.find(p => p.id === id);
-                if (found) setSelectedPin(found);
-                setInsightsModalProjectId(id);
-              }}
-              onNavigateToRiskIntelligence={(id) => {
-                const found = pins.find(p => p.id === id);
-                if (found) setSelectedPin(found);
-                setCurrentTab('intelligence');
-              }}
-              onNavigateToInvestigation={(id) => {
-                const found = pins.find(p => p.id === id);
-                if (found) setSelectedPin(found);
-                setInvestigationModalProjectId(id);
-              }}
-              onOpenAddProject={() => setShowAddModal(true)}
-              onRemoveProject={handleRemoveProject}
-            />
-          )}
+      ) : currentTab === 'projects' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll pt-24 sm:pt-28 pb-24">
+          <MyProjects
+            currentUser={currentUser}
+            pins={pins}
+            onSelectProject={(projId) => {
+              const found = pins.find(p => p.id === projId);
+              if (found) setSelectedPin(found);
+              setInsightsModalProjectId(projId);
+            }}
+            onViewProject={(projId) => {
+              const found = pins.find(p => p.id === projId);
+              if (found) setSelectedPin(found);
+              setInsightsModalProjectId(projId);
+            }}
+            onNavigateToInsights={(projId) => {
+              const found = pins.find(p => p.id === projId);
+              if (found) setSelectedPin(found);
+              setInsightsModalProjectId(projId);
+            }}
+            onNavigateToRiskIntelligence={(projId) => {
+              const found = pins.find(p => p.id === projId);
+              if (found) setSelectedPin(found);
+              setInsightsModalProjectId(null);
+              setCurrentTab('intelligence');
+            }}
+            onNavigateToInvestigation={(projId) => {
+              const found = pins.find(p => p.id === projId);
+              if (found) setSelectedPin(found);
+              setInvestigationModalProjectId(projId);
+            }}
+            onOpenAddProject={() => setShowAddModal(true)}
+            onRemoveProject={handleRemoveProject}
+          />
+        </div>
+      ) : currentTab === 'intelligence' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll pt-24 sm:pt-28 pb-24">
+          <ProjectIntelligence
+            projectId={selectedPin?.id || pins[0]?.id}
+            currentUser={currentUser}
+            allProjects={pins}
+            onNavigateToInvestigation={(projId) => {
+              setInvestigationModalProjectId(projId);
+            }}
+            onSelectProject={(projId) => {
+              const found = pins.find(p => p.id === projId);
+              if (found) setSelectedPin(found);
+            }}
+            onOpenAddProject={() => setShowAddModal(true)}
+            onNavigateBack={() => setCurrentTab('projects')}
+          />
+        </div>
+      ) : currentTab === 'analytics' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll pt-24 sm:pt-28 pb-24">
+          <Analytics
+            allProjects={pins}
+            currentUser={currentUser}
+            onNavigateToProject={(projId) => {
+              const found = pins.find(p => p.id === projId);
+              if (found) setSelectedPin(found);
+              setInsightsModalProjectId(projId);
+            }}
+            onNavigateToInvestigation={(projId) => {
+              const found = pins.find(p => p.id === projId);
+              if (found) setSelectedPin(found);
+              setInvestigationModalProjectId(projId);
+            }}
+            onOpenAddProject={() => setShowAddModal(true)}
+          />
+        </div>
+      ) : currentTab === 'alerts' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll pt-24 sm:pt-28 pb-24">
+          <Alerts
+            currentUser={currentUser}
+            pinsCount={pins.length}
+            onNavigateToInvestigation={(projId) => setInvestigationModalProjectId(projId)}
+            onOpenInvestigation={(projId) => setInvestigationModalProjectId(projId)}
+            onNavigateToProject={(projId) => {
+              const found = pins.find(p => p.id === projId);
+              if (found) setSelectedPin(found);
+              setInsightsModalProjectId(projId);
+            }}
+            onOpenAddProject={() => setShowAddModal(true)}
+          />
+        </div>
+      ) : currentTab === 'assistant' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll pt-24 sm:pt-28 pb-24">
+          <Assistant
+            selectedProjectId={selectedPin?.id}
+            currentUser={currentUser}
+            allProjects={pins}
+            onNavigateToProject={(projId) => {
+              const found = pins.find(p => p.id === projId);
+              if (found) setSelectedPin(found);
+              setInsightsModalProjectId(projId);
+            }}
+          />
+        </div>
+      ) : currentTab === 'data_models' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll pt-24 sm:pt-28 pb-24">
+          <DataModels />
+        </div>
+      ) : currentTab === 'users_audit' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto buttery-smooth-scroll pt-24 sm:pt-28 pb-24">
+          <UsersAudit />
+        </div>
+      ) : null}
 
-          {currentTab === 'intelligence' && (
-            <ProjectIntelligence
-              projectId={selectedPin?.id}
-              currentUser={currentUser}
-              allProjects={pins}
-              onNavigateToInvestigation={(id) => {
-                if (id) {
-                  const found = pins.find(p => p.id === id);
-                  if (found) setSelectedPin(found);
+      {/* MODALS */}
+      {insightsModalProjectId && (
+        <ProjectInsightsModal
+          projectId={insightsModalProjectId}
+          isOpen={true}
+          currentUser={currentUser}
+          isAdmin={isAdmin}
+          onClose={() => setInsightsModalProjectId(null)}
+          onNavigateToInvestigation={(projId) => {
+            setInsightsModalProjectId(null);
+            setInvestigationModalProjectId(projId);
+          }}
+          onProjectUpdated={() => {
+            if (currentUser) {
+              fetchMyProjects(currentUser.username).then(dbProjects => {
+                if (dbProjects && dbProjects.length > 0) {
+                  const mapped = dbProjects.map(p => ({
+                    id: p.project_id,
+                    name: p.project_name,
+                    state: p.state,
+                    latPct: Math.round((((p.location?.latitude || 20) - 8) / (36 - 8)) * 100),
+                    lngPct: Math.round((((p.location?.longitude || 78) - 68) / (97 - 68)) * 100),
+                    dphis: Math.round(p.dphis || 50),
+                    risk: p.risk_level || 'moderate',
+                    cost: `₹${p.cost?.revised || 4000} Cr`,
+                    delay: `${Math.round((p.dphis || 50) > 70 ? 24 : 6)} mo`
+                  }));
+                  setPins(mapped);
                 }
-                setInvestigationModalProjectId(id || selectedPin?.id || pins[0]?.id || null);
-              }}
-              onNavigateBack={() => setCurrentTab('projects')}
-              onOpenAddProject={!isAdmin ? () => setShowAddModal(true) : undefined}
-              onSelectProject={(id) => {
-                const found = pins.find(p => p.id === id);
-                if (found) setSelectedPin(found);
-              }}
-            />
-          )}
-
-          {currentTab === 'analytics' && (
-            <Analytics
-              pinsCount={pins.length}
-              allProjects={pins}
-              currentUser={currentUser}
-              onOpenAddProject={!isAdmin ? () => setShowAddModal(true) : undefined}
-              onNavigateToProject={(id) => {
-                const found = pins.find(p => p.id === id);
-                if (found) setSelectedPin(found);
-                setCurrentTab('intelligence');
-              }}
-              onNavigateToInvestigation={(id) => {
-                const found = pins.find(p => p.id === id);
-                if (found) setSelectedPin(found);
-                setInvestigationModalProjectId(id);
-              }}
-            />
-          )}
-
-          {currentTab === 'assistant' && (
-            <Assistant
-              selectedProjectId={selectedPin?.id || ''}
-              currentUser={currentUser}
-              allProjects={pins}
-              onNavigateToProject={(id) => {
-                const found = pins.find(p => p.id === id);
-                if (found) setSelectedPin(found);
-                setInsightsModalProjectId(id);
-              }}
-            />
-          )}
-
-          {currentTab === 'alerts' && (
-            <Alerts
-              currentUser={currentUser}
-              pinsCount={pins.length}
-              onOpenAddProject={!isAdmin ? () => setShowAddModal(true) : undefined}
-              onNavigateToInvestigation={(id) => {
-                const found = pins.find(p => p.id === id);
-                if (found) setSelectedPin(found);
-                setInvestigationModalProjectId(id);
-              }}
-              onNavigateToProject={(id) => {
-                const found = pins.find(p => p.id === id);
-                if (found) setSelectedPin(found);
-                setInsightsModalProjectId(id);
-              }}
-            />
-          )}
-
-          {(currentTab === 'data_models' || currentTab === 'reports') && (
-            <DataModels />
-          )}
-
-          {currentTab === 'users_audit' && (
-            <UsersAudit />
-          )}
-        </div>
+              }).catch(console.warn);
+            }
+          }}
+        />
       )}
 
-      {/* FLOATING BOTTOM DOCK CONTROLS (Only on Motion tab for Non-Admin Users) */}
-      {(currentTab === 'motion' || currentTab === 'overview') && !isAdmin && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
-          <button
-            onClick={() => setShowAddModal(true)}
-            style={!isDark ? { color: '#000000' } : undefined}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono-code font-bold transition-all duration-200 cursor-pointer ${
-              isDark
-                ? 'bg-[#0B0F17] hover:bg-[#141A26] border border-white/15 text-white shadow-lg'
-                : 'bg-white/80 hover:bg-white/95 text-black border border-white/95 shadow-[0_6px_24px_rgba(0,0,0,0.12),inset_0_1.5px_2px_rgba(255,255,255,0.95)] backdrop-blur-md'
-            }`}
-          >
-            <span style={!isDark ? { color: '#000000' } : undefined} className={`text-sm leading-none font-bold ${isDark ? 'text-white/80' : 'text-black'}`}>+</span>
-            <span style={!isDark ? { color: '#000000' } : undefined} className={`font-bold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>Add Project</span>
-          </button>
-        </div>
+      {investigationModalProjectId && (
+        <InvestigationModal
+          isOpen={true}
+          projectId={investigationModalProjectId}
+          onClose={() => setInvestigationModalProjectId(null)}
+        />
       )}
 
-      {/* PROJECT INSIGHTS POP-UP MODAL */}
-      <ProjectInsightsModal
-        isOpen={!!insightsModalProjectId}
-        projectId={insightsModalProjectId}
-        currentUser={currentUser}
-        isAdmin={isAdmin}
-        onClose={() => setInsightsModalProjectId(null)}
-        onNavigateToInvestigation={(id) => {
-          const found = pins.find(p => p.id === id);
-          if (found) setSelectedPin(found);
-          setInsightsModalProjectId(null);
-          setInvestigationModalProjectId(id);
-        }}
-      />
+      {settingsModalOpen && (
+        <SettingsModal
+          isOpen={settingsModalOpen}
+          initialTab={settingsModalTab}
+          onClose={() => setSettingsModalOpen(false)}
+          currentUser={currentUser}
+          onSignOut={handleSignOut}
+        />
+      )}
 
-      {/* INVESTIGATION POP-UP MODAL (Replaces separate investigation page) */}
-      <InvestigationModal
-        isOpen={!!investigationModalProjectId}
-        projectId={investigationModalProjectId}
-        onClose={() => setInvestigationModalProjectId(null)}
-        onOpenAddProject={() => {
-          setInvestigationModalProjectId(null);
-          setShowAddModal(true);
-        }}
-      />
+      {showAddModal && (
+        <AddProjectModal
+          isOpen={showAddModal}
+          currentUser={currentUser}
+          existingProjectsCount={pins.length}
+          onClose={() => setShowAddModal(false)}
+          onProjectAdded={(newProj) => {
+            const costCr = newProj?.cost?.revised || 4000;
+            const newPin: ProjectPin = {
+              id: newProj.project_id,
+              name: newProj.project_name,
+              state: newProj.state || 'National Corridor',
+              latPct: Math.round((((newProj.location?.latitude || 20) - 8) / (36 - 8)) * 100),
+              lngPct: Math.round((((newProj.location?.longitude || 78) - 68) / (97 - 68)) * 100),
+              dphis: Math.round(newProj.dphis || 50),
+              risk: newProj.risk_level || 'moderate',
+              cost: `₹${costCr} Cr`,
+              delay: `${Math.round((newProj.dphis || 50) > 70 ? 24 : 6)} mo`
+            };
+            setPins(prev => [newPin, ...prev.filter(p => p.id !== newPin.id)]);
+            setSelectedPin(newPin);
+            setInsightsModalProjectId(newPin.id);
+          }}
+        />
+      )}
 
-      {/* ACCOUNT & PROFILE SETTINGS MODAL */}
-      <SettingsModal
-        isOpen={settingsModalOpen}
-        initialTab={settingsModalTab}
-        currentUser={currentUser}
-        onClose={() => setSettingsModalOpen(false)}
-        onSignOut={handleSignOut}
-      />
-
-      {/* GEMINI 57-FEATURE & LIGHTGBM ML ASSET INGESTION MODAL */}
-      <AddProjectModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        currentUser={currentUser}
-        onProjectAdded={handleProjectAdded}
-        existingProjectsCount={pins.length}
-      />
-
-      {/* CEO PIN MANAGER MODAL */}
       {showCeoModal && (
         <CeoPinManager
-          onAddPin={handleAddPin}
+          isOpen={showCeoModal}
           onClose={() => setShowCeoModal(false)}
+          pins={pins}
+          selectedPin={selectedPin}
+          onSelectPin={(pin) => {
+            setSelectedPin(pin);
+            setInsightsModalProjectId(pin.id);
+          }}
+          onAddPin={(newPin) => {
+            setPins(prev => [newPin, ...prev]);
+            setSelectedPin(newPin);
+          }}
         />
       )}
     </div>

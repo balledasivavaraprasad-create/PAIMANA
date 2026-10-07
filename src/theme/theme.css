@@ -1,0 +1,295 @@
+/* InfraBuild-AI Unified Design Tokens & Theme System
+ * Synchronized with the Public Editorial Landing Page Palette & Precision Finishing
+ */
+
+
+:root,
+[data-theme='dark'] {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Pure Neutral Black & White Palette — Zero Blue Tint / Zero Blue Overlay */
+  --bg-base: transparent;
+  --bg-subtle: rgba(22, 22, 24, 0.82);
+  --bg-panel: rgba(12, 12, 14, 0.90);
+  --bg-elevated: rgba(20, 20, 22, 0.95);
+  --bg-inset: rgba(8, 8, 9, 0.85);
+  --bg-overlay: rgba(0, 0, 0, 0.88);
+  --bg-command: rgba(14, 14, 16, 0.98);
+  --bg-base-contrast: #000000;
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #E5E5E5;
+  --text-muted: #A3A3A3;
+  --text-inverse: #000000;
+  --text-link: #FFFFFF;
+
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-default: rgba(255, 255, 255, 0.20);
+  --border-strong: rgba(255, 255, 255, 0.35);
+  --border-focus: #FFFFFF;
+
+  /* Synchronized Landing Editorial Design Tokens — Pure Black & White Cards */
+  --el-bg: transparent;
+  --el-bg-surface: rgba(12, 12, 14, 0.92);
+  --el-text-primary: #FFFFFF;
+  --el-text-secondary: #E5E5E5;
+  --el-text-muted: #A3A3A3;
+  --el-border: rgba(255, 255, 255, 0.18);
+  --el-border-subtle: rgba(255, 255, 255, 0.10);
+  --el-accent-blue: #FFFFFF;
+  --el-accent-emerald: #34D399;
+  --el-accent-amber: #FBBF24;
+  --el-accent-rose: #F87171;
+
+  /* Pure Neutral Card Fields (Zero Blue Overlay) */
+  --el-field-peach: rgba(20, 20, 22, 0.85);
+  --el-field-peach-border: rgba(255, 255, 255, 0.16);
+  --el-field-lavender: rgba(20, 20, 22, 0.85);
+  --el-field-lavender-border: rgba(255, 255, 255, 0.16);
+  --el-field-mint: rgba(20, 20, 22, 0.85);
+  --el-field-mint-border: rgba(255, 255, 255, 0.16);
+  --el-field-blue: rgba(20, 20, 22, 0.85);
+  --el-field-blue-border: rgba(255, 255, 255, 0.16);
+  --el-field-dark: #0A0A0A;
+
+  --badge-healthy-bg: rgba(255, 255, 255, 0.08);
+  --badge-healthy-text: #FFFFFF;
+  --badge-healthy-border: rgba(255, 255, 255, 0.25);
+
+  --badge-attention-bg: rgba(255, 255, 255, 0.08);
+  --badge-attention-text: #FFFFFF;
+  --badge-attention-border: rgba(255, 255, 255, 0.25);
+
+  --badge-highrisk-bg: rgba(255, 255, 255, 0.10);
+  --badge-highrisk-text: #FFFFFF;
+  --badge-highrisk-border: rgba(255, 255, 255, 0.30);
+
+  --badge-critical-bg: rgba(255, 255, 255, 0.12);
+  --badge-critical-text: #FFFFFF;
+  --badge-critical-border: rgba(255, 255, 255, 0.35);
+
+  --badge-intelligence-bg: rgba(255, 255, 255, 0.08);
+  --badge-intelligence-text: #FFFFFF;
+  --badge-intelligence-border: rgba(255, 255, 255, 0.25);
+
+  --badge-agentic-bg: rgba(255, 255, 255, 0.08);
+  --badge-agentic-text: #FFFFFF;
+  --badge-agentic-border: rgba(255, 255, 255, 0.25);
+
+  --badge-neutral-bg: rgba(255, 255, 255, 0.06);
+  --badge-neutral-text: #E5E5E5;
+  --badge-neutral-border: rgba(255, 255, 255, 0.18);
+
+  --card-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  --popover-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.18);
+  --dropdown-bg: #101012;
+  --dropdown-hover: #1A1A1E;
+  --input-bg: #0A0A0C;
+  --input-border: rgba(255, 255, 255, 0.18);
+
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Warm White / Cream Editorial Palette with glowing orange hue pass-through */
+  --bg-base: transparent;
+  --bg-subtle: rgba(244, 242, 236, 0.78);
+  --bg-panel: rgba(255, 255, 255, 0.88);
+  --bg-elevated: rgba(255, 255, 255, 0.96);
+  --bg-inset: rgba(243, 241, 234, 0.75);
+  --bg-overlay: rgba(18, 19, 20, 0.45);
+  --bg-command: rgba(255, 255, 255, 0.98);
+  --bg-base-contrast: #FFFFFF;
+
+  --text-primary: #121314;
+  --text-secondary: #4E5055;
+  --text-muted: #84868C;
+  --text-inverse: #FAF9F5;
+  --text-link: #0284C7;
+
+  --border-subtle: #EFEFEA;
+  --border-default: #E5E3DC;
+  --border-strong: #C5C3BA;
+  --border-focus: #0284C7;
+
+  /* Synchronized Landing Editorial Design Tokens for Light Mode */
+  --el-bg: #FAF9F5;
+  --el-bg-surface: #FFFFFF;
+  --el-text-primary: #121314;
+  --el-text-secondary: #4E5055;
+  --el-text-muted: #84868C;
+  --el-border: #E5E3DC;
+  --el-border-subtle: #F0EFEA;
+  --el-accent-blue: #0284C7;
+  --el-accent-emerald: #059669;
+  --el-accent-amber: #D97706;
+  --el-accent-rose: #DC2626;
+
+  --el-field-peach: #FFF4ED;
+  --el-field-peach-border: #FDE2D2;
+  --el-field-lavender: #F6F3FA;
+  --el-field-lavender-border: #E8E0F3;
+  --el-field-mint: #F0FAF3;
+  --el-field-mint-border: #D1F0DC;
+  --el-field-blue: #F0F7FA;
+  --el-field-blue-border: #D0E7F5;
+  --el-field-dark: #0B0F17;
+
+  --badge-healthy-bg: #F0FDF4;
+  --badge-healthy-text: #15803D;
+  --badge-healthy-border: #BBF7D0;
+
+  --badge-attention-bg: #FEF3C7;
+  --badge-attention-text: #B45309;
+  --badge-attention-border: #FDE68A;
+
+  --badge-highrisk-bg: #FFEDD5;
+  --badge-highrisk-text: #C2410C;
+  --badge-highrisk-border: #FED7AA;
+
+  --badge-critical-bg: #FEE2E2;
+  --badge-critical-text: #DC2626;
+  --badge-critical-border: #FECACA;
+
+  --badge-intelligence-bg: #EFF6FF;
+  --badge-intelligence-text: #0284C7;
+  --badge-intelligence-border: #BFDBFE;
+
+  --badge-agentic-bg: #F5F3FF;
+  --badge-agentic-text: #7C3AED;
+  --badge-agentic-border: #DDD6FE;
+
+  --badge-neutral-bg: #F3F2EE;
+  --badge-neutral-text: #737578;
+  --badge-neutral-border: #E5E3DC;
+
+  --card-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --popover-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.08);
+  --dropdown-bg: #FFFFFF;
+  --dropdown-hover: #F4F2EC;
+  --input-bg: #FAF9F5;
+  --input-border: #E5E3DC;
+
+  color-scheme: light;
+}
+
+/* Micro-transitions & picture-perfect finish */
+button,
+a,
+input,
+select,
+textarea {
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Sleek custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 140, 140, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 140, 0.45);
+}
+
+/* Card hover animation */
+.hover-card-lift {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+.hover-card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes beaconRadar {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes borderGradientShine {
+  0% {
+    transform: translateX(-100%);
+  }
+  50%, 100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.85;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.2);
+  }
+}
+
+/* Responsive TopBar utilities */
+@media (max-width: 1100px) {
+  .topbar-text-compact {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+  }
+}
+
+@media (max-width: 960px) {
+  .topbar-project-snippet {
+    display: none !important;
+  }
+}
+
+@media (max-width: 880px) {
+  .topbar-container {
+    padding: 0 16px !important;
+  }
+}
+
+/* Page Transition & Signature Entrance */
+@keyframes pageEnterFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.infrabuild-app-root main > div {
+  animation: pageEnterFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

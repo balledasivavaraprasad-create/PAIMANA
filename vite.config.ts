@@ -39,6 +39,20 @@ export default defineConfig(({ mode }) => {
           '**/.figma/**',
         ],
       },
+      proxy: {
+        '/api/v1': {
+          target: 'http://localhost:8001',
+          changeOrigin: true,
+        },
+        '/api': {
+          target: 'http://localhost:8001',
+          changeOrigin: true,
+          bypass: (req) => {
+            if (req.url === '/api/send-email') return req.url;
+            return undefined;
+          },
+        },
+      },
     },
     preview: {
       host: process.env.FIGMA_DEV_SERVER_HOST || '0.0.0.0',

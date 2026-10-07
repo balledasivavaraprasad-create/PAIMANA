@@ -158,7 +158,7 @@ export default function ProjectInsightsModal({
 
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 backdrop-blur-md animate-fade-in ${
+      className={`fixed inset-0 z-[100000] flex items-center justify-center p-3 sm:p-6 backdrop-blur-md animate-fade-in ${
         isDark ? 'bg-black/80' : 'bg-slate-900/60'
       }`}
       onClick={(e) => {
@@ -583,19 +583,6 @@ export default function ProjectInsightsModal({
             }`}>Esc</kbd> or click ✕ to close
           </span>
           <div className="flex items-center gap-2">
-            {onNavigateToInvestigation && (
-              <button
-                type="button"
-                onClick={() => onNavigateToInvestigation(projectId)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border flex items-center gap-1.5 ${
-                  isDark 
-                    ? 'bg-amber-400 text-black border-amber-300 hover:bg-amber-300' 
-                    : 'bg-amber-400 text-black border-amber-500 hover:bg-amber-500 shadow-sm'
-                }`}
-              >
-                <span>⚡ Deep AI Investigation</span>
-              </button>
-            )}
             <button
               onClick={onClose}
               className={`px-4 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${

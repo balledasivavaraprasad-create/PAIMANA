@@ -10,7 +10,8 @@ import { CurvedGrowthArrow, CurvedDecreaseArrow } from '../components/CurvedTren
 interface Props {
   currentUser?: UserProfile | null;
   pins: ProjectPin[];
-  onSelectProject: (projectId: string) => void;
+  onSelectProject?: (projectId: string) => void;
+  onViewProject?: (projectId: string) => void;
   onNavigateToInsights?: (projectId: string) => void;
   onNavigateToRiskIntelligence?: (projectId: string) => void;
   onNavigateToInvestigation?: (projectId: string) => void;
@@ -82,6 +83,7 @@ export default function MyProjects({
   currentUser,
   pins,
   onSelectProject,
+  onViewProject,
   onNavigateToInsights,
   onNavigateToRiskIntelligence,
   onNavigateToInvestigation,
@@ -91,6 +93,11 @@ export default function MyProjects({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'ANALYST';
+
+  const handleSelect = (projId: string) => {
+    if (onSelectProject) onSelectProject(projId);
+    if (onViewProject) onViewProject(projId);
+  };
   
   // Filters State
   const [searchQuery, setSearchQuery] = useState('');
@@ -553,7 +560,7 @@ export default function MyProjects({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSelectProject(pin.id);
+                      handleSelect(pin.id);
                       if (onNavigateToInsights) {
                         onNavigateToInsights(pin.id);
                       } else {
@@ -575,7 +582,6 @@ export default function MyProjects({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSelectProject(pin.id);
                       if (onNavigateToRiskIntelligence) {
                         onNavigateToRiskIntelligence(pin.id);
                       }
@@ -620,7 +626,7 @@ export default function MyProjects({
                   <tr 
                     key={pin.id} 
                     onClick={() => {
-                      onSelectProject(pin.id);
+                      handleSelect(pin.id);
                       setInsightsModalProjectId(pin.id);
                     }}
                     className={`transition-colors cursor-pointer ${isDark ? 'hover:bg-white/5' : 'hover:bg-slate-50'}`}
@@ -659,7 +665,7 @@ export default function MyProjects({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onSelectProject(pin.id);
+                            handleSelect(pin.id);
                             if (onNavigateToInsights) {
                               onNavigateToInsights(pin.id);
                             } else {
@@ -678,7 +684,6 @@ export default function MyProjects({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onSelectProject(pin.id);
                             if (onNavigateToRiskIntelligence) {
                               onNavigateToRiskIntelligence(pin.id);
                             }
@@ -696,7 +701,7 @@ export default function MyProjects({
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onSelectProject(pin.id);
+                              handleSelect(pin.id);
                               onNavigateToInvestigation(pin.id);
                             }}
                             title="Launch AI Root Cause Investigation Console"

@@ -30,8 +30,8 @@ class Settings(BaseSettings):
     # SMTP Authentication & Email Service
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 465
-    SMTP_USER: Optional[str] = "syntaxtrrors@gmail.com"
-    SMTP_PASS: Optional[str] = "szbfukaiioisvnly"
+    SMTP_USER: Optional[str] = "balledasivavaraprasad@gmail.com"
+    SMTP_PASS: Optional[str] = "hfdchogrqricwnby"
     SMTP_FROM_NAME: str = "PAIMANA Sovereign Platform"
     OTP_EXPIRE_MINUTES: int = 5
 
@@ -41,6 +41,15 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
     LLM_MODEL: str = "gemini-flash-latest"
+
+    # Observability (optional; monitoring must not depend on Langfuse)
+    LANGFUSE_PUBLIC_KEY: Optional[str] = None
+    LANGFUSE_SECRET_KEY: Optional[str] = None
+    LANGFUSE_HOST: Optional[str] = None
+
+    # Monitoring
+    MONITORING_STALE_DAYS: int = 14
+    MONITORING_SCAN_LIMIT: int = 500
 
     model_config = SettingsConfigDict(
         env_file=["backend/.env", ".env"],

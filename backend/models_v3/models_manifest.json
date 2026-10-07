@@ -1,0 +1,94 @@
+{
+  "manifest_version": "1.0",
+  "runtime_environment": {
+    "sklearn_version": "1.9.0",
+    "python_version": "3.14.6"
+  },
+  "models": {
+    "cost_overrun": {
+      "name": "cost_overrun",
+      "filename": "model_cost_overrun.joblib",
+      "sha256_checksum": "71faa970b1f569ef117f09fc7b7329f0e28642dd26014bbd09d445716482f896",
+      "file_size_bytes": 3450394,
+      "sklearn_version": "1.9.0",
+      "python_version": "3.14.6",
+      "feature_names": [
+        "original_cost_cr",
+        "cumulative_expenditure_cr",
+        "physical_progress_pct",
+        "expenditure_original_cost_pct",
+        "project_age_months",
+        "planned_duration_months",
+        "monthly_progress_change_pct",
+        "monthly_expenditure_change_cr",
+        "progress_velocity_pct_per_month",
+        "expenditure_growth_pct",
+        "progress_expenditure_gap_pct",
+        "remaining_progress_pct",
+        "state_freq",
+        "agency_freq",
+        "ministry",
+        "sector"
+      ],
+      "created_at": 1791003288.2384005,
+      "description": "Pinned artifact for cost_overrun"
+    },
+    "time_overrun": {
+      "name": "time_overrun",
+      "filename": "model_time_overrun.joblib",
+      "sha256_checksum": "125579e46ae50272f1126b24417b65f4f2b4d051145c2cad1531cea197131743",
+      "file_size_bytes": 498553,
+      "sklearn_version": "1.9.0",
+      "python_version": "3.14.6",
+      "feature_names": [
+        "original_cost_cr",
+        "cumulative_expenditure_cr",
+        "physical_progress_pct",
+        "expenditure_original_cost_pct",
+        "project_age_months",
+        "planned_duration_months",
+        "monthly_progress_change_pct",
+        "monthly_expenditure_change_cr",
+        "progress_velocity_pct_per_month",
+        "expenditure_growth_pct",
+        "progress_expenditure_gap_pct",
+        "remaining_progress_pct",
+        "state_freq",
+        "agency_freq",
+        "ministry",
+        "sector"
+      ],
+      "created_at": 1791003288.2734554,
+      "description": "Pinned artifact for time_overrun"
+    },
+    "risk_score": {
+      "name": "risk_score",
+      "filename": "model_risk_score.joblib",
+      "sha256_checksum": "f7533b5c01e67162f8ca382feb076f7a30cfc7a05f4734306fe55b0241c2d88a",
+      "file_size_bytes": 886057,
+      "sklearn_version": "1.9.0",
+      "python_version": "3.14.6",
+      "feature_names": [
+        "original_cost_cr",
+        "cumulative_expenditure_cr",
+        "physical_progress_pct",
+        "expenditure_original_cost_pct",
+        "project_age_months",
+        "planned_duration_months",
+        "monthly_progress_change_pct",
+        "monthly_expenditure_change_cr",
+        "progress_velocity_pct_per_month",
+        "expenditure_growth_pct",
+        "progress_expenditure_gap_pct",
+        "remaining_progress_pct",
+        "state_freq",
+        "agency_freq",
+        "ministry",
+        "sector"
+      ],
+      "created_at": 1791003288.2991292,
+      "description": "Pinned artifact for risk_score"
+    }
+  },
+  "generated_at": 1791003288.2991374
+}

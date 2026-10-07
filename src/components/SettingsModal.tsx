@@ -60,7 +60,7 @@ export default function SettingsModal({
 
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 backdrop-blur-md animate-fade-in ${
+      className={`fixed inset-0 z-[100000] flex items-center justify-center p-3 sm:p-6 backdrop-blur-md animate-fade-in ${
         isDark ? 'bg-black/80' : 'bg-slate-900/60'
       }`}
       onClick={(e) => {

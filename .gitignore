@@ -55,3 +55,9 @@ Design UI Elements/
 .vercel
 .env*
 /Models/
+*.zip
+backend_zip_extracted/
+*.db
+*.db-shm
+*.db-wal
+frontend/

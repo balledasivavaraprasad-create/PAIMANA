@@ -1,0 +1,7 @@
+pandas
+numpy
+scikit-learn==1.8.*    # must match the version used to train the .joblib files (check with: python -c "import sklearn;print(sklearn.__version__)" in your notebook env)
+xgboost                # required by model_time_overrun and model_risk_score
+joblib
+pyyaml
+shap                   # optional: SHAP explanations in shap_explain.py; agent degrades gracefully without it
