@@ -13,7 +13,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode; defaultMode?: ThemeMode }> = ({
   children,
-  defaultMode = 'dark',
+  defaultMode = 'light',
 }) => {
   const [mode, setModeState] = useState<ThemeMode>(() => {
     try {

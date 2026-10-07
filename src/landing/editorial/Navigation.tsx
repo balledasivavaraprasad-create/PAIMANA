@@ -20,17 +20,21 @@ export const Navigation: React.FC<{ onOpenPlatform: () => void }> = ({ onOpenPla
 
   const [currentMode, setCurrentMode] = useState<'dark' | 'light'>(() => {
     if (typeof document !== 'undefined') {
-      return (document.documentElement.getAttribute('data-theme') as 'dark' | 'light') || 'dark';
+      const mode = document.documentElement.getAttribute('data-theme');
+      if (mode === 'dark' || mode === 'light') return mode;
     }
-    return 'dark';
+    return 'light';
   });
 
   const toggleLandingTheme = () => {
     const next = currentMode === 'dark' ? 'light' : 'dark';
     setCurrentMode(next);
     document.documentElement.setAttribute('data-theme', next);
+    document.documentElement.style.colorScheme = next;
     try {
+      localStorage.setItem('paimana-theme', next);
       localStorage.setItem('infrabuild_theme', next);
+      localStorage.setItem('infrabuild-landing.theme', next);
     } catch (e) {}
   };
 

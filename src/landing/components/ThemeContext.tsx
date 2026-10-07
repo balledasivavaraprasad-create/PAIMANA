@@ -37,17 +37,17 @@ interface ThemeProviderProps {
  * each other when they are mounted in the same document.
  */
 export function ThemeProvider({ children, className }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<LandingTheme>('dark');
+  const [theme, setThemeState] = useState<LandingTheme>('light');
 
   useEffect(() => {
-    let initial: LandingTheme;
+    let initial: LandingTheme = 'light';
     try {
       const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-      initial =
-        stored === 'dark' || stored === 'light' ? stored : prefersLightScheme() ? 'light' : 'dark';
+      if (stored === 'dark' || stored === 'light') {
+        initial = stored;
+      }
     } catch {
-      // Private browsing / storage disabled — fall back to the OS preference.
-      initial = prefersLightScheme() ? 'light' : 'dark';
+      initial = 'light';
     }
     setThemeState(initial);
   }, []);

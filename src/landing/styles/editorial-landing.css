@@ -734,15 +734,73 @@ body {
    DARK THEME SYSTEM OVERRIDES ("The Dark Gaze" — Executive Sovereign Palette)
    ========================================================================== */
 
+/* Token Overrides for Dark Mode */
+[data-theme='dark'],
 [data-theme='dark'] body,
+[data-theme='dark'] .editorial-landing,
 .landing-root[data-theme='dark'] {
+  --el-bg: #070A12;
+  --el-bg-surface: #0E131F;
+  --el-text-primary: #FFFFFF;
+  --el-text-secondary: #CBD5E1;
+  --el-text-muted: #94A3B8;
+  --el-border: rgba(255, 255, 255, 0.16);
+  --el-border-subtle: rgba(255, 255, 255, 0.08);
+  --bg-panel: rgba(18, 24, 38, 0.90);
+  --bg-base-contrast: #070A12;
   background-color: transparent;
   color: #FFFFFF;
 }
 
-[data-theme='dark'] .editorial-landing,
-.landing-root[data-theme='dark'] .editorial-landing {
-  color: #FFFFFF;
+/* Token Overrides for Light Mode */
+[data-theme='light'],
+[data-theme='light'] body,
+[data-theme='light'] .editorial-landing,
+.landing-root[data-theme='light'] {
+  --el-bg: #FAF9F5;
+  --el-bg-surface: #FFFFFF;
+  --el-text-primary: #0F172A;
+  --el-text-secondary: #475569;
+  --el-text-muted: #64748B;
+  --el-border: #E2E8F0;
+  --el-border-subtle: #F1F5F9;
+  --bg-panel: #FFFFFF;
+  --bg-base-contrast: #FFFFFF;
+  color: #0F172A;
+}
+
+[data-theme='dark'] .welcome-anim-title {
+  color: #FFFFFF !important;
+}
+[data-theme='dark'] .welcome-anim-subcopy {
+  color: #E2E8F0 !important;
+}
+[data-theme='dark'] .welcome-metric-card {
+  background-color: rgba(15, 23, 42, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+[data-theme='dark'] .welcome-metric-card > div:first-child {
+  color: #FFFFFF !important;
+}
+[data-theme='dark'] .welcome-anim-eyebrow span:last-child {
+  color: #F8FAFC !important;
+}
+
+[data-theme='light'] .welcome-anim-title {
+  color: #0F172A !important;
+}
+[data-theme='light'] .welcome-anim-subcopy {
+  color: #334155 !important;
+}
+[data-theme='light'] .welcome-metric-card {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+[data-theme='light'] .welcome-metric-card > div:first-child {
+  color: #0F172A !important;
+}
+[data-theme='light'] .welcome-anim-eyebrow span:last-child {
+  color: #0F172A !important;
 }
 
 [data-theme='dark'] .el-hero-title,

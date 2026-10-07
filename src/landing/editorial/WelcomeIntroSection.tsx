@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useTheme } from '../../hooks/useTheme';
 
 interface WelcomeIntroSectionProps {
   onSignIn: () => void;
@@ -9,6 +10,8 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
   onSignIn,
   onExploreLanding,
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const sectionRef = useRef<HTMLElement>(null);
 
   // Seamless scroll-down detection:
@@ -143,14 +146,14 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
             display: 'inline-flex',
             alignItems: 'center',
             gap: '10px',
-            padding: '7px 18px',
+            padding: '8px 20px',
             borderRadius: '9999px',
-            backgroundColor: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid var(--el-border)',
+            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(15, 23, 42, 0.05)',
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.25)' : '1px solid rgba(15, 23, 42, 0.14)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
             marginBottom: '26px',
-            boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.25)',
+            boxShadow: isDark ? '0 8px 24px -4px rgba(0, 0, 0, 0.45)' : '0 4px 16px -2px rgba(0, 0, 0, 0.06)',
           }}
         >
           <span
@@ -169,7 +172,7 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
               fontWeight: 800,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
-              color: 'var(--el-text-primary)',
+              color: isDark ? '#F8FAFC' : '#0F172A',
             }}
           >
             SOVEREIGN TELEMETRY GATEWAY • AUTONOMOUS INFRASTRUCTURE COMMAND
@@ -183,10 +186,10 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
             fontFamily: 'var(--el-font-sans, "Plus Jakarta Sans", sans-serif)',
             fontSize: 'clamp(2.75rem, 6.4vw, 5.5rem)',
             fontWeight: 800,
-            lineHeight: 1.02,
+            lineHeight: 1.04,
             letterSpacing: '-0.04em',
             margin: '0 0 22px 0',
-            color: 'var(--el-text-primary)',
+            color: isDark ? '#FFFFFF' : '#0F172A',
           }}
         >
           Welcome to{' '}
@@ -194,9 +197,12 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
             className="welcome-gradient-text"
             style={{
               display: 'inline-block',
-              background: 'linear-gradient(135deg, var(--el-text-primary) 20%, #818CF8 60%, #38BDF8 100%)',
+              background: isDark
+                ? 'linear-gradient(135deg, #60A5FA 0%, #A78BFA 50%, #38BDF8 100%)'
+                : 'linear-gradient(135deg, #1E40AF 0%, #4F46E5 50%, #0284C7 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
+              textShadow: isDark ? '0 0 30px rgba(56, 189, 248, 0.25)' : 'none',
             }}
           >
             InfraBuild AI
@@ -210,9 +216,10 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
             fontFamily: 'var(--el-font-sans, "Plus Jakarta Sans", sans-serif)',
             fontSize: 'clamp(1.05rem, 1.35vw, 1.25rem)',
             lineHeight: 1.6,
-            color: 'var(--el-text-secondary)',
+            color: isDark ? '#E2E8F0' : '#334155',
             maxWidth: '720px',
             margin: '0 0 36px 0',
+            fontWeight: 500,
           }}
         >
           Continuous national infrastructure intelligence, predictive risk surveillance, and automated forensic cross-auditing — protecting capital delivery across 428 national corridors before minor deviations become public crises.
@@ -233,21 +240,21 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
           <div
             className="welcome-metric-card"
             style={{
-              backgroundColor: 'var(--bg-panel, rgba(12, 12, 14, 0.92))',
-              border: '1px solid var(--el-border)',
+              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.85)' : '#FFFFFF',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.16)' : '1px solid #E2E8F0',
               borderRadius: '16px',
               padding: '16px 18px',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               textAlign: 'center',
-              boxShadow: '0 12px 30px -8px rgba(0, 0, 0, 0.35)',
+              boxShadow: isDark ? '0 12px 30px -8px rgba(0, 0, 0, 0.55)' : '0 8px 24px -4px rgba(0, 0, 0, 0.08)',
               transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--el-text-primary)', letterSpacing: '-0.02em' }}>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#0F172A', letterSpacing: '-0.02em' }}>
               428
             </div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--el-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94A3B8' : '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
               Corridors Monitored
             </div>
           </div>
@@ -255,21 +262,21 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
           <div
             className="welcome-metric-card"
             style={{
-              backgroundColor: 'var(--bg-panel, rgba(12, 12, 14, 0.92))',
-              border: '1px solid var(--el-border)',
+              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.85)' : '#FFFFFF',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.16)' : '1px solid #E2E8F0',
               borderRadius: '16px',
               padding: '16px 18px',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               textAlign: 'center',
-              boxShadow: '0 12px 30px -8px rgba(0, 0, 0, 0.35)',
+              boxShadow: isDark ? '0 12px 30px -8px rgba(0, 0, 0, 0.55)' : '0 8px 24px -4px rgba(0, 0, 0, 0.08)',
               transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            <div style={{ fontSize: '26px', fontWeight: 800, color: '#34D399', letterSpacing: '-0.02em' }}>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: isDark ? '#34D399' : '#059669', letterSpacing: '-0.02em' }}>
               14.8%
             </div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--el-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94A3B8' : '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
               Early Drift Detection
             </div>
           </div>
@@ -277,21 +284,21 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
           <div
             className="welcome-metric-card"
             style={{
-              backgroundColor: 'var(--bg-panel, rgba(12, 12, 14, 0.92))',
-              border: '1px solid var(--el-border)',
+              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.85)' : '#FFFFFF',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.16)' : '1px solid #E2E8F0',
               borderRadius: '16px',
               padding: '16px 18px',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               textAlign: 'center',
-              boxShadow: '0 12px 30px -8px rgba(0, 0, 0, 0.35)',
+              boxShadow: isDark ? '0 12px 30px -8px rgba(0, 0, 0, 0.55)' : '0 8px 24px -4px rgba(0, 0, 0, 0.08)',
               transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--el-text-primary)', letterSpacing: '-0.02em' }}>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#0F172A', letterSpacing: '-0.02em' }}>
               28
             </div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--el-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94A3B8' : '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
               Peer Cohort Clusters
             </div>
           </div>
@@ -299,21 +306,21 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
           <div
             className="welcome-metric-card"
             style={{
-              backgroundColor: 'var(--bg-panel, rgba(12, 12, 14, 0.92))',
-              border: '1px solid var(--el-border)',
+              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.85)' : '#FFFFFF',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.16)' : '1px solid #E2E8F0',
               borderRadius: '16px',
               padding: '16px 18px',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               textAlign: 'center',
-              boxShadow: '0 12px 30px -8px rgba(0, 0, 0, 0.35)',
+              boxShadow: isDark ? '0 12px 30px -8px rgba(0, 0, 0, 0.55)' : '0 8px 24px -4px rgba(0, 0, 0, 0.08)',
               transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            <div style={{ fontSize: '26px', fontWeight: 800, color: '#38BDF8', letterSpacing: '-0.02em' }}>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: isDark ? '#38BDF8' : '#0284C7', letterSpacing: '-0.02em' }}>
               0
             </div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--el-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94A3B8' : '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
               Unaccountable Actions
             </div>
           </div>
@@ -335,7 +342,7 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
           <button
             type="button"
             onClick={onSignIn}
-            className="el-btn-black welcome-btn-get-started"
+            className="welcome-btn-get-started"
             style={{
               padding: '15px 34px',
               fontSize: '15px',
@@ -345,8 +352,10 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
               alignItems: 'center',
               gap: '10px',
               cursor: 'pointer',
-              border: '1px solid var(--el-text-primary)',
-              boxShadow: '0 12px 36px -4px rgba(0, 0, 0, 0.35)',
+              backgroundColor: isDark ? '#FFFFFF' : '#0F172A',
+              color: isDark ? '#070A12' : '#FFFFFF',
+              border: isDark ? '1px solid #FFFFFF' : '1px solid #0F172A',
+              boxShadow: isDark ? '0 8px 24px -4px rgba(255, 255, 255, 0.25)' : '0 8px 24px -4px rgba(0, 0, 0, 0.35)',
               transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
@@ -367,7 +376,6 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
           <button
             type="button"
             onClick={onExploreLanding}
-            className="el-btn-outline"
             style={{
               padding: '15px 30px',
               fontSize: '15px',
@@ -377,8 +385,12 @@ export const WelcomeIntroSection: React.FC<WelcomeIntroSectionProps> = ({
               alignItems: 'center',
               gap: '8px',
               cursor: 'pointer',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.90)',
+              color: isDark ? '#FFFFFF' : '#0F172A',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid #CBD5E1',
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
+              boxShadow: isDark ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.04)',
             }}
           >
             <span>Explore Portfolio Film</span>

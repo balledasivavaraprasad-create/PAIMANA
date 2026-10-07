@@ -6,7 +6,6 @@ function getInitialTheme(): Theme {
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem('paimana-theme') as Theme;
     if (saved === 'light' || saved === 'dark') return saved;
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
   }
   return 'light';
 }
